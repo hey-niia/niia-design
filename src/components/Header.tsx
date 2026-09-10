@@ -2,11 +2,7 @@ export default function Header() {
   return (
     <header className="border-b pb-8">
       <h1>Niia Bieliavtseva</h1>
-      <h2>
-        Product Designer
-        <br />
-        AI Design Engineer
-      </h2>
+      <h2 className="mt-2">Senior Product Designer, AI Design Engineer</h2>
       <div className="flex space-x-2">
         <a
           href="mailto:nia.bieliavtseva@gmail.com"

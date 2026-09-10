@@ -81,7 +81,7 @@ export const projects: Project[] = [
   },
   {
     slug: "enterprise-dashboard",
-    category: "Dashboard, Web App",
+    category: "Dashboard, Web App, AI",
     name: "Enterprise Dashboard",
     title: "Enterprise operations dashboard for digital screen deployment",
     summary:
