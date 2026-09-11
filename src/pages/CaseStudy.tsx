@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { getProject, type ContentBlock } from "../data/projects";
+import WiggleText from "../components/WiggleText";
 
 function Block({
   block,
@@ -59,19 +60,22 @@ export default function CaseStudy() {
 
   if (!project) {
     return (
-      <main className="mx-auto max-w-4xl py-16">
+      <main className="pb-24">
         <p>
-          Project not found. <Link to="/" className="underline">Back to work</Link>
+          Project not found.{" "}
+          <Link to="/" className="underline">
+            <WiggleText>Back to work</WiggleText>
+          </Link>
         </p>
       </main>
     );
   }
 
   return (
-    <main className="mx-auto max-w-4xl py-16">
+    <main className="pb-24">
       <header className="border-b pb-8">
         <Link to="/" className="underline">
-          ← Back to work
+          <WiggleText>← Back to work</WiggleText>
         </Link>
         <p className="my-2">{project.client}</p>
         <h1>{project.title}</h1>
@@ -102,11 +106,14 @@ export default function CaseStudy() {
 
       <footer className="border-t py-8">
         <p>
-          Last updated: {project.lastUpdated} — <a href="mailto:nia.bieliavtseva@gmail.com" className="underline">Let's design it!</a>
+          Last updated: {project.lastUpdated} —{" "}
+          <a href="mailto:nia.bieliavtseva@gmail.com" className="underline">
+            <WiggleText>Let's design it!</WiggleText>
+          </a>
         </p>
         <p className="my-2">
           <Link to="/" className="underline">
-            ← Back to work
+            <WiggleText>← Back to work</WiggleText>
           </Link>
         </p>
       </footer>

@@ -1,1 +1,249 @@
 @import "tailwindcss";
+
+@font-face {
+  font-family: "ABC Diatype";
+  src: url("/fonts/diatype/ABCDiatype-Light-Trial.otf") format("opentype");
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "ABC Diatype";
+  src: url("/fonts/diatype/ABCDiatype-LightItalic-Trial.otf") format("opentype");
+  font-weight: 300;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: "ABC Diatype";
+  src: url("/fonts/diatype/ABCDiatype-Regular-Trial.otf") format("opentype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "ABC Diatype";
+  src: url("/fonts/diatype/ABCDiatype-RegularItalic-Trial.otf") format("opentype");
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: "ABC Diatype";
+  src: url("/fonts/diatype/ABCDiatype-Medium-Trial.otf") format("opentype");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "ABC Diatype";
+  src: url("/fonts/diatype/ABCDiatype-MediumItalic-Trial.otf") format("opentype");
+  font-weight: 500;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: "ABC Diatype";
+  src: url("/fonts/diatype/ABCDiatype-Bold-Trial.otf") format("opentype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "ABC Diatype";
+  src: url("/fonts/diatype/ABCDiatype-BoldItalic-Trial.otf") format("opentype");
+  font-weight: 700;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: "ABC Diatype";
+  src: url("/fonts/diatype/ABCDiatype-Heavy-Trial.otf") format("opentype");
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "ABC Diatype";
+  src: url("/fonts/diatype/ABCDiatype-HeavyItalic-Trial.otf") format("opentype");
+  font-weight: 800;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: "ABC Diatype";
+  src: url("/fonts/diatype/ABCDiatype-Black-Trial.otf") format("opentype");
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "ABC Diatype";
+  src: url("/fonts/diatype/ABCDiatype-BlackItalic-Trial.otf") format("opentype");
+  font-weight: 900;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: "ABC Diatype";
+  src: url("/fonts/diatype/ABCDiatype-Ultra-Trial.otf") format("opentype");
+  font-weight: 950;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "ABC Diatype";
+  src: url("/fonts/diatype/ABCDiatype-UltraItalic-Trial.otf") format("opentype");
+  font-weight: 950;
+  font-style: italic;
+  font-display: swap;
+}
+
+@theme {
+  --font-sans: "ABC Diatype", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", Menlo, monospace;
+}
+
+body {
+  font-family: var(--font-sans);
+}
+
+a {
+  cursor: pointer;
+  display: inline-block;
+  transition: color 0.15s ease;
+}
+
+a:hover {
+  color: #fbbaac;
+}
+
+/* Active nav page: the same "arc + tint" treatment as :hover, held statically
+   instead of only firing on mouse-over — a persistent "you are here". */
+.nav-active {
+  color: #fbbaac;
+}
+
+.nav-active .wiggle-letter {
+  transform: translateY(var(--lift, 0px)) rotate(var(--rotate, 0deg));
+}
+
+/* Case study cards link to a whole preview block (image, category, summary),
+   not a text link — keep them static on hover instead of tinting the card. */
+.work-card-link:hover {
+  color: inherit;
+}
+
+/* Per-letter arc: each letter lifts toward the word's center and tilts
+   tangent to the curve, so the whole word bends upward like a smile. */
+.wiggle-letter {
+  display: inline-block;
+  text-decoration: inherit;
+  transform: translateY(0) rotate(0deg);
+  transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transition-delay: var(--delay, 0ms);
+}
+
+a:hover .wiggle-letter {
+  transform: translateY(var(--lift, 0px)) rotate(var(--rotate, 0deg));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wiggle-letter {
+    transition: none;
+  }
+}
+
+/* AI Experiments nav Easter egg — intermittent build/glow animation */
+.ai-nav-link {
+  position: relative;
+  display: inline-block;
+}
+
+.ai-nav-text-glow {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+  background: linear-gradient(90deg, #6366f1, #ec4899, #f59e0b, #10b981, #6366f1);
+  background-size: 300% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.ai-nav-text-glow.is-active {
+  animation:
+    ai-nav-glow 1.2s ease-in-out forwards,
+    ai-nav-gradient-shift 1.2s linear forwards;
+}
+
+@keyframes ai-nav-glow {
+  0% {
+    opacity: 0;
+  }
+  35% {
+    opacity: 1;
+  }
+  70% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes ai-nav-gradient-shift {
+  0% {
+    background-position: 0% 0%;
+  }
+  100% {
+    background-position: 100% 0%;
+  }
+}
+
+.ai-nav-burst {
+  position: absolute;
+  inset: 0;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.ai-nav-burst-emoji {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  font-size: 0.8em;
+  line-height: 1;
+  opacity: 0;
+  pointer-events: none;
+  animation: ai-nav-burst 0.9s ease-out forwards;
+}
+
+@keyframes ai-nav-burst {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) translate(calc(var(--dx) * 0.2), calc(var(--dy) * 0.2))
+      scale(0.3) rotate(var(--rot, 0deg));
+  }
+  30% {
+    opacity: 1;
+  }
+  65% {
+    opacity: 1;
+    transform: translate(-50%, -50%) translate(var(--dx), var(--dy)) scale(1)
+      rotate(var(--rot, 0deg));
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) translate(calc(var(--dx) * 1.4), calc(var(--dy) * 1.4))
+      scale(0.8) rotate(var(--rot, 0deg));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ai-nav-burst,
+  .ai-nav-text-glow {
+    display: none;
+  }
+}

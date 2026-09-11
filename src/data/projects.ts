@@ -4,6 +4,13 @@ export type ContentBlock =
   | { type: "image"; src: string; alt: string }
   | { type: "gallery"; images: { src: string; alt: string }[] };
 
+export interface ProjectScreenshot {
+  src: string;
+  alt: string;
+  /** Very vertical asset (e.g. a full-page scroll capture) — cap by height instead of width. */
+  tall?: boolean;
+}
+
 export interface Project {
   slug: string;
   category: string;
@@ -14,7 +21,7 @@ export interface Project {
   role: string;
   duration: string;
   tools: string[];
-  cardImage: string;
+  screenshots: ProjectScreenshot[];
   lastUpdated: string;
   content: ContentBlock[];
 }
@@ -31,7 +38,10 @@ export const projects: Project[] = [
     role: "Product Designer",
     duration: "4 months",
     tools: ["Figma", "Claude AI", "Figjam", "Notion"],
-    cardImage: "/projects/ios-app.png",
+    screenshots: [
+      { src: "/projects/ios-app/1.png", alt: "Wellness AI app screens" },
+      { src: "/projects/ios-app/3.png", alt: "Emotional fitness app progression screen" },
+    ],
     lastUpdated: "Feb, 2026",
     content: [
       {
@@ -90,7 +100,9 @@ export const projects: Project[] = [
     role: "UI/UX Designer",
     duration: "2.5 months",
     tools: ["Figma", "Claude AI", "Figjam"],
-    cardImage: "/projects/enterprise-dashboard.png",
+    screenshots: [
+      { src: "/projects/enterprise-dashboard.png", alt: "Enterprise dashboard overview" },
+    ],
     lastUpdated: "Nov, 2025",
     content: [
       {
@@ -128,7 +140,14 @@ export const projects: Project[] = [
     role: "UI/UX Designer",
     duration: "1 month",
     tools: ["Figma"],
-    cardImage: "/projects/digitalscreen.png",
+    screenshots: [
+      { src: "/projects/digitalscreen.png", alt: "Digital signage company website" },
+      {
+        src: "/projects/digitalscreen/1.png",
+        alt: "Digital signage company website, full page",
+        tall: true,
+      },
+    ],
     lastUpdated: "Nov, 2025",
     content: [
       {
@@ -153,7 +172,7 @@ export const projects: Project[] = [
     role: "UI/UX Designer",
     duration: "2.5 months",
     tools: ["Figma"],
-    cardImage: "/projects/hirement.png",
+    screenshots: [{ src: "/projects/hirement.png", alt: "Hirement interview flow builder" }],
     lastUpdated: "Nov, 2025",
     content: [
       {
