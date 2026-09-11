@@ -8,8 +8,11 @@ export default function AIExperiments() {
     <main className="pb-24">
       <Nav />
 
+      <header className="border-b py-8">
+        <h1 className="font-black tracking-tight text-4xl lg:text-6xl">AI Experiments</h1>
+      </header>
+
       <section className="py-8">
-        <h3 className="mb-6 border-b pb-2">AI Experiments</h3>
         <p className="mb-4 italic">
           Things I've designed and built myself with AI — shipped, not mockups.
         </p>
@@ -18,7 +21,7 @@ export default function AIExperiments() {
         ) : (
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             {experiments.map((exp) => (
-              <div key={exp.name} className="border p-4">
+              <div key={exp.name} className="rounded-sm bg-neutral-100 p-4">
                 <h4>{exp.name}</h4>
                 <p className="my-2 italic">{exp.description}</p>
                 <p className="text-base">{exp.stack}</p>
