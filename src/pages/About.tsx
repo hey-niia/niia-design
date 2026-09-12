@@ -7,8 +7,8 @@ export default function About() {
     <main className="pb-24">
       <Nav />
 
-      <section className="flex justify-center pt-6 md:pt-24">
-        <div className="max-w-xl">
+      <section className="pt-6 md:pt-24">
+        <div className="max-w-2xl">
           <p className="mb-4">
             I started as a founder, not a designer. Leap was mine from day one — packaging,
             distribution, the Instagram page, all of it — because there was no one else to hand it
@@ -82,8 +82,11 @@ export default function About() {
           <div className="md:flex-1">
             {/* Wikimedia Commons, CC BY 2.0 — https://commons.wikimedia.org/wiki/File:Child_engaged_in_creative_play_with_wooden_building_blocks_on_a_pink_play_mat_in_a_cozy_indoor_space.jpg */}
             <img src="/photos/blocks.jpg" alt="" className="mb-3 h-40 w-full object-cover" />
-            <p className="mb-2">I'm a bit obsessed with how kids learn to make things.</p>
-            <p className="text-sm">
+            <p>I'm a bit obsessed with how kids learn to make things.</p>
+            <p className="mt-2 font-mono text-xs tracking-widest text-neutral-400 uppercase">
+              Play
+            </p>
+            <p className="mt-2 text-sm">
               Long before software, most of us learned to build by playing — blocks, scribbles,
               taking stuff apart to see how it worked. I spend time thinking about how that kind
               of learning survives past age six [volunteer/mentor detail — TK], and it quietly
@@ -92,8 +95,11 @@ export default function About() {
           </div>
           <div className="md:flex-1">
             <img src="/photos/drawing.jpg" alt="" className="mb-3 h-40 w-full object-cover" />
-            <p className="mb-2">I still draw, badly and often.</p>
-            <p className="text-sm">
+            <p>I still draw, badly and often.</p>
+            <p className="mt-2 font-mono text-xs tracking-widest text-neutral-400 uppercase">
+              Sketchbook
+            </p>
+            <p className="mt-2 text-sm">
               [Medium — TK, e.g. gouache / sketchbook] is where I get to be wrong without
               consequences — no user testing, no stakeholders, just deciding something looks right
               and moving on. It's the fastest way I know to reset a design brain that's been
@@ -102,8 +108,11 @@ export default function About() {
           </div>
           <div className="md:flex-1">
             <img src="/photos/yoga.jpg" alt="" className="mb-3 h-40 w-full object-cover" />
-            <p className="mb-2">Yoga is the one meeting I don't reschedule.</p>
-            <p className="text-sm">
+            <p>Yoga is the one meeting I don't reschedule.</p>
+            <p className="mt-2 font-mono text-xs tracking-widest text-neutral-400 uppercase">
+              Movement
+            </p>
+            <p className="mt-2 text-sm">
               [Frequency — TK, e.g. most mornings] on the mat, mostly to remember that not
               everything needs to be optimized. It's the closest thing I have to a version control
               system for my own attention.
