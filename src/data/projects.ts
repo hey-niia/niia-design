@@ -1,14 +1,25 @@
 export type ContentBlock =
   | { type: "paragraph"; text: string }
   | { type: "heading"; text: string }
-  | { type: "image"; src: string; alt: string }
-  | { type: "gallery"; images: { src: string; alt: string }[] };
+  /** Top-level narrative section (Problem framing, Solution, Final design, Results) — anchors the "On this page" TOC. */
+  | { type: "section"; id: string; title: string }
+  | { type: "list"; items: string[] }
+  | { type: "quote"; text: string; attribution: string }
+  | { type: "image"; src: string; alt: string; caption?: string }
+  | { type: "gallery"; images: { src: string; alt: string; caption?: string }[] };
 
 export interface ProjectScreenshot {
   src: string;
   alt: string;
   /** Very vertical asset (e.g. a full-page scroll capture) — cap by height instead of width. */
   tall?: boolean;
+}
+
+/** One Impact Overview card: a metric, the causal reason it moved, and the result. */
+export interface ImpactStat {
+  metric: string;
+  description: string;
+  result: string;
 }
 
 export interface Project {
@@ -19,74 +30,175 @@ export interface Project {
   summary: string;
   client: string;
   role: string;
+  /** Who else was involved, by function — omit if solo or not documented. */
+  team?: string;
   duration: string;
   tools: string[];
   screenshots: ProjectScreenshot[];
   lastUpdated: string;
+  /** Impact Overview: 2-3 stat cards surfaced at the top of the case study. */
+  impact?: ImpactStat[];
   content: ContentBlock[];
 }
 
 export const projects: Project[] = [
   {
+    // Rewritten against case-study.md (the Ben Shih framework). See PR/commit notes —
+    // Problem framing and Solution are intentionally thin: the original content had no
+    // documented research process (no named frictions, no interview count, no funnel
+    // data), so nothing was invented to fill that gap. Real research notes or a
+    // stakeholder/user quote would strengthen this more than any further copy pass.
     slug: "ios-app",
     category: "iOS App, AI",
     name: "Wellness AI Companion",
-    title: "Pioneering AI-driven emotional fitness iOS app transforming lives worldwide",
+    title: "Turning six neuroscience systems into one AI coaching experience",
     summary:
-      "AI-first iOS wellness app — App of the Day across multiple countries. Research, design system, and full delivery.",
+      "Redesigned a neuroscience-backed wellness app from a complex, multi-feature product into a single guided AI coach — selected as Apple's App of the Day across multiple countries.",
     client: "Client (NDA)",
-    role: "Product Designer",
-    duration: "4 months",
+    role: "Product design, design systems, UX research, App Store creative",
+    team: "Neuroscience research advisors (university partnerships)",
+    duration: "4 months · 2025",
     tools: ["Figma", "Claude AI", "Figjam", "Notion"],
     screenshots: [
       { src: "/projects/ios-app/1.png", alt: "Wellness AI app screens" },
       { src: "/projects/ios-app/3.png", alt: "Emotional fitness app progression screen" },
     ],
     lastUpdated: "Feb, 2026",
+    impact: [
+      {
+        metric: "Recognition",
+        description: "After the redesign shipped,",
+        result: "the app was selected as Apple's App of the Day across multiple countries.",
+      },
+      {
+        metric: "Scientific grounding",
+        description: "Every level in the app is validated against",
+        result: "real 3T structural MRI, FNIRS brain imaging, and MoCA cognitive testing.",
+      },
+      {
+        metric: "Reach",
+        // NOTE: "millions of users" carries over from the original brief/summary copy —
+        // verify this figure (and swap in a real before/after lift metric if one is
+        // shareable under NDA) before this goes live.
+        description: "The simplified system now supports",
+        result: "millions of users training across six evidence-based neurotransmitter systems.",
+      },
+    ],
     content: [
       {
+        type: "image",
+        src: "/projects/ios-app/1.png",
+        alt: "Wellness app home screen showing an AI coach prompt and a single progress bar across six neurotransmitter systems",
+        caption:
+          "One question from the coach, one progress bar for all six systems — instead of a home screen split six ways.",
+      },
+
+      { type: "section", id: "problem-framing", title: "Problem framing" },
+      {
         type: "paragraph",
-        text: "Led the design pivot of a neuroscience-backed emotional fitness platform — from a complex multi-feature app into a streamlined AI coaching experience. The redesigned app was featured as App of the Day across multiple countries.",
+        text: "The platform is built on real neuroscience: university research partners ran structural MRI, FNIRS brain imaging, and cognitive testing to validate a model of emotional fitness across six neurotransmitter systems — dopamine, serotonin, testosterone, oxytocin, opioids, and cannabinoids. That's rare scientific grounding for a wellness app, and it's core to why the product works.",
       },
       {
         type: "paragraph",
-        text: "The platform uses fMRI research from university partnerships to help millions of users train their emotional fitness through six neurotransmitter systems. It's been featured in a documentary series on the science of happiness and is expanding into clinical research applications.",
+        text: "It's also a lot to hand someone on day one. Before the redesign, each of those six systems had grown its own tracking, its own badges, its own screens — scientifically sound, but a lot of surface area for someone who just wants to know if today was a good day. The job was to fold six validated systems into one experience without flattening the science into vague wellness platitudes, and without losing the specificity that made the app credible in the first place.",
       },
-      { type: "image", src: "/projects/ios-app/1.png", alt: "Wellness AI app screens" },
-      { type: "heading", text: "Multi-Level Progression System" },
+
+      { type: "section", id: "solution", title: "Solution" },
       {
         type: "paragraph",
-        text: "Transformed a neuroscience-grounded progression framework into an aspirational yet achievable journey spanning beginner through master levels. Designed comprehensive progression tracking across multiple emotional fitness dimensions with intuitive visual feedback, including range-based balance calculations, progressive complexity unlocking, and optional achievement badges that encourage exploration and community engagement. Balanced scientific integrity from university research partnerships with behavioral psychology to create meaningful early wins while maintaining long-term goals.",
-      },
-      { type: "image", src: "/projects/ios-app/2.png", alt: "Progression system screens" },
-      { type: "heading", text: "Design System Architecture" },
-      {
-        type: "paragraph",
-        text: "Created a lightweight, future-ready design system purpose-built for the product's evolution toward a chat-based interface. The system includes primitive and semantic color tokens, spacing and radius values, typography styles, and gradients — all with intelligent naming conventions that bridge design and development seamlessly. Uniquely architected for AI-assisted implementation, enabling token names to map directly from design variables to code without requiring handoff documentation.",
-      },
-      { type: "image", src: "/projects/ios-app/3.png", alt: "Design system tokens" },
-      { type: "heading", text: "App Store Screenshots" },
-      {
-        type: "paragraph",
-        text: "Created screenshot sets, visual messaging, and privacy screen illustrations that contributed to the app being featured as App of the Day across multiple countries, reaching millions of potential users worldwide. Developed privacy-forward visual communication that addressed user concerns while clearly articulating the platform's neuroscience-based value proposition.",
-      },
-      { type: "image", src: "/projects/ios-app/4.png", alt: "App Store screenshot set" },
-      { type: "heading", text: "Navigation & Iconography" },
-      {
-        type: "paragraph",
-        text: "Designed a comprehensive icon system for bottom navigation that maintains clarity across varied contexts while reinforcing emotional fitness positioning. The icons balance approachability with precision, serving both casual users building initial habits and committed practitioners pursuing mastery.",
+        text: "Working with the platform's neuroscience advisors, I collapsed the six systems into one dashboard: a single row of progress dots, one per neurotransmitter, always visible at the top of the app. The depth is still there once you tap in — the default view just isn't split six ways anymore.",
       },
       {
-        type: "gallery",
-        images: [
-          { src: "/projects/ios-app/5.png", alt: "Navigation and iconography" },
-          { src: "/projects/ios-app/6.png", alt: "Additional app screens" },
+        type: "list",
+        items: [
+          "A conversational log where every memory a user shares gets tagged to the system(s) it affects, with a plain-language explanation of why — instead of a form asking six separate questions.",
+          "A level system — Learner, Apprentice, Practitioner, and beyond — that turns the six-system total into one number climbing toward the next unlock.",
+          "A parallel “what you're training” framing (endurance, strength, flexibility, coordination, speed, balance) that gives each neurotransmitter system a fitness analogy people already understand.",
         ],
       },
       {
         type: "paragraph",
-        text: "The design process involved close collaboration with neuroscience advisors to ensure all gamification and progression elements aligned with evidence-based emotional fitness principles validated through fMRI studies. I created interactive prototypes for rapid iteration, developed information architecture for AI coaching flows, and established a component library supporting both current features and ambitious future expansion — including the platform's evolution toward clinical research applications.",
+        text: "I built interactive prototypes of the coaching flow and the level system to pressure-test the interaction model with the neuroscience advisors before handing anything to engineering.",
       },
+
+      { type: "section", id: "final-design", title: "Final design" },
+      { type: "heading", text: "One dashboard for six neurotransmitter systems" },
+      {
+        type: "paragraph",
+        text: "The home screen asks one question at a time and keeps the six-system progress bar visible but out of the way. Share a memory, and the app tags it to the systems it affects and explains the reasoning in plain language instead of a lab printout.",
+      },
+      {
+        type: "gallery",
+        images: [
+          {
+            src: "/projects/ios-app/2.png",
+            alt: "AI coaching screen tagging a shared memory to the opioid and cannabinoid systems, with a plain-language explanation",
+            caption:
+              "Every memory a user logs gets tagged to the systems it affects and explained in plain language, not a lab report.",
+          },
+          {
+            src: "/projects/ios-app/3.png",
+            alt: "Level progression screens — Learner, Apprentice, and Practitioner — each showing progress bars and the scientific methods behind them",
+            caption:
+              "Every level names the real methods behind it — 3T structural MRI, FNIRS brain imaging, MoCA cognitive testing — so the gamification never reads as made up.",
+          },
+        ],
+      },
+
+      { type: "heading", text: "A design system built to hand straight to AI" },
+      {
+        type: "paragraph",
+        text: "I built a lightweight token system — primitive and semantic colors, spacing, radius, typography, one color per level — with names that map directly from Figma variables to code. That was deliberate: the product was moving toward AI-assisted implementation, and a token named levels/level-3 shouldn't need a separate handoff doc to make sense to a model or an engineer.",
+      },
+      {
+        type: "image",
+        src: "/projects/ios-app/4.png",
+        alt: "Design system token table showing semantic background, text, and per-level color tokens",
+        caption:
+          "Token names map directly from Figma variables to code, so implementation didn't need a separate handoff document.",
+      },
+
+      { type: "heading", text: "Turning the science into App Store creative" },
+      {
+        type: "paragraph",
+        text: "I designed the App Store screenshot set — the pitch, the brain visualization, the social proof — translating the same six-system science into three screens someone scrolls past in five seconds. It's part of what got the app selected as Apple's App of the Day.",
+      },
+      {
+        type: "image",
+        src: "/projects/ios-app/5.png",
+        alt: "App Store marketing screenshots for the wellness app, including Apple's App of the Day badge",
+        caption:
+          "The same six-system science, rewritten as marketing screenshots — this set contributed to the app being selected as Apple's App of the Day.",
+      },
+
+      { type: "heading", text: "Icons for six ways of training your brain" },
+      {
+        type: "paragraph",
+        text: "Each neurotransmitter system needed an icon that read clearly at nav-bar size and held up next to five others that all needed to feel like they belonged to the same family — endurance, flexibility, strength, coordination, speed, balance.",
+      },
+      {
+        type: "image",
+        src: "/projects/ios-app/6.png",
+        alt: "Six training-dimension cards — endurance, flexibility, strength, coordination, speed, balance — with their icon set",
+        caption:
+          "Each neurotransmitter system got a physical-fitness analogy people already understand, and an icon distinct enough to read at a glance in the nav bar.",
+      },
+
+      { type: "section", id: "results", title: "Results" },
+      {
+        type: "list",
+        items: [
+          "Selected as Apple's App of the Day across multiple countries.",
+          "Featured in a documentary series on the science of happiness.",
+          "Now expanding into clinical research applications.",
+        ],
+      },
+      {
+        type: "paragraph",
+        text: "The redesign didn't just make six systems fit on one screen — it kept the neuroscience credible enough to hold up in a documentary and, now, in clinical research settings.",
+      },
+      // TODO: a real quote from the client or a user would land better here than
+      // anything else in the Results section — don't fabricate one in the meantime.
     ],
   },
   {
