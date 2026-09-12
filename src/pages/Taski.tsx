@@ -1,262 +1,180 @@
-import { useEffect, useState, type FormEvent } from "react";
 import { Link } from "react-router-dom";
 import Nav from "../components/Nav";
-
-type RoutineTask = { id: string; text: string; lastDoneDate: string | null };
-type TodayTask = { id: string; text: string; done: boolean };
-
-type Stored = {
-  routine: RoutineTask[];
-  today: TodayTask[];
-  todayDate: string;
-};
-
-const STORAGE_KEY = "taski:v1";
-
-function todayStr() {
-  const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-}
-
-function uid() {
-  return Math.random().toString(36).slice(2, 10);
-}
-
-function loadInitial(): Stored {
-  const fallback: Stored = { routine: [], today: [], todayDate: todayStr() };
-  const raw = window.localStorage.getItem(STORAGE_KEY);
-  if (!raw) return fallback;
-  try {
-    const parsed = JSON.parse(raw) as Stored;
-    // A new day wipes today's one-off list but keeps the routine (its
-    // checkmarks are derived from lastDoneDate, so they reset on their own).
-    if (parsed.todayDate !== fallback.todayDate) {
-      return { ...parsed, today: [], todayDate: fallback.todayDate };
-    }
-    return parsed;
-  } catch {
-    return fallback;
-  }
-}
-
-function TaskRow({
-  text,
-  done,
-  onToggle,
-  onDelete,
-}: {
-  text: string;
-  done: boolean;
-  onToggle: () => void;
-  onDelete: () => void;
-}) {
-  return (
-    <li className="flex items-center border-b">
-      <button
-        type="button"
-        onClick={onToggle}
-        aria-pressed={done}
-        className="flex flex-1 items-center gap-3 py-4 text-left"
-      >
-        <span
-          className={`flex h-6 w-6 shrink-0 items-center justify-center border text-base ${
-            done ? "bg-black text-white" : ""
-          }`}
-          aria-hidden="true"
-        >
-          {done ? "✓" : ""}
-        </span>
-        <span className={done ? "line-through opacity-60" : ""}>{text}</span>
-      </button>
-      <button
-        type="button"
-        onClick={onDelete}
-        aria-label={`Delete "${text}"`}
-        className="p-4 opacity-50 hover:opacity-100"
-      >
-        ×
-      </button>
-    </li>
-  );
-}
+import WiggleText from "../components/WiggleText";
 
 export default function Taski() {
-  const [data, setData] = useState<Stored>(loadInitial);
-  const [routineDraft, setRoutineDraft] = useState("");
-  const [todayDraft, setTodayDraft] = useState("");
-
-  useEffect(() => {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-  }, [data]);
-
-  const doneCount = data.routine.filter((t) => t.lastDoneDate === data.todayDate).length;
-  const hasDoneToday = data.today.some((t) => t.done);
-
-  function addRoutine(e: FormEvent) {
-    e.preventDefault();
-    const text = routineDraft.trim();
-    if (!text) return;
-    setData((d) => ({ ...d, routine: [...d.routine, { id: uid(), text, lastDoneDate: null }] }));
-    setRoutineDraft("");
-  }
-
-  function toggleRoutine(id: string) {
-    setData((d) => ({
-      ...d,
-      routine: d.routine.map((t) =>
-        t.id === id
-          ? { ...t, lastDoneDate: t.lastDoneDate === d.todayDate ? null : d.todayDate }
-          : t,
-      ),
-    }));
-  }
-
-  function deleteRoutine(id: string) {
-    setData((d) => ({ ...d, routine: d.routine.filter((t) => t.id !== id) }));
-  }
-
-  function addToday(e: FormEvent) {
-    e.preventDefault();
-    const text = todayDraft.trim();
-    if (!text) return;
-    setData((d) => ({ ...d, today: [...d.today, { id: uid(), text, done: false }] }));
-    setTodayDraft("");
-  }
-
-  function toggleToday(id: string) {
-    setData((d) => ({
-      ...d,
-      today: d.today.map((t) => (t.id === id ? { ...t, done: !t.done } : t)),
-    }));
-  }
-
-  function deleteToday(id: string) {
-    setData((d) => ({ ...d, today: d.today.filter((t) => t.id !== id) }));
-  }
-
-  function clearDoneToday() {
-    setData((d) => ({ ...d, today: d.today.filter((t) => !t.done) }));
-  }
-
   return (
     <main className="pb-24">
       <Nav />
 
       <section className="py-8">
         <Link to="/ai-experiments" className="underline">
-          ← AI Experiments
+          <WiggleText>← AI Experiments</WiggleText>
         </Link>
 
         <h1 className="mt-6 mb-2 text-3xl font-medium lg:text-5xl">Taski</h1>
         <p className="mb-10 max-w-xl italic">
-          A to-do list that doesn't pressure you. Add the things you want to do most days once,
-          then just check them off — nothing scores you, nothing has to happen at an exact time.
+          A native Mac to-do app for routines that reset instead of nagging you. Group tasks into
+          named routines that check off and start fresh each day, let anything recur on its own
+          schedule, and keep one-off life-admin in a plain "Unsorted" list — no streaks, no red,
+          no guilt.
         </p>
 
-        <div className="mb-12">
-          <div className="mb-4 flex items-baseline justify-between border-b pb-2">
-            <h3>Routine</h3>
-            {data.routine.length > 0 && (
-              <span className="text-base opacity-60">
-                {doneCount}/{data.routine.length} today
-              </span>
-            )}
-          </div>
-
-          {data.routine.length === 0 && (
-            <p className="mb-2 italic opacity-60">
-              Nothing here yet. Add the first thing you want to do most days — waking up, a walk,
-              anything.
-            </p>
-          )}
-
-          {data.routine.length > 0 && (
-            <ul className="mb-2">
-              {data.routine.map((t) => (
-                <TaskRow
-                  key={t.id}
-                  text={t.text}
-                  done={t.lastDoneDate === data.todayDate}
-                  onToggle={() => toggleRoutine(t.id)}
-                  onDelete={() => deleteRoutine(t.id)}
-                />
-              ))}
-            </ul>
-          )}
-
-          <form onSubmit={addRoutine} className="flex items-center gap-3 border-b py-3">
-            <input
-              value={routineDraft}
-              onChange={(e) => setRoutineDraft(e.target.value)}
-              placeholder="Add a routine step…"
-              className="flex-1 bg-transparent outline-none placeholder:opacity-40"
-            />
-            <button
-              type="submit"
-              disabled={!routineDraft.trim()}
-              className="shrink-0 underline disabled:opacity-30"
-            >
-              Add
-            </button>
-          </form>
+        <div className="mb-12 bg-black">
+          <img
+            src="/experiments/taski-cover.png"
+            alt="Taski showing a Morning routine, a Work routine, and an Evening wind-down routine, each with recurring tasks and schedule chips"
+            className="w-full"
+          />
         </div>
 
-        <div>
-          <div className="mb-4 flex items-baseline justify-between border-b pb-2">
-            <h3>Today</h3>
-            {hasDoneToday && (
-              <button
-                type="button"
-                onClick={clearDoneToday}
-                className="text-base underline opacity-60 hover:opacity-100"
-              >
-                Clear done
-              </button>
-            )}
-          </div>
-
-          {data.today.length === 0 && (
-            <p className="mb-2 italic opacity-60">
-              Nothing here yet. Add whatever's on your mind for today.
-            </p>
-          )}
-
-          {data.today.length > 0 && (
-            <ul className="mb-2">
-              {data.today.map((t) => (
-                <TaskRow
-                  key={t.id}
-                  text={t.text}
-                  done={t.done}
-                  onToggle={() => toggleToday(t.id)}
-                  onDelete={() => deleteToday(t.id)}
-                />
-              ))}
-            </ul>
-          )}
-
-          <form onSubmit={addToday} className="flex items-center gap-3 border-b py-3">
-            <input
-              value={todayDraft}
-              onChange={(e) => setTodayDraft(e.target.value)}
-              placeholder="Add something for today…"
-              className="flex-1 bg-transparent outline-none placeholder:opacity-40"
-            />
-            <button
-              type="submit"
-              disabled={!todayDraft.trim()}
-              className="shrink-0 underline disabled:opacity-30"
-            >
-              Add
-            </button>
-          </form>
+        <div className="mb-12 flex justify-center">
+          <a
+            href="https://github.com/hey-niia/taski/releases/latest"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="border px-6 py-3 underline"
+          >
+            <WiggleText>Download for Mac →</WiggleText>
+          </a>
         </div>
 
-        <p className="mt-12 max-w-xl text-base italic opacity-50">
-          Routine checkmarks clear every morning. Today's list clears itself too, so it never
-          piles up. Everything is saved only on this device.
+        <h3 className="mt-8 mb-2">The story</h3>
+        <p className="my-4">
+          This started as a to-do app for my wife, who has ADHD. The specific thing it's built
+          against is how an unstructured day quietly turns into working until midnight — not from
+          a lack of trying, but because nothing external gave the day a shape. Most to-do apps
+          make that worse: streaks that break, overdue items that turn red, a running score of how
+          behind you are. None of that helps someone whose problem is executive function, not
+          motivation.
+        </p>
+        <p className="my-4">
+          I did the design research properly rather than guessing — it's checked against every
+          decision already made, gaps and overclaims called out rather than smoothed over. The
+          clearest, most defensible finding wasn't about color — ADHD doesn't change hue
+          perception — it was that red's alarm association is a <em>learned convention</em>,
+          exactly the emotional register this app opts out of, and that light sensitivity is
+          dramatically more common in ADHD adults (69% vs. 28% in one clinical review), which is
+          the actual case for building real theming instead of guessing at one "correct" palette.
+        </p>
+        <p className="my-4">
+          The product idea that came out of that: <strong>routines</strong>, not tasks with due
+          dates, are the right unit for structure. A "Morning" routine that resets every day gives
+          the start of the day a shape without anyone deciding anything; a one-off task like
+          "renew car insurance" doesn't need to belong to a routine at all, so it lives in a plain
+          Unsorted list instead of being forced somewhere it doesn't fit.
+        </p>
+
+        <h3 className="mt-8 mb-2">What I actually did here</h3>
+        <p className="my-4">
+          I design software for a living but had never shipped a native Mac app myself, and a
+          Tauri + Rust + Swift stack was new ground. I directed Claude Code through the whole
+          build — architecture, every UI decision, and the research — rather than writing the Rust
+          or Swift myself. A few of the calls along the way:
+        </p>
+        <ul className="my-4 list-inside list-disc space-y-2">
+          <li>
+            Choosing routines-with-recurrence over due-dates-with-tags as the core model, and
+            deciding a one-off task shouldn't be forced into a routine to be useful.
+          </li>
+          <li>
+            Reading the actual ADHD/UX literature before deciding on the palette and motion rules,
+            instead of assuming "ADHD-friendly" meant a specific color — and writing down where
+            the evidence was strong versus thin.
+          </li>
+          <li>
+            Rejecting an early redesign pass that quietly turned "overdue" red and asking for it
+            back out — the app's whole premise is that overdue shouldn't look like an alarm.
+          </li>
+          <li>
+            Catching repeated pixel-level misalignments between the routine header icon, the task
+            checkbox, and the composer row that I kept sending back until they were actually
+            identical, not just close.
+          </li>
+          <li>
+            Asking for the routine icon field to become a real searchable emoji picker, like the
+            native macOS picker or Slack's, instead of a text field you type or paste an emoji
+            into.
+          </li>
+          <li>
+            Directing the on-device icon-suggestion feature: a new routine's icon is suggested
+            automatically by Apple's on-device Foundation Models framework, editable by hand at
+            any time — no cloud call, no account.
+          </li>
+        </ul>
+
+        <h3 className="mt-8 mb-2">What it does</h3>
+        <ul className="my-4 list-inside list-disc space-y-2">
+          <li>
+            <strong>Routines</strong> — named, reorderable groups of tasks, each with its own icon,
+            suggested on-device when you create it.
+          </li>
+          <li>
+            <strong>Recurrence</strong> — daily, weekly on specific days, or a custom interval;
+            anything can recur, not just routine tasks.
+          </li>
+          <li>
+            <strong>Drag-and-drop reordering</strong> — within a routine or between routines, via
+            a hover-revealed handle that stays out of the way otherwise.
+          </li>
+          <li>
+            <strong>Calendar</strong> — an Upcoming list grouped by day, or a Month grid with a
+            day-detail panel, both backed by the same completion history.
+          </li>
+          <li>
+            <strong>Four themes</strong> — Paper, Clay, Sky, and Dusk (a dark mode), covering the
+            light-sensitivity gap the research turned up.
+          </li>
+        </ul>
+
+        <div className="my-8 grid grid-cols-1 gap-4 md:grid-cols-3">
+          <div className="bg-black">
+            <img
+              src="/experiments/taski-theme.png"
+              alt="Taski's theme picker open, showing four palette options"
+              className="w-full"
+            />
+          </div>
+          <div className="bg-black">
+            <img
+              src="/experiments/taski-calendar-upcoming.png"
+              alt="Taski's Calendar screen in Upcoming view, tasks grouped by day"
+              className="w-full"
+            />
+          </div>
+          <div className="bg-black">
+            <img
+              src="/experiments/taski-calendar-month.png"
+              alt="Taski's Calendar screen in Month view, with a day-detail panel"
+              className="w-full"
+            />
+          </div>
+        </div>
+
+        <h3 className="mt-8 mb-2">Worth knowing</h3>
+        <p className="my-4">
+          Taski is unsigned and Apple Silicon only. No account, no server, no analytics — every
+          task, routine, and completion lives in a local SQLite database on your Mac.
         </p>
       </section>
+
+      <footer className="border-t py-8">
+        <p>
+          <a
+            href="https://github.com/hey-niia/taski"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline"
+          >
+            <WiggleText>View source on GitHub</WiggleText>
+          </a>
+        </p>
+        <p className="my-2">
+          <Link to="/ai-experiments" className="underline">
+            <WiggleText>← AI Experiments</WiggleText>
+          </Link>
+        </p>
+      </footer>
     </main>
   );
 }

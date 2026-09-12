@@ -10,9 +10,10 @@ export const experiments: Experiment[] = [
   {
     name: "Taski",
     description:
-      "A black-and-white to-do app built for my wife, who has ADHD. Free-form tasks for today, plus a routine list that checks off and resets daily instead of nagging or scoring you.",
-    stack: "React, TypeScript, Tailwind — no backend, saved locally in the browser",
+      "A native Mac to-do app built for my wife, who has ADHD. Routines that check off and reset daily instead of nagging or scoring you, anything can recur, and on-device Apple Intelligence suggests each routine's icon.",
+    stack: "Tauri, Rust, React, TypeScript, SQLite, Apple Intelligence (Foundation Models)",
     link: "/taski",
+    image: "/experiments/taski-cover.png",
   },
   {
     name: "Skim",
