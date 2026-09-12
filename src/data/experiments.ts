@@ -27,6 +27,7 @@ export const experiments: Experiment[] = [
     description:
       "Named after my cat, who reminds me just by existing that I don't have to run around like the world's ending. Tell her how often to check in and how long to stay, and she pops into the corner of your screen to nap, stretch, or wander, then disappears. No streaks, no guilt — just a small, grateful pause.",
     stack: "Electron, TypeScript",
-    link: "https://github.com/hey-niia/08/releases/latest",
+    link: "/08",
+    image: "/experiments/08-cover.png",
   },
 ];
