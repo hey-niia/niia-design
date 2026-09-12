@@ -1,11 +1,7 @@
-import { FreelanceIcon } from "./icons";
-
 type Milestone = {
   years: string;
   role: string;
   org: string;
-  /** Real logo image for orgs that have a website; omitted for Freelance. */
-  iconSrc?: string;
   description: string;
   bullets: string[];
 };
@@ -15,7 +11,6 @@ const MILESTONES: Milestone[] = [
     years: "2016–2021",
     role: "Founder",
     org: "Leap",
-    iconSrc: "/logos/leap.png",
     description: "Solo founder, so \"role\" meant whatever needed doing that week.",
     bullets: [
       "Ran product and packaging design end to end",
@@ -27,7 +22,6 @@ const MILESTONES: Milestone[] = [
     years: "2021–Present",
     role: "Co-founder",
     org: "Overspace",
-    iconSrc: "/logos/overspace.png",
     description: "Built a studio around the parts of design that don't fit in a portfolio shot.",
     bullets: [
       "Research, strategy, and systems work for startups and scale-ups",
@@ -48,43 +42,23 @@ const MILESTONES: Milestone[] = [
   },
 ];
 
-const INDENT_STEP = 32;
-
 export default function Journey() {
   return (
-    <div className="divide-y divide-black">
+    <div className="relative">
+      <div className="absolute top-1.5 bottom-1.5 left-[3px] w-px bg-neutral-200" />
       {MILESTONES.map((m, i) => (
-        <div
-          key={m.years}
-          className="group px-4 py-4 transition-colors hover:bg-black hover:text-white"
-          style={{ marginLeft: i * INDENT_STEP }}
-        >
-          <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-            <span className="font-mono text-sm tracking-wide uppercase">{m.years}</span>
-            <span className="mr-auto ml-4">
-              {m.role} —{" "}
-              {m.iconSrc ? (
-                <img
-                  src={m.iconSrc}
-                  alt=""
-                  className="mr-1 inline-block h-6 w-6 rounded-sm align-[-6px]"
-                />
-              ) : (
-                <FreelanceIcon className="mr-1 inline-block h-4 w-4 align-[-3px]" />
-              )}
-              {m.org}
-            </span>
-          </div>
-          <div className="grid grid-rows-[0fr] transition-[grid-template-rows] duration-300 ease-out group-hover:grid-rows-[1fr]">
-            <div className="overflow-hidden">
-              <p className="mt-3 italic">{m.description}</p>
-              <ul className="mt-2 list-disc pl-5 text-sm">
-                {m.bullets.map((b) => (
-                  <li key={b}>{b}</li>
-                ))}
-              </ul>
-            </div>
-          </div>
+        <div key={m.years} className={`relative pl-8 ${i > 0 ? "mt-8" : ""}`}>
+          <div className="absolute top-1.5 left-0 h-[7px] w-[7px] rounded-full bg-[#e65f2e]" />
+          <p className="text-base">{m.org}</p>
+          <p className="mt-2 font-mono text-xs tracking-widest text-neutral-400 uppercase">
+            {m.role} · {m.years}
+          </p>
+          <p className="mt-2 text-sm">{m.description}</p>
+          <ul className="mt-2 list-disc pl-5 text-sm">
+            {m.bullets.map((b) => (
+              <li key={b}>{b}</li>
+            ))}
+          </ul>
         </div>
       ))}
     </div>
