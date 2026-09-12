@@ -25,7 +25,7 @@ export const experiments: Experiment[] = [
   {
     name: "08",
     description:
-      "A tiny cat-video window that lives in your Mac's menu bar. Every few minutes it pops up in the corner playing a muted clip of a cat doing nothing productive, then disappears. No features, no notifications — just a small reminder to be lazy for a second.",
+      "A tiny Pomodoro-style break reminder shaped like a cat. Tell her how often to check in and how long to stay, and she pops into the corner of your screen — napping, stretching, walking — for exactly that long, then disappears. No tasks, no streaks, no guilt-tripping.",
     stack: "Electron, TypeScript",
     link: "https://github.com/hey-niia/08/releases/latest",
   },
