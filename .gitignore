@@ -19,3 +19,7 @@ yarn-error.log*
 
 # build cache
 *.tsbuildinfo
+
+# sibling projects for the AI Experiments page — each is its own
+# independent git repo/GitHub project, not part of this site's history
+/experiments/

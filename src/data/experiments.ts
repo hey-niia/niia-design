@@ -16,13 +16,14 @@ export const experiments: Experiment[] = [
   {
     name: "Skim",
     description:
-      "A native macOS news reader that digests articles into a main idea and key points entirely on-device with Apple Intelligence — no cloud API, no accounts.",
+      "A native Mac news reader for the 5 sites I actually read. Click a headline, get the main idea and key points, entirely on-device — no cloud API, no account. I designed and directed it end to end; Claude Code wrote the Swift.",
     stack: "SwiftUI, Apple Intelligence (Foundation Models)",
+    link: "/skim",
   },
   {
     name: "08",
     description:
-      "A tiny black-and-white cat who lives in your Mac's menu bar. Every few minutes she wanders across the screen — napping, stretching, chasing yarn — then disappears. No features, no notifications, just a small reminder to do nothing for a second.",
+      "A tiny cat-video window that lives in your Mac's menu bar. Every few minutes it pops up in the corner playing a muted clip of a cat doing nothing productive, then disappears. No features, no notifications — just a small reminder to be lazy for a second.",
     stack: "Electron, TypeScript",
     link: "https://github.com/hey-niia/08/releases/latest",
   },
