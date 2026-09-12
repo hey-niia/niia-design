@@ -44,8 +44,8 @@ export default function About() {
         </p>
         <div className="flex flex-col gap-8 md:flex-row">
           <div className="md:flex-1">
-            <p className="font-mono text-xs tracking-widest text-neutral-400 uppercase">01</p>
-            <p className="mt-2">Build the thing, not the deck.</p>
+            <p className="font-mono text-6xl leading-none text-neutral-200">01</p>
+            <p className="mt-4">Build the thing, not the deck.</p>
             <p className="mt-2 text-sm">
               Leap didn't leave room for slideware — customers cared whether the box worked, not
               why. That bias never left. I'd rather ship a rough prototype than defend a polished
@@ -53,8 +53,8 @@ export default function About() {
             </p>
           </div>
           <div className="md:flex-1">
-            <p className="font-mono text-xs tracking-widest text-neutral-400 uppercase">02</p>
-            <p className="mt-2">Hide the complexity, not the effort.</p>
+            <p className="font-mono text-6xl leading-none text-neutral-200">02</p>
+            <p className="mt-4">Hide the complexity, not the effort.</p>
             <p className="mt-2 text-sm">
               AI products get complicated fast, and the job is making sure the person using them
               never has to know that. If a feature needs a tooltip to explain itself, the design
@@ -62,8 +62,8 @@ export default function About() {
             </p>
           </div>
           <div className="md:flex-1">
-            <p className="font-mono text-xs tracking-widest text-neutral-400 uppercase">03</p>
-            <p className="mt-2">Trust compounds faster than good ideas.</p>
+            <p className="font-mono text-6xl leading-none text-neutral-200">03</p>
+            <p className="mt-4">Trust compounds faster than good ideas.</p>
             <p className="mt-2 text-sm">
               Running a studio taught me the best outcome rarely comes from being the smartest
               person in the room — it comes from a client or team that trusts the process enough
