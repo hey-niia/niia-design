@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import Nav from "../components/Nav";
 import WiggleText from "../components/WiggleText";
+import Zoomable from "../components/Zoomable";
 
 export default function Taski() {
   return (
@@ -21,7 +22,7 @@ export default function Taski() {
         </p>
 
         <div className="mb-12 bg-black">
-          <img
+          <Zoomable
             src="/experiments/taski-cover.png"
             alt="Taski showing a Morning routine, a Work routine, and an Evening wind-down routine, each with recurring tasks and schedule chips"
             className="w-full"
@@ -41,21 +42,19 @@ export default function Taski() {
 
         <h3 className="mt-8 mb-2">The story</h3>
         <p className="my-4">
-          This started as a to-do app for my wife, who has ADHD. The specific thing it's built
-          against is how an unstructured day quietly turns into working until midnight — not from
-          a lack of trying, but because nothing external gave the day a shape. Most to-do apps
-          make that worse: streaks that break, overdue items that turn red, a running score of how
-          behind you are. None of that helps someone whose problem is executive function, not
-          motivation.
+          Ever notice how an unstructured day quietly turns into working until midnight? Not from
+          a lack of trying — just because nothing external gave the day a shape. That's the wall
+          I kept watching family and friends with ADHD hit, and it's exactly where typical to-do
+          apps make things worse: streaks that break, overdue items that turn red, a running score
+          of how behind you are. None of that helps when the problem is structure, not motivation
+          — so instead of guessing at what would, I dove into the actual research on ADHD and
+          attention.
         </p>
         <p className="my-4">
-          I did the design research properly rather than guessing — it's checked against every
-          decision already made, gaps and overclaims called out rather than smoothed over. The
-          clearest, most defensible finding wasn't about color — ADHD doesn't change hue
-          perception — it was that red's alarm association is a <em>learned convention</em>,
-          exactly the emotional register this app opts out of, and that light sensitivity is
-          dramatically more common in ADHD adults (69% vs. 28% in one clinical review), which is
-          the actual case for building real theming instead of guessing at one "correct" palette.
+          The clearest finding wasn't really about color — it's that red's alarm association is a{" "}
+          <em>learned convention</em>, exactly the emotional register this app opts out of, which
+          is the actual case for building real theming instead of settling on one "correct"
+          palette.
         </p>
         <p className="my-4">
           The product idea that came out of that: <strong>routines</strong>, not tasks with due
@@ -78,9 +77,9 @@ export default function Taski() {
             deciding a one-off task shouldn't be forced into a routine to be useful.
           </li>
           <li>
-            Reading the actual ADHD/UX literature before deciding on the palette and motion rules,
-            instead of assuming "ADHD-friendly" meant a specific color — and writing down where
-            the evidence was strong versus thin.
+            Reading the actual literature on color and attention before deciding on the palette
+            and motion rules, instead of assuming "calming" meant a specific color — and writing
+            down where the evidence was strong versus thin.
           </li>
           <li>
             Rejecting an early redesign pass that quietly turned "overdue" red and asking for it
@@ -129,21 +128,21 @@ export default function Taski() {
 
         <div className="my-8 grid grid-cols-1 gap-4 md:grid-cols-3">
           <div className="bg-black">
-            <img
+            <Zoomable
               src="/experiments/taski-theme.png"
               alt="Taski's theme picker open, showing four palette options"
               className="w-full"
             />
           </div>
           <div className="bg-black">
-            <img
+            <Zoomable
               src="/experiments/taski-calendar-upcoming.png"
               alt="Taski's Calendar screen in Upcoming view, tasks grouped by day"
               className="w-full"
             />
           </div>
           <div className="bg-black">
-            <img
+            <Zoomable
               src="/experiments/taski-calendar-month.png"
               alt="Taski's Calendar screen in Month view, with a day-detail panel"
               className="w-full"
@@ -153,8 +152,16 @@ export default function Taski() {
 
         <h3 className="mt-8 mb-2">Worth knowing</h3>
         <p className="my-4">
-          Taski is unsigned and Apple Silicon only. No account, no server, no analytics — every
-          task, routine, and completion lives in a local SQLite database on your Mac.
+          Taski is unsigned but runs natively on both Apple Silicon and Intel Macs. No account, no
+          server, no analytics — every task, routine, and completion lives in a local SQLite
+          database on your Mac.
+        </p>
+        <p className="my-4">
+          This is the second version. The{" "}
+          <Link to="/taski-v1" className="underline">
+            <WiggleText>first version</WiggleText>
+          </Link>{" "}
+          was a simple web to-do list — still live, if you want to see where it started.
         </p>
       </section>
 

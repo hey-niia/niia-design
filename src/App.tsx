@@ -4,6 +4,7 @@ import About from "./pages/About";
 import CaseStudy from "./pages/CaseStudy";
 import AIExperiments from "./pages/AIExperiments";
 import Taski from "./pages/Taski";
+import TaskiV1 from "./pages/TaskiV1";
 import Skim from "./pages/Skim";
 import CatEight from "./pages/CatEight";
 import ScrollToTop from "./components/ScrollToTop";
@@ -18,6 +19,7 @@ export default function App() {
         <Route path="/about" element={<About />} />
         <Route path="/ai-experiments" element={<AIExperiments />} />
         <Route path="/taski" element={<Taski />} />
+        <Route path="/taski-v1" element={<TaskiV1 />} />
         <Route path="/skim" element={<Skim />} />
         <Route path="/08" element={<CatEight />} />
         <Route path="/work/:slug" element={<CaseStudy />} />

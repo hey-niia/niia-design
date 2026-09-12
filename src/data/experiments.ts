@@ -10,10 +10,17 @@ export const experiments: Experiment[] = [
   {
     name: "Taski",
     description:
-      "A native Mac to-do app built for my wife, who has ADHD. Routines that check off and reset daily instead of nagging or scoring you, anything can recur, and on-device Apple Intelligence suggests each routine's icon.",
+      "A native Mac to-do app built for family and friends with ADHD, for whom typical to-do apps never stuck — researched and designed around real ADHD/attention findings. Routines reset daily instead of nagging you, anything can recur, and on-device Apple Intelligence suggests each routine's icon.",
     stack: "Tauri, Rust, React, TypeScript, SQLite, Apple Intelligence (Foundation Models)",
     link: "/taski",
     image: "/experiments/taski-cover.png",
+  },
+  {
+    name: "Taski — first version",
+    description:
+      "The original Taski, before it became a Mac app: a to-do list that doesn't pressure you, built and shipped as a simple web app. Still live, still working exactly as it did back then.",
+    stack: "React, TypeScript, Tailwind — no backend, saved locally in the browser",
+    link: "/taski-v1",
   },
   {
     name: "Skim",
