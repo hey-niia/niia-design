@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Niia Bieliavtseva</title>
+    <script>
+      // GitHub Pages serves this file for any unknown path. Stash the full
+      // path the visitor actually wanted, then bounce to the real app at "/"
+      // — index.html's own inline script restores it via history.replaceState
+      // before React Router mounts, so the correct page renders.
+      // See https://github.com/rafgraph/spa-github-pages
+      sessionStorage.redirect = location.href;
+    </script>
+    <meta http-equiv="refresh" content="0; url=/" />
+  </head>
+  <body></body>
+</html>

@@ -56,6 +56,21 @@
     </script>
   </head>
   <body class="p-4 font-sans text-base lg:text-xl bg-white text-neutral-700">
+    <!--
+      GitHub Pages serves no real file for client-side routes like /skim, so a
+      direct link or refresh 404s. 404.html redirects here with the intended
+      path packed into a query string; this restores it before React Router
+      ever sees the URL. See https://github.com/rafgraph/spa-github-pages
+    -->
+    <script>
+      (function () {
+        var redirect = sessionStorage.redirect;
+        delete sessionStorage.redirect;
+        if (redirect && redirect !== location.href) {
+          history.replaceState(null, "", redirect);
+        }
+      })();
+    </script>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

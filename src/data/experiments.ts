@@ -3,6 +3,7 @@ export interface Experiment {
   description: string;
   stack: string;
   link?: string;
+  image?: string;
 }
 
 export const experiments: Experiment[] = [
@@ -19,6 +20,7 @@ export const experiments: Experiment[] = [
       "A native Mac news reader for the 5 sites I actually read. Click a headline, get the main idea and key points, entirely on-device — no cloud API, no account. I designed and directed it end to end; Claude Code wrote the Swift.",
     stack: "SwiftUI, Apple Intelligence (Foundation Models)",
     link: "/skim",
+    image: "/experiments/skim-cover.png",
   },
   {
     name: "08",

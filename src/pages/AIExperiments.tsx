@@ -21,25 +21,32 @@ export default function AIExperiments() {
         ) : (
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             {experiments.map((exp) => (
-              <div key={exp.name} className="rounded-sm bg-neutral-100 p-4">
-                <h4>{exp.name}</h4>
-                <p className="my-2 italic">{exp.description}</p>
-                <p className="text-base">{exp.stack}</p>
-                {exp.link &&
-                  (exp.link.startsWith("/") ? (
-                    <Link to={exp.link} className="underline">
-                      <WiggleText>Try it →</WiggleText>
-                    </Link>
-                  ) : (
-                    <a
-                      href={exp.link}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="underline"
-                    >
-                      <WiggleText>View →</WiggleText>
-                    </a>
-                  ))}
+              <div key={exp.name} className="overflow-hidden rounded-sm bg-neutral-100">
+                {exp.image && (
+                  <div className="bg-black">
+                    <img src={exp.image} alt={`${exp.name} screenshot`} className="w-full" />
+                  </div>
+                )}
+                <div className="p-4">
+                  <h4>{exp.name}</h4>
+                  <p className="my-2 italic">{exp.description}</p>
+                  <p className="text-base">{exp.stack}</p>
+                  {exp.link &&
+                    (exp.link.startsWith("/") ? (
+                      <Link to={exp.link} className="underline">
+                        <WiggleText>Try it →</WiggleText>
+                      </Link>
+                    ) : (
+                      <a
+                        href={exp.link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="underline"
+                      >
+                        <WiggleText>View →</WiggleText>
+                      </a>
+                    ))}
+                </div>
               </div>
             ))}
           </div>
