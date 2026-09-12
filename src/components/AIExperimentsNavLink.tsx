@@ -100,7 +100,7 @@ export default function AIExperimentsNavLink() {
   return (
     <Link
       to="/ai-experiments"
-      className={`ai-nav-link underline ${isActive ? "nav-active" : ""}`}
+      className={`ai-nav-link ${isActive ? "nav-active" : ""}`}
     >
       <span className="ai-nav-text-base">AI Experiments</span>
       <span className={`ai-nav-text-glow ${phase === "glow" ? "is-active" : ""}`} aria-hidden="true">

@@ -1,131 +1,55 @@
 @import "tailwindcss";
 
 @font-face {
-  font-family: "ABC Diatype";
-  src: url("/fonts/diatype/ABCDiatype-Light-Trial.otf") format("opentype");
-  font-weight: 300;
+  font-family: "Geist";
+  src: url("/fonts/geist/Geist-Variable.woff2") format("woff2");
+  font-weight: 100 900;
   font-style: normal;
   font-display: swap;
 }
 @font-face {
-  font-family: "ABC Diatype";
-  src: url("/fonts/diatype/ABCDiatype-LightItalic-Trial.otf") format("opentype");
-  font-weight: 300;
-  font-style: italic;
-  font-display: swap;
-}
-@font-face {
-  font-family: "ABC Diatype";
-  src: url("/fonts/diatype/ABCDiatype-Regular-Trial.otf") format("opentype");
-  font-weight: 400;
+  font-family: "Geist Mono";
+  src: url("/fonts/geist/GeistMono-Variable.woff2") format("woff2");
+  font-weight: 100 900;
   font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: "ABC Diatype";
-  src: url("/fonts/diatype/ABCDiatype-RegularItalic-Trial.otf") format("opentype");
-  font-weight: 400;
-  font-style: italic;
-  font-display: swap;
-}
-@font-face {
-  font-family: "ABC Diatype";
-  src: url("/fonts/diatype/ABCDiatype-Medium-Trial.otf") format("opentype");
-  font-weight: 500;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: "ABC Diatype";
-  src: url("/fonts/diatype/ABCDiatype-MediumItalic-Trial.otf") format("opentype");
-  font-weight: 500;
-  font-style: italic;
-  font-display: swap;
-}
-@font-face {
-  font-family: "ABC Diatype";
-  src: url("/fonts/diatype/ABCDiatype-Bold-Trial.otf") format("opentype");
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: "ABC Diatype";
-  src: url("/fonts/diatype/ABCDiatype-BoldItalic-Trial.otf") format("opentype");
-  font-weight: 700;
-  font-style: italic;
-  font-display: swap;
-}
-@font-face {
-  font-family: "ABC Diatype";
-  src: url("/fonts/diatype/ABCDiatype-Heavy-Trial.otf") format("opentype");
-  font-weight: 800;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: "ABC Diatype";
-  src: url("/fonts/diatype/ABCDiatype-HeavyItalic-Trial.otf") format("opentype");
-  font-weight: 800;
-  font-style: italic;
-  font-display: swap;
-}
-@font-face {
-  font-family: "ABC Diatype";
-  src: url("/fonts/diatype/ABCDiatype-Black-Trial.otf") format("opentype");
-  font-weight: 900;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: "ABC Diatype";
-  src: url("/fonts/diatype/ABCDiatype-BlackItalic-Trial.otf") format("opentype");
-  font-weight: 900;
-  font-style: italic;
-  font-display: swap;
-}
-@font-face {
-  font-family: "ABC Diatype";
-  src: url("/fonts/diatype/ABCDiatype-Ultra-Trial.otf") format("opentype");
-  font-weight: 950;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: "ABC Diatype";
-  src: url("/fonts/diatype/ABCDiatype-UltraItalic-Trial.otf") format("opentype");
-  font-weight: 950;
-  font-style: italic;
   font-display: swap;
 }
 
 @theme {
-  --font-sans: "ABC Diatype", ui-sans-serif, system-ui, sans-serif;
-  --font-mono: ui-monospace, "SF Mono", Menlo, monospace;
+  --font-sans: "Geist", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "Geist Mono", ui-monospace, monospace;
 }
 
-body {
-  font-family: var(--font-sans);
+/* Tailwind puts its own rules in named cascade layers (@layer theme, base,
+   components, utilities). Any plain, unlayered rule beats a layered one
+   outright, regardless of specificity — so without this @layer wrapper,
+   this file's `a { display: inline-block }` would silently defeat every
+   `flex`/`grid`/`block` utility applied to a Link/`<a>` anywhere on the
+   site. Keep future global element-selector overrides in here too. */
+@layer base {
+  body {
+    font-family: var(--font-sans);
+  }
+
+  /* Link treatment: no underline at rest, hover turns burnt orange. */
+  a {
+    cursor: pointer;
+    display: inline-block;
+    color: inherit;
+    text-decoration: none;
+    transition: color 0.15s ease;
+  }
+
+  @media (hover: hover) {
+    a:hover {
+      color: #e65f2e;
+    }
+  }
 }
 
 ::selection {
   color: #e65f2e;
   background-color: rgba(230, 95, 46, 0.1);
-}
-
-/* Link treatment: no underline at rest, hover turns burnt orange. */
-a {
-  cursor: pointer;
-  display: inline-block;
-  color: inherit;
-  text-decoration: none;
-  transition: color 0.15s ease;
-}
-
-@media (hover: hover) {
-  a:hover {
-    color: #e65f2e;
-  }
 }
 
 /* Active nav page: the same color treatment as :hover, held statically
