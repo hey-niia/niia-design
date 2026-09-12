@@ -25,7 +25,7 @@ export const experiments: Experiment[] = [
   {
     name: "08",
     description:
-      "A tiny Pomodoro-style break reminder shaped like a cat. Tell her how often to check in and how long to stay, and she pops into the corner of your screen — napping, stretching, walking — for exactly that long, then disappears. No tasks, no streaks, no guilt-tripping.",
+      "Named after my cat, who reminds me just by existing that I don't have to run around like the world's ending. Tell her how often to check in and how long to stay, and she pops into the corner of your screen to nap, stretch, or wander, then disappears. No streaks, no guilt — just a small, grateful pause.",
     stack: "Electron, TypeScript",
     link: "https://github.com/hey-niia/08/releases/latest",
   },
