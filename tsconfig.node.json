@@ -14,7 +14,10 @@
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "noFallthroughCasesInSwitch": true
+    "noFallthroughCasesInSwitch": true,
+
+    /* vite.config.ts reads process.env.PORT. */
+    "types": ["node"]
   },
   "include": ["vite.config.ts"]
 }
