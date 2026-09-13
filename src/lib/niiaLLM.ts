@@ -204,8 +204,8 @@ const ANSWERS: CannedAnswer[] = [
   {
     keywords: ["ai", "artificial intelligence", "claude", "llm", "machine learning", "gpt"],
     answer:
-      "AI shows up two ways in my work: I design AI-first products (a neuroscience-backed wellness coach, AI-native hiring tools), and I build with AI — using Claude for prototyping, documentation, and increasingly for shipping the code itself, not just the spec. Here's some of the rawer, in-progress stuff:",
-    cards: EXPERIMENT_CARDS,
+      "AI shows up two ways in my work: I design AI-first products, and I build with AI myself — using Claude for prototyping, documentation, and increasingly for shipping the code itself, not just the spec. Here's the flagship case study, plus some of the rawer, in-progress experiments:",
+    cards: [...projectCard("ios-app"), ...EXPERIMENT_CARDS],
   },
   {
     keywords: ["favorite project", "proudest", "best project", "most proud", "which project"],
