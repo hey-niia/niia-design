@@ -48,21 +48,22 @@ export default function About() {
         <div className="flex flex-col gap-8 md:flex-row">
           <div className="md:flex-1">
             <PhotoCarousel photos={playPhotos} className="mb-3 h-40 w-full" />
-            <p>My other design practice.</p>
+            <p>My other design practice</p>
             <p className="mt-2 font-mono text-xs tracking-widest text-neutral-400 uppercase">
               Play
             </p>
             <p className="mt-2 text-sm">
-              I have kids, which reorganised my life around them — and turned out to be some of
-              the best design training I've had. I ran creative workshops, then built a camp in
-              Odesa where artists, musicians and directors from across Ukraine made things with
-              kids rather than for them. It hadn't been done before. Now, in Berlin, it's
-              quieter: our own kids, small performances, invented projects.
+              I have kids, and that reorganised my life. It also turned out to be some of the best
+              design training I've had. I ran creative workshops, then organised a camp in Odesa
+              where artists, musicians and directors from across Ukraine made things with kids
+              rather than for them. Nothing like it existed before. It continued in Berlin as
+              workshops. Now it's quieter: our own kids and an everyday life built around making
+              things.
             </p>
           </div>
           <div className="md:flex-1">
             <img src="/photos/drawing.jpg" alt="" className="mb-3 h-40 w-full object-cover" />
-            <p>I draw.</p>
+            <p>I draw</p>
             <p className="mt-2 font-mono text-xs tracking-widest text-neutral-400 uppercase">
               Sketchbook
             </p>
@@ -74,7 +75,7 @@ export default function About() {
           </div>
           <div className="md:flex-1">
             <img src="/photos/yoga.jpg" alt="" className="mb-3 h-40 w-full object-cover" />
-            <p>I do yoga.</p>
+            <p>I do yoga</p>
             <p className="mt-2 font-mono text-xs tracking-widest text-neutral-400 uppercase">
               Movement
             </p>
