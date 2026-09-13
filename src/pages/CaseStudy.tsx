@@ -1,7 +1,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type MouseEvent } from "react";
 import { Link, useParams } from "react-router-dom";
 import { getProject, projects, type ContentBlock, type Credit } from "../data/projects";
+import AnnotatedImage from "../components/AnnotatedImage";
+import BeforeAfter from "../components/BeforeAfter";
 import Nav from "../components/Nav";
+import ResearchQuotes from "../components/ResearchQuotes";
 import WiggleText from "../components/WiggleText";
 import WorkGridCard from "../components/WorkGridCard";
 import { useNiiaChat } from "../context/useNiiaChat";
@@ -362,10 +365,44 @@ function Block({
           <img
             src={block.src}
             alt={block.alt}
-            className="w-full cursor-none"
+            className={`w-full cursor-none${block.maxWidth ? " mx-auto" : ""}`}
+            style={block.maxWidth ? { maxWidth: block.maxWidth } : undefined}
             onClick={() => onImageClick(block.src)}
             onMouseMove={zoomCursor.onMouseMove}
             onMouseLeave={zoomCursor.onMouseLeave}
+          />
+          {block.caption && (
+            <p className="mt-2 text-sm italic text-gray-400">{block.caption}</p>
+          )}
+        </div>
+      );
+    case "annotated-image":
+      return (
+        <div className="my-8">
+          <AnnotatedImage
+            src={block.src}
+            alt={block.alt}
+            pins={block.pins}
+            maxWidth={block.maxWidth}
+          />
+          {block.caption && (
+            <p className="mt-4 text-sm italic text-gray-400">{block.caption}</p>
+          )}
+        </div>
+      );
+    case "research-quotes":
+      return <ResearchQuotes items={block.items} />;
+    case "before-after":
+      return (
+        <div className="my-8">
+          <BeforeAfter
+            before={block.before}
+            after={block.after}
+            beforeAlt={block.beforeAlt}
+            afterAlt={block.afterAlt}
+            beforeLabel={block.beforeLabel}
+            afterLabel={block.afterLabel}
+            maxWidth={block.maxWidth}
           />
           {block.caption && (
             <p className="mt-2 text-sm italic text-gray-400">{block.caption}</p>
@@ -594,8 +631,25 @@ export default function CaseStudy() {
           </section>
         </div>
 
+        <footer className="border-t border-gray-200 py-16">
+          <div className="flex items-center justify-center gap-8">
+            <a href={`mailto:${EMAIL}`} className="flex items-center gap-1.5">
+              <span aria-hidden>✉</span>
+              <WiggleText>Email</WiggleText>
+            </a>
+            <button
+              type="button"
+              onClick={openWelcome}
+              className="flex cursor-pointer items-center gap-1.5"
+            >
+              <span aria-hidden>✦</span>
+              <WiggleText>Talk to Niia AI</WiggleText>
+            </button>
+          </div>
+        </footer>
+
         {moreProjects.length > 0 && (
-          <section className="border-t border-gray-200 py-8">
+          <section className="py-16">
             <p className="mb-6 text-sm tracking-wide text-gray-400 uppercase">
               More case studies
             </p>
@@ -606,23 +660,6 @@ export default function CaseStudy() {
             </div>
           </section>
         )}
-
-        <footer className="border-t border-gray-200 pt-16 pb-12">
-          <div className="flex items-center justify-center gap-8">
-            <a href={`mailto:${EMAIL}`} className="flex items-center gap-1.5 underline">
-              <span aria-hidden>✉</span>
-              <WiggleText>Email</WiggleText>
-            </a>
-            <button
-              type="button"
-              onClick={openWelcome}
-              className="flex cursor-pointer items-center gap-1.5 underline"
-            >
-              <span aria-hidden>✦</span>
-              <WiggleText>Talk to Niia AI</WiggleText>
-            </button>
-          </div>
-        </footer>
       </div>
 
       <span

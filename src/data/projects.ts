@@ -7,8 +7,49 @@ export type ContentBlock =
   /** Editorial alternative to a bullet list — large mono numerals, matching About's Values section. */
   | { type: "numbered-list"; items: string[] }
   | { type: "quote"; text: string; attribution: string }
-  | { type: "image"; src: string; alt: string; caption?: string }
+  /**
+   * `maxWidth` caps the rendered width in px and centers the image. Needed for
+   * phone-shaped assets: the column is wider than they are, so without it they
+   * upscale past 1:1 (soft) and eat thousands of pixels of scroll.
+   */
+  | { type: "image"; src: string; alt: string; caption?: string; maxWidth?: number }
+  /** Screenshot with interactive numbered markers — see AnnotatedImage. */
+  | {
+      type: "annotated-image";
+      src: string;
+      alt: string;
+      maxWidth?: number;
+      caption?: string;
+      pins: { x: number; y: number; title: string; body: string }[];
+    }
+  /** Interview evidence: hoverable initials avatar, quote, takeaway. */
+  | {
+      type: "research-quotes";
+      items: {
+        initials: string;
+        name: string;
+        context: string;
+        quote: string;
+        takeaway: string;
+      }[];
+    }
   | { type: "gallery"; images: { src: string; alt: string; caption?: string }[] }
+  /**
+   * Drag-to-reveal comparison of one surface before and after the redesign.
+   * Both images must share an aspect ratio — see BeforeAfter.
+   */
+  | {
+      type: "before-after";
+      before: string;
+      after: string;
+      beforeAlt: string;
+      afterAlt: string;
+      beforeLabel?: string;
+      afterLabel?: string;
+      /** Cap the rendered width, in px — phone screenshots need this. */
+      maxWidth?: number;
+      caption?: string;
+    }
   /** Big standalone numbers (page views, MAU, usability score…), no card/border. */
   | { type: "stat-row"; stats: { value: string; label: string }[] }
   /** Numbered short-form callouts (frictions, concepts) — 2-4 items, gray fill. */
@@ -79,31 +120,30 @@ export const projects: Project[] = [
       { initials: "Me", label: "Niia Bieliavtseva", highlight: true },
       { initials: "RA", label: "Research Advisors" },
     ],
-    duration: "4 months · 2025",
+    duration: "Dec 2025 – Sep 2026 · 10 months",
     tools: ["Figma", "Claude", "Figjam", "Notion"],
     screenshots: [
       { src: "/projects/ios-app/1.png", alt: "Wellness AI app screens" },
       { src: "/projects/ios-app/3.png", alt: "Emotional fitness app progression screen" },
     ],
-    lastUpdated: "Feb, 2026",
+    lastUpdated: "Sep, 2026",
+    // Figures are from the May 2026 internal product review, cleared for
+    // publication. The client itself stays anonymous — see `client` above.
     impact: [
+      {
+        metric: "Activation",
+        description: "Replacing a home screen that made four separate asks with a coach that makes one,",
+        result: "first-memory creation rose from 39% to 60% of trial starters.",
+      },
+      {
+        metric: "Retention",
+        description: "Because opening the app now produces a reply rather than a dashboard,",
+        result: "week-one retention for paid subscribers went from 28% to 49%.",
+      },
       {
         metric: "Recognition",
         description: "After the redesign shipped,",
         result: "the app was selected as Apple's App of the Day across multiple countries.",
-      },
-      {
-        metric: "Scientific grounding",
-        description: "Every level in the app is validated against",
-        result: "real 3T structural MRI, FNIRS brain imaging, and MoCA cognitive testing.",
-      },
-      {
-        metric: "Reach",
-        // NOTE: "millions of users" carries over from the original brief/summary copy —
-        // verify this figure (and swap in a real before/after lift metric if one is
-        // shareable under NDA) before this goes live.
-        description: "The simplified system now supports",
-        result: "millions of users training across six evidence-based neurotransmitter systems.",
       },
     ],
     content: [
@@ -118,32 +158,221 @@ export const projects: Project[] = [
       { type: "section", id: "problem-framing", title: "Problem" },
       {
         type: "paragraph",
-        text: "The platform is built on real neuroscience: university research partners ran structural MRI, FNIRS brain imaging, and cognitive testing to validate a model of emotional fitness across six neurotransmitter systems — dopamine, serotonin, testosterone, oxytocin, opioids, and cannabinoids. That's rare scientific grounding for a wellness app, and it's core to why the product works.",
+        text: "This product has something most wellness apps don't: a real evidence base. University research partners ran structural MRI, fNIRS brain imaging and cognitive testing to validate a model of emotional fitness across six neurotransmitter systems — dopamine, serotonin, testosterone, oxytocin, opioids and cannabinoids. It had already been Apple's App of the Day. The science was never the problem.",
       },
       {
         type: "paragraph",
-        text: "It's also a lot to hand someone on day one. Before the redesign, each of those six systems had grown its own tracking, its own badges, its own screens — scientifically sound, but a lot of surface area for someone who just wants to know if today was a good day. The job was to fold six validated systems into one experience without flattening the science into vague wellness platitudes, and without losing the specificity that made the app credible in the first place.",
+        text: "The problem was how little of it survived contact with a new user. In the month before we changed anything, 39% of people who started a trial ever logged a single memory — the one action the entire product is built on. Six in ten paid for a week, did nothing, and left.",
+      },
+      {
+        // PLACEHOLDER — swap for the real Amplitude export at 1460×820.
+        // The figure in the caption is from the May 2026 product review.
+        type: "image",
+        src: "/projects/ios-app/problem-activation-funnel.png",
+        alt: "Funnel showing 133 trial starts against 52 first memories created in the pre-redesign cohort",
+        caption:
+          "52 of 133 trial starters (39.1%) ever created a first memory. Everything downstream — the six systems, the levels, the weekly report — is computed from memories, so a user who never logs one never sees the product work.",
+      },
+
+      { type: "heading", text: "How I tackled it" },
+      {
+        type: "numbered-list",
+        items: [
+          "Ran the app as a new user and mapped every screen — what it asked of me, and whether anything on it explained why.",
+          "Pulled the activation funnel in Amplitude to find where people stopped, rather than guessing from the screens alone.",
+          "Read the cancellation reasons and support tickets, which is where people say the quiet part out loud.",
+          "Interviewed users one-on-one, build by build, to hear how they described the app in their own words.",
+        ],
+      },
+      {
+        type: "paragraph",
+        text: "The interview that reframed the problem for me was with a user who understood the science better than most of our marketing did. She'd watched our founder's conference talk, taken notes, downloaded the research papers, and written a blog post about it. She could recite the six-neurotransmitter framework word for word. And she still wouldn't pay for the app.",
+      },
+      {
+        type: "research-quotes",
+        items: [
+          {
+            initials: "AS",
+            name: "Alena S.",
+            context: "London · interviewed on build 2.9.0, May 2026",
+            quote:
+              "There is nothing tangible, and this is a very weird experience to pay for.",
+            takeaway:
+              "She happily paid £30 for a paper journal but balked at the subscription. Understanding the science turned out to be no substitute for feeling the product work on you — “If I feel that I'm getting a real transformation in my behavior, I would pay for it.”",
+          },
+        ],
+      },
+      {
+        type: "paragraph",
+        text: "We were selling comprehension when people wanted to feel a change. And you can't feel a change from a product you never really started using — which brings us back to that 39%.",
+      },
+      {
+        type: "paragraph",
+        text: "So what was actually stopping people? Not the science. Three navigation problems wearing a lab coat.",
+      },
+      {
+        type: "callouts",
+        items: [
+          {
+            title: "No primary action",
+            description:
+              "Open the app and nothing tells you what to do first. The home screen made four separate asks and ranked none of them.",
+          },
+          {
+            title: "High cognitive load",
+            description:
+              "Cognitive load is the mental effort a screen demands before you can act. Here it was a composite score, six neurotransmitters, a photo feed and a memory prompt — all at once, none explained.",
+          },
+          {
+            title: "Progress split four ways",
+            description:
+              "Today, Stats, Memories and You each held a fragment of how you were doing. Answering “am I getting anywhere?” meant assembling the answer yourself across four tabs.",
+          },
+        ],
+      },
+      {
+        type: "paragraph",
+        text: "Here's the whole home screen at full length. Tap any marker to see what goes wrong there — and yes, the product name is blurred, not missing.",
+      },
+      {
+        // Marker positions are the real Figma layer offsets, expressed as a
+        // percentage of frame height — see node 12568:31610 in the iOS (Copy)
+        // file. Don't eyeball these if the screenshot is ever re-exported.
+        type: "annotated-image",
+        src: "/projects/ios-app/problem-today-annotated.png",
+        alt: "The old home screen at full length: score ring, neurotransmitter suggestions, today's photos, an add-a-past-memory prompt, and a five-item tab bar",
+        maxWidth: 420,
+        pins: [
+          {
+            x: 93,
+            y: 25.9,
+            title: "Unexplained hero metric",
+            body: "A composite score is the biggest thing on the screen, and nothing says what it measures or how to move it.",
+          },
+          {
+            x: 93,
+            y: 34.3,
+            title: "Undefined jargon",
+            body: "Dopamine, oxytocin and serotonin are offered as suggestions and defined nowhere. The science that makes the product credible reads as noise here.",
+          },
+          {
+            x: 93,
+            y: 42.1,
+            title: "Unclear relevance",
+            body: "Today's photos appear with no stated link to wellbeing. Skim the onboarding and the app reads as a photo album.",
+          },
+          {
+            x: 93,
+            y: 67.7,
+            title: "A fourth competing ask",
+            body: "“Add a past memory” — still no reason given, on a screen that has already asked three times.",
+          },
+          {
+            x: 93,
+            y: 96,
+            title: "Progress split four ways",
+            body: "Today, Stats, Memories and You each hold a fragment of the same picture.",
+          },
+        ],
+        caption:
+          "One screen, four calls to action, and no stated reason to perform any of them.",
       },
 
       { type: "section", id: "solution", title: "Solution" },
       {
         type: "paragraph",
-        text: "Working with the platform's neuroscience advisors, I collapsed the six systems into one dashboard: a single row of progress dots, one per neurotransmitter, always visible at the top of the app. The depth is still there once you tap in — the default view just isn't split six ways anymore.",
+        text: "So how do you explain six neurotransmitter systems to someone who has given you about four seconds? You stop trying to explain them on a screen.",
+      },
+      {
+        type: "paragraph",
+        text: "The bet we made in a team workshop — me, the PM, the iOS engineers, the founder who owns the neuroscience, and the community lead who reads every support ticket — was to make the app answer instead of display. Open it and you land in a conversation. The coach asks how your day went. What you say determines what it offers next, so the explanation arrives at the moment it's relevant rather than all at once on a dashboard.",
+      },
+      {
+        type: "paragraph",
+        text: "Each concept traces back to one of the three frictions:",
       },
       {
         type: "list",
         items: [
-          "A conversational log where every memory a user shares gets tagged to the system(s) it affects, with a plain-language explanation of why — instead of a form asking six separate questions.",
-          "A level system — Learner, Apprentice, Practitioner, and beyond — that turns the six-system total into one number climbing toward the next unlock.",
-          "A parallel “what you're training” framing (endurance, strength, flexibility, coordination, speed, balance) that gives each neurotransmitter system a fitness analogy people already understand.",
+          "Chat as the home screen, answering “no primary action.” One question, one reply, one thing to do. Everything else moves behind it.",
+          "A coach that explains in context, answering “high cognitive load.” Share a memory and it tells you which systems it affects and why, in plain language, instead of the screen defining six terms up front.",
+          "Four destinations behind a drawer, answering “progress split four ways.” The five-tab bar collapses; the You page becomes the single place your progress lives.",
+        ],
+      },
+      {
+        type: "image",
+        src: "/projects/ios-app/solution-drawer.png",
+        alt: "The new navigation drawer showing Coaching, You, Team and Memories, with Settings at the bottom",
+        maxWidth: 360,
+        caption:
+          "Five tabs of equal weight became one default surface plus three places to go looking. Coaching is where you land; nothing else competes for the opening move.",
+      },
+
+      { type: "heading", text: "Iterating on the progress card" },
+      {
+        type: "paragraph",
+        text: "The hardest piece wasn't the conversation — it was telling someone where they stand without going back to a dashboard. Progress had to surface inside the chat, in a card small enough not to interrupt.",
+      },
+      {
+        type: "paragraph",
+        text: "The first versions praised you. “Great job!” and “You are making huge progress!” over a percentage bar. Reviewing them next to each other, the problem was obvious: a percentage of an unnamed total is the same unexplained metric we'd just spent months removing from the home screen. Pleasant, and no help deciding what to do next.",
+      },
+      {
+        type: "image",
+        src: "/projects/ios-app/solution-card-iterations.png",
+        alt: "Four progress card variants — two praise-led with percentage bars, two naming the Happiness Report with a five-segment counter — next to the expanded progress sheet and its empty state",
+        caption:
+          "Top row: praise over a percentage. Bottom row: a named destination over a five-segment counter, so “3/5” tells you exactly how many memories are left. The version that shipped is the one that answers “and then what?”",
+      },
+      {
+        type: "paragraph",
+        text: "The shipped card names the thing you're moving toward — your weekly Happiness Report — and counts the memories remaining in whole numbers. Tap it and a sheet expands with the level bar and the report progress together. It's the same fix as the home screen, applied at card scale: replace an unexplained number with a named next step.",
+      },
+
+      { type: "heading", text: "What we cut" },
+      {
+        type: "paragraph",
+        text: "A fair amount, and mostly on purpose. Shipping an AI-first pivot means resisting the urge to make everything AI-first at once.",
+      },
+      {
+        type: "list",
+        items: [
+          "The photo-suggestion card didn't ship as the coach's opening message. It enters mid-conversation instead, so it can't disrupt the one routine we'd just proven worked. First-message placement was deferred to an A/B test once we had real click-through data.",
+          "The persistent quick-access button was cut back to a single entry point in the input bar, rather than living everywhere in the app, until the sheet behind it earned its keep.",
+          "The neuroscience annotation on workouts was dropped entirely from V1. It was the kind of detail that reads as rigour to us and as more text to everyone else.",
+          "Our own target came down. The team had proposed 40% of users tapping the card at least once per session; an earlier 50% was talked down as optimistic rather than quietly kept as a stretch goal.",
         ],
       },
       {
         type: "paragraph",
-        text: "I built interactive prototypes of the coaching flow and the level system to pressure-test the interaction model with the neuroscience advisors before handing anything to engineering.",
+        text: "The level system got the same treatment. The founder's original framework needed 50 memories to clear Level 1, thousands of sent gifts, and brain imaging to pass the upper levels. We cut Level 1 to 10 memories, made the scans optional at every level, and drip-fed the rules one level at a time. Same science, reachable first milestone.",
       },
 
       { type: "section", id: "final-design", title: "Final design" },
+
+      { type: "heading", text: "What you see when you open the app" },
+      {
+        type: "paragraph",
+        text: "The old home screen led with a composite wellbeing score that nothing on the page explained, then stacked photos from today, three neurotransmitter suggestions, and a prompt to add a past memory — four unrelated asks before a new user had any idea what the app wanted from them. The new one asks a single question and waits.",
+      },
+      {
+        // Exported via scripts/figma-export.py. Both are 786×1704 — the before
+        // is the old Today frame cropped to the top 852pt so it's compared at
+        // the same viewport as the after, not as a full page scroll.
+        //   before: iOS (Copy) KCR6CITRUDpaBFFnqgYbWG  12568:31610
+        //   after:  Production 4cBNswIEFN0tLHhntFYcry  3161:12164
+        type: "before-after",
+        before: "/projects/ios-app/before-today.png",
+        after: "/projects/ios-app/after-coaching.png",
+        beforeAlt:
+          "The old Today screen: an unexplained composite wellbeing score, neurotransmitter suggestion pills, photos from today, and an add-a-past-memory prompt",
+        afterAlt:
+          "The new Coaching screen: six neurotransmitter progress dots, one message from the coach, and a Share a moment input",
+        maxWidth: 360,
+        caption:
+          "Drag to compare. Same moment in the app — opening it cold — before and after the redesign.",
+      },
+
       { type: "heading", text: "One dashboard for six neurotransmitter systems" },
       {
         type: "paragraph",
@@ -208,6 +437,66 @@ export const projects: Project[] = [
 
       { type: "section", id: "results", title: "Results" },
       {
+        type: "paragraph",
+        text: "The AI coach shipped on 7 May 2026. These are the cohorts either side of that date — people who started before it existed, against people who started after.",
+      },
+      {
+        // Figures from the May 2026 internal product review. Activation is
+        // 52/133 pre vs 202/338 post; retention is the paid-subscriber weekly
+        // cohort. Week 6 is deliberately omitted — the post-M cohort hadn't
+        // aged into it yet, so its 0% is a cohort artifact, not a decline.
+        type: "stat-row",
+        stats: [
+          { value: "39% → 60%", label: "Trial starters who logged a first memory" },
+          { value: "28% → 49%", label: "Week-one retention, paid subscribers" },
+          { value: "9% → 12.7%", label: "Download-to-trial conversion" },
+        ],
+      },
+      {
+        type: "paragraph",
+        text: "The activation number is the one that matters. Every other thing the product does — the six systems, the levels, the weekly report — is computed from memories, so a user who never logs one never sees any of it. Moving that from four in ten to six in ten means half again as many people actually reached the product.",
+      },
+      {
+        type: "paragraph",
+        text: "Retention moved for a related reason: opening the app now produces a reply, so there's a reason to come back tomorrow that isn't a number you don't understand.",
+      },
+      {
+        type: "paragraph",
+        text: "The clearest evidence came from someone who had already quit. She'd lapsed more than a year earlier, got an email about the coaching feature, saved it until she was on holiday and had time to read it properly, and came back.",
+      },
+      {
+        type: "research-quotes",
+        items: [
+          {
+            initials: "LL",
+            name: "Laura L.",
+            context: "Canada · interviewed on build 3.0.9, June 2026",
+            quote: "There's somebody waiting for me.",
+            takeaway:
+              "A returning lapsed user on why she came back — that, and “there's a plan when I get there.” It had changed how she used her camera, too: she photographed a hole in the wall her husband had fixed, because “that is love.” The app stopped being a tracker and became a reason to notice things.",
+          },
+        ],
+      },
+
+      { type: "heading", text: "What didn't work" },
+      {
+        type: "paragraph",
+        text: "Two things, and they're the same thing from opposite directions.",
+      },
+      {
+        type: "list",
+        items: [
+          "Long-time users lost features they liked. 42% of May's support inquiries were product issues, questions and comments, and the recurring theme was old functionality deprecated in favour of the coach. One cancellation read: “Became overly complicated. I preferred just adding photos and getting my weekly report.” Simplifying for new users is not free for the people who had already learned the old thing.",
+          "New users still missed the explanations. Laura never found the onboarding tooltips at all, didn't know the neurotransmitters train in a fixed sequence, and discovered she could edit a memory's date and duration only by accident. The coach answers questions well; it's still not great at telling you which questions are worth asking.",
+        ],
+      },
+      {
+        type: "paragraph",
+        text: "Both fed the next round of work — the mood check-in, the level system, and the progress cards that tell you where you are without being asked.",
+      },
+
+      { type: "heading", text: "Beyond the numbers" },
+      {
         type: "numbered-list",
         items: [
           "Selected as Apple's App of the Day across multiple countries.",
@@ -219,8 +508,6 @@ export const projects: Project[] = [
         type: "paragraph",
         text: "The redesign didn't just make six systems fit on one screen — it kept the neuroscience credible enough to hold up in a documentary and, now, in clinical research settings.",
       },
-      // TODO: a real quote from the client or a user would land better here than
-      // anything else in the Results section — don't fabricate one in the meantime.
     ],
   },
   {
