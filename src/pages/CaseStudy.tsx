@@ -234,7 +234,7 @@ function Block({
           {block.stats.map((stat, i) => (
             <div key={i}>
               <p className="text-5xl font-medium tracking-tight">{stat.value}</p>
-              <p className="mt-2 text-sm text-neutral-500">{stat.label}</p>
+              <p className="mt-2 text-sm text-gray-400">{stat.label}</p>
             </div>
           ))}
         </div>
@@ -244,12 +244,12 @@ function Block({
         <div className="my-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
           {block.items.map((item, i) => (
             <div key={i} className="bg-neutral-100 p-6">
-              <p className="mb-3 font-mono text-xs text-neutral-400">
+              <p className="mb-3 font-mono text-xs text-gray-400">
                 {String(i + 1).padStart(2, "0")}
               </p>
               <p className="font-medium">{item.title}</p>
               {item.description && (
-                <p className="mt-2 text-sm text-neutral-500">{item.description}</p>
+                <p className="mt-2 text-sm text-gray-400">{item.description}</p>
               )}
             </div>
           ))}
@@ -267,7 +267,7 @@ function Block({
             onMouseLeave={zoomCursor.onMouseLeave}
           />
           {block.caption && (
-            <p className="mt-2 text-sm italic text-neutral-500">{block.caption}</p>
+            <p className="mt-2 text-sm italic text-gray-400">{block.caption}</p>
           )}
         </div>
       );
@@ -285,7 +285,7 @@ function Block({
                 onMouseLeave={zoomCursor.onMouseLeave}
               />
               {img.caption && (
-                <p className="mt-2 text-sm italic text-neutral-500">{img.caption}</p>
+                <p className="mt-2 text-sm italic text-gray-400">{img.caption}</p>
               )}
             </div>
           ))}
@@ -388,82 +388,90 @@ export default function CaseStudy() {
     <main className="pb-24">
       <Nav />
       <div className="mx-auto max-w-4xl pt-10">
-        <header className="border-b border-gray-400 pb-8">
-          <p className="mb-4 font-mono text-xs tracking-widest text-neutral-400 uppercase">
-            {project.client}
-          </p>
-          <h1 className="mb-4 text-3xl font-medium lg:text-5xl">{project.title}</h1>
-          {project.summary && <p className="mt-4 max-w-2xl">{project.summary}</p>}
-        </header>
-
-        <section id="overview" className="scroll-mt-8 border-b border-gray-400 py-8">
-          <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-            <div>
-              <p>Role</p>
-              <p className="italic">{project.role}</p>
-            </div>
-            {project.team && (
-              <div>
-                <p>Team</p>
-                <p className="italic">{project.team}</p>
-                {project.credits && project.credits.length > 0 && (
-                  <CreditAvatars credits={project.credits} />
-                )}
-              </div>
-            )}
-            <div>
-              <p>Timeline</p>
-              <p className="italic">{project.duration}</p>
-            </div>
-            <div>
-              <p>Tools</p>
-              <ToolList tools={project.tools} />
-            </div>
-          </div>
-
-          {project.impact && project.impact.length > 0 && (
-            <div className="mt-10">
-              <p className="mb-4 text-sm tracking-wide text-neutral-500 uppercase">
-                Impact overview
-              </p>
-              <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-                {project.impact.map((stat) => (
-                  <div key={stat.metric} className="bg-neutral-100 p-6">
-                    <p className="mb-2 font-medium">{stat.metric}</p>
-                    <p className="text-sm">
-                      {stat.description} <strong>{stat.result}</strong>
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </section>
-
         <div className="relative">
-          {/* Sits in the page margin, outside the reading column, so the column
-              itself never has to shrink to make room for it. Needs real estate
-              beyond max-w-4xl on both sides, hence the wide custom breakpoint. */}
+          {/* Sits further out in the page margin, outside the reading column, so
+              the column itself never has to shrink to make room for it. Spans
+              the full header-to-content height (not just the content section)
+              so it starts at the top of the page, opposite the content start.
+              Needs real estate beyond max-w-4xl on both sides, hence the wide
+              custom breakpoint. */}
           {hasToc && (
-            <aside className="hidden min-[1360px]:absolute min-[1360px]:inset-y-0 min-[1360px]:right-full min-[1360px]:mr-12 min-[1360px]:block min-[1360px]:w-32">
-              <nav className="min-[1360px]:sticky min-[1360px]:top-24 min-[1360px]:pt-8">
-                <ul className="flex flex-col gap-3">
-                  {toc.map((item) => (
-                    <li key={item.id}>
-                      <a
-                        href={`#${item.id}`}
-                        className={`text-sm ${
-                          activeId === item.id ? "font-medium text-black" : "text-neutral-400"
-                        }`}
-                      >
-                        {item.title}
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              </nav>
+            <aside className="hidden min-[1360px]:absolute min-[1360px]:inset-y-0 min-[1360px]:right-full min-[1360px]:mr-20 min-[1360px]:block min-[1360px]:w-32">
+              <div className="min-[1360px]:sticky min-[1360px]:top-24">
+                <Link to="/" className="mb-6 block text-sm text-gray-400">
+                  <WiggleText>← Back</WiggleText>
+                </Link>
+                <nav>
+                  <ul className="flex flex-col gap-3">
+                    {toc.map((item) => (
+                      <li key={item.id}>
+                        <a
+                          href={`#${item.id}`}
+                          className={`text-sm ${
+                            activeId === item.id ? "font-medium text-black" : "text-gray-400"
+                          }`}
+                        >
+                          {item.title}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                </nav>
+              </div>
             </aside>
           )}
+
+          <header className="border-b border-gray-200 pb-8">
+            <p className="mb-4 font-mono text-xs tracking-widest text-gray-400 uppercase">
+              {project.client}
+            </p>
+            <h1 className="mb-4 text-3xl font-medium lg:text-5xl">{project.title}</h1>
+            {project.summary && <p className="mt-4 max-w-2xl">{project.summary}</p>}
+          </header>
+
+          <section id="overview" className="scroll-mt-8 border-b border-gray-200 py-8">
+            <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+              <div>
+                <p>Role</p>
+                <p className="italic">{project.role}</p>
+              </div>
+              {project.team && (
+                <div>
+                  <p>Team</p>
+                  <p className="italic">{project.team}</p>
+                  {project.credits && project.credits.length > 0 && (
+                    <CreditAvatars credits={project.credits} />
+                  )}
+                </div>
+              )}
+              <div>
+                <p>Timeline</p>
+                <p className="italic">{project.duration}</p>
+              </div>
+              <div>
+                <p>Tools</p>
+                <ToolList tools={project.tools} />
+              </div>
+            </div>
+
+            {project.impact && project.impact.length > 0 && (
+              <div className="mt-10">
+                <p className="mb-4 text-sm tracking-wide text-gray-400 uppercase">
+                  Impact overview
+                </p>
+                <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+                  {project.impact.map((stat) => (
+                    <div key={stat.metric} className="bg-neutral-100 p-6">
+                      <p className="mb-2 font-medium">{stat.metric}</p>
+                      <p className="text-sm">
+                        {stat.description} <strong>{stat.result}</strong>
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </section>
 
           <section className="py-8">
             {project.content.map((block, i) => (
@@ -478,8 +486,8 @@ export default function CaseStudy() {
         </div>
 
         {moreProjects.length > 0 && (
-          <section className="border-t border-gray-400 py-8">
-            <p className="mb-6 text-sm tracking-wide text-neutral-500 uppercase">
+          <section className="border-t border-gray-200 py-8">
+            <p className="mb-6 text-sm tracking-wide text-gray-400 uppercase">
               More case studies
             </p>
             <div className="columns-1 gap-8 sm:columns-2">
@@ -490,7 +498,7 @@ export default function CaseStudy() {
           </section>
         )}
 
-        <footer className="border-t border-gray-400 py-8">
+        <footer className="border-t border-gray-200 py-8">
           <p>
             <a href="mailto:nia.bieliavtseva@gmail.com" className="underline">
               <WiggleText>Let's design it!</WiggleText>
