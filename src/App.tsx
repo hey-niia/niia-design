@@ -12,6 +12,7 @@ import ScrollToTop from "./components/ScrollToTop";
 import Footer from "./components/Footer";
 import NiiaChatSidebar from "./components/NiiaChatSidebar";
 import SelectionAskTooltip from "./components/SelectionAskTooltip";
+import ImageContextMenu from "./components/ImageContextMenu";
 import { NiiaChatProvider } from "./context/NiiaChatContext";
 import { useNiiaChat } from "./context/useNiiaChat";
 
@@ -39,6 +40,7 @@ function AppContent() {
       </div>
       <SelectionAskTooltip />
       <NiiaChatSidebar />
+      <ImageContextMenu />
     </>
   );
 }

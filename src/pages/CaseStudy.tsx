@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type MouseEvent } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type MouseEvent } from "react";
 import { Link, useParams } from "react-router-dom";
 import { getProject, projects, type ContentBlock, type Credit } from "../data/projects";
 import Nav from "../components/Nav";
@@ -50,13 +50,19 @@ function CreditAvatars({ credits }: { credits: Credit[] }) {
   );
 }
 
-const ZOOM_MIN = 1;
-const ZOOM_MAX = 4;
-const ZOOM_STEP = 0.5;
+// A step multiplies/divides the current scale rather than adding a fixed
+// amount, so it feels similarly sized whether the image is showing at 8% or
+// 80%.
+const ZOOM_STEP_FACTOR = 1.25;
 // Reserved space around the image so it never touches the viewport edges or
 // the floating zoom controls at the bottom.
 const LIGHTBOX_PADDING = 32;
 const LIGHTBOX_CONTROLS_SPACE = 96;
+// Below this average luminance (0-255) behind the pill, it's a dark backdrop
+// and the default light-glass styling is legible; above it, flip to a dark
+// chip so the white text doesn't wash out against a light part of the image.
+const CONTRAST_LUMA_THRESHOLD = 175;
+const EMAIL = "nia.bieliavtseva@gmail.com";
 
 function Lightbox({
   images,
@@ -71,8 +77,14 @@ function Lightbox({
 }) {
   const { src, alt } = images[index];
   const [natural, setNatural] = useState<{ w: number; h: number } | null>(null);
-  const [zoom, setZoom] = useState(ZOOM_MIN);
+  // Absolute scale, not a multiplier — 1 means the image's real pixel size.
+  // Null until the image loads, at which point it's set to fitWidthScale.
+  const [userScale, setUserScale] = useState<number | null>(null);
   const [viewport, setViewport] = useState({ w: window.innerWidth, h: window.innerHeight });
+  const [pillOnLight, setPillOnLight] = useState(false);
+  const imgRef = useRef<HTMLImageElement>(null);
+  const pillRef = useRef<HTMLDivElement>(null);
+  const sampleRaf = useRef<number | undefined>(undefined);
 
   useEffect(() => {
     const onResize = () => setViewport({ w: window.innerWidth, h: window.innerHeight });
@@ -82,7 +94,7 @@ function Lightbox({
 
   // A fresh image needs its own measurements and starts back at fit-to-screen.
   useEffect(() => {
-    setZoom(ZOOM_MIN);
+    setUserScale(null);
     setNatural(null);
   }, [index]);
 
@@ -99,61 +111,149 @@ function Lightbox({
   // Scale the image to its real box size (not a CSS transform) so the
   // overflow-auto container actually gets scrollable content once zoomed —
   // a transform only repaints, it never grows the scrollable area.
-  //
-  // Fit is by width only, capped so we never upscale past the real
-  // resolution (which would just pixelate it). A tall screenshot — a
-  // full-page capture, say — stays readable at full width and scrolls
-  // vertically instead of shrinking to fit its whole height on screen.
-  const fitScale = natural ? Math.min(1, (viewport.w - LIGHTBOX_PADDING * 2) / natural.w) : 1;
-  const scale = fitScale * zoom;
+  const availableWidth = viewport.w - LIGHTBOX_PADDING * 2;
   const availableHeight = viewport.h - LIGHTBOX_PADDING * 2 - LIGHTBOX_CONTROLS_SPACE;
-  const overflows = natural ? natural.h * scale > availableHeight : false;
+  // Default view: fit by width only, capped so we never upscale past the
+  // real resolution. A tall screenshot — a full-page capture, say — stays
+  // readable at full width and scrolls vertically instead of shrinking to
+  // fit its whole height on screen.
+  const fitWidthScale = natural ? Math.min(1, availableWidth / natural.w) : 1;
+  // The smallest useful scale: the whole image visible at once, no
+  // scrolling. Below fitWidthScale for anything tall enough (or, as here,
+  // just proportioned awkwardly for the viewport) to still overflow the
+  // height even at fit-by-width — zooming out this far is what lets you see
+  // all of it in one glance.
+  const minScale = natural
+    ? Math.min(fitWidthScale, availableHeight / natural.h)
+    : 1;
+  // Never upscale past native resolution — that just pixelates it.
+  const maxScale = 1;
+  const canZoom = maxScale > minScale + 0.001;
+  const scale = Math.min(maxScale, Math.max(minScale, userScale ?? fitWidthScale));
+  const overflowsHorizontally = natural ? natural.w * scale > availableWidth + 0.5 : false;
+  const overflowsVertically = natural ? natural.h * scale > availableHeight + 0.5 : false;
+
+  // The pill floats over whatever part of the (possibly scrolled, possibly
+  // zoomed) screenshot sits behind it, which can be light or dark — sample
+  // the pixels directly underneath it and flip the pill's own theme to match.
+  const sampleContrast = useCallback(() => {
+    const imgEl = imgRef.current;
+    const pillEl = pillRef.current;
+    if (!imgEl || !pillEl || scale <= 0) return;
+    const imgRect = imgEl.getBoundingClientRect();
+    const pillRect = pillEl.getBoundingClientRect();
+    const x0 = Math.max(imgRect.left, pillRect.left);
+    const x1 = Math.min(imgRect.right, pillRect.right);
+    const y0 = Math.max(imgRect.top, pillRect.top);
+    const y1 = Math.min(imgRect.bottom, pillRect.bottom);
+    if (x1 <= x0 || y1 <= y0) {
+      setPillOnLight(false);
+      return;
+    }
+    const canvas = document.createElement("canvas");
+    canvas.width = 16;
+    canvas.height = 16;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    try {
+      ctx.drawImage(
+        imgEl,
+        (x0 - imgRect.left) / scale,
+        (y0 - imgRect.top) / scale,
+        (x1 - x0) / scale,
+        (y1 - y0) / scale,
+        0,
+        0,
+        canvas.width,
+        canvas.height,
+      );
+      const { data } = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      let total = 0;
+      for (let i = 0; i < data.length; i += 4) {
+        total += 0.2126 * data[i] + 0.7152 * data[i + 1] + 0.0722 * data[i + 2];
+      }
+      setPillOnLight(total / (data.length / 4) > CONTRAST_LUMA_THRESHOLD);
+    } catch {
+      // Same-origin project screenshots shouldn't taint the canvas, but if
+      // something ever does, just keep the last known theme.
+    }
+  }, [scale]);
+
+  useEffect(() => {
+    sampleContrast();
+  }, [sampleContrast, natural]);
+
+  const onBackdropScroll = () => {
+    if (sampleRaf.current) cancelAnimationFrame(sampleRaf.current);
+    sampleRaf.current = requestAnimationFrame(sampleContrast);
+  };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-auto bg-black/90" onClick={onClose}>
+    <>
       <div
-        className={`flex min-h-full p-8 ${overflows ? "items-start justify-start" : "items-center justify-center"}`}
-        style={{ paddingBottom: LIGHTBOX_CONTROLS_SPACE }}
+        className="fixed inset-0 z-50 overflow-auto bg-black/90"
+        onClick={onClose}
+        onScroll={onBackdropScroll}
       >
-        <img
-          src={src}
-          alt={alt}
-          onLoad={(e) => {
-            const img = e.currentTarget;
-            setNatural({ w: img.naturalWidth, h: img.naturalHeight });
-          }}
-          onClick={(e) => e.stopPropagation()}
-          style={
-            natural
-              ? { width: natural.w * scale, height: natural.h * scale, maxWidth: "none" }
-              : { maxWidth: "100%", maxHeight: "70vh" }
-          }
-        />
+        <div
+          className={`flex min-h-full p-8 ${overflowsVertically ? "items-start" : "items-center"} ${
+            overflowsHorizontally ? "justify-start" : "justify-center"
+          }`}
+          style={{ paddingBottom: LIGHTBOX_CONTROLS_SPACE }}
+        >
+          <img
+            ref={imgRef}
+            src={src}
+            alt={alt}
+            onLoad={(e) => {
+              const img = e.currentTarget;
+              setNatural({ w: img.naturalWidth, h: img.naturalHeight });
+            }}
+            onClick={(e) => e.stopPropagation()}
+            style={
+              natural
+                ? { width: natural.w * scale, height: natural.h * scale, maxWidth: "none" }
+                : { maxWidth: "100%", maxHeight: "70vh" }
+            }
+          />
+        </div>
       </div>
 
+      {/* A sibling of the scrolling backdrop above, not a child of it — some
+          WebKit versions treat a `fixed` element nested inside a `fixed` +
+          `overflow-auto` ancestor as if it scrolled with the content, which
+          would carry these controls off-screen on a tall image. */}
       <div
-        className="fixed bottom-6 left-1/2 z-[60] flex -translate-x-1/2 items-center gap-1 rounded-full border border-white/15 bg-white/10 px-2 py-1.5 text-white shadow-[0_8px_30px_rgba(0,0,0,0.35)] backdrop-blur-xl"
-        onClick={(e) => e.stopPropagation()}
+        ref={pillRef}
+        className={`fixed bottom-6 left-1/2 z-[60] flex -translate-x-1/2 items-center gap-1 rounded-full border px-2 py-1.5 shadow-[0_8px_30px_rgba(0,0,0,0.35)] backdrop-blur-xl transition-colors ${
+          pillOnLight ? "border-black/10 bg-black/70 text-white" : "border-white/15 bg-white/10 text-white"
+        }`}
       >
-        <button
-          type="button"
-          onClick={() => setZoom((z) => Math.max(ZOOM_MIN, +(z - ZOOM_STEP).toFixed(2)))}
-          disabled={zoom <= ZOOM_MIN}
-          className="rounded-full px-2.5 py-1.5 transition-colors hover:bg-white/10 disabled:opacity-30"
-          aria-label="Zoom out"
-        >
-          −
-        </button>
-        <span className="w-12 text-center text-sm tabular-nums">{Math.round(zoom * 100)}%</span>
-        <button
-          type="button"
-          onClick={() => setZoom((z) => Math.min(ZOOM_MAX, +(z + ZOOM_STEP).toFixed(2)))}
-          disabled={zoom >= ZOOM_MAX}
-          className="rounded-full px-2.5 py-1.5 transition-colors hover:bg-white/10 disabled:opacity-30"
-          aria-label="Zoom in"
-        >
-          +
-        </button>
+        {canZoom && (
+          <>
+            <button
+              type="button"
+              onClick={() => setUserScale(Math.max(minScale, scale / ZOOM_STEP_FACTOR))}
+              disabled={scale <= minScale + 0.001}
+              className="rounded-full px-2.5 py-1.5 transition-colors hover:bg-white/10 disabled:opacity-30"
+              aria-label="Zoom out"
+            >
+              −
+            </button>
+            <span className="w-12 text-center text-sm tabular-nums">
+              {Math.round(scale * 100)}%
+            </span>
+            <button
+              type="button"
+              onClick={() => setUserScale(Math.min(maxScale, scale * ZOOM_STEP_FACTOR))}
+              disabled={scale >= maxScale - 0.001}
+              className="rounded-full px-2.5 py-1.5 transition-colors hover:bg-white/10 disabled:opacity-30"
+              aria-label="Zoom in"
+            >
+              +
+            </button>
+          </>
+        )}
         {images.length > 1 && (
           <>
             <span aria-hidden className="mx-1 h-4 w-px bg-white/15" />
@@ -162,7 +262,9 @@ function Lightbox({
             </span>
           </>
         )}
-        <span aria-hidden className="mx-1 h-4 w-px bg-white/15" />
+        {(canZoom || images.length > 1) && (
+          <span aria-hidden className="mx-1 h-4 w-px bg-white/15" />
+        )}
         <button
           type="button"
           onClick={onClose}
@@ -171,7 +273,7 @@ function Lightbox({
           Close
         </button>
       </div>
-    </div>
+    </>
   );
 }
 
@@ -387,14 +489,16 @@ export default function CaseStudy() {
   return (
     <main className="pb-24">
       <Nav />
-      <div className="mx-auto max-w-4xl">
-        <header className="border-b pb-8">
-          <p className="my-2">{project.client}</p>
-          <h1 className="mt-2 mb-2 text-3xl font-medium lg:text-5xl">{project.title}</h1>
-          {project.summary && <p className="mt-2 max-w-2xl italic">{project.summary}</p>}
+      <div className="mx-auto max-w-4xl pt-10">
+        <header className="border-b border-gray-400 pb-8">
+          <p className="mb-4 font-mono text-xs tracking-widest text-neutral-400 uppercase">
+            {project.client}
+          </p>
+          <h1 className="mb-4 text-3xl font-medium lg:text-5xl">{project.title}</h1>
+          {project.summary && <p className="mt-4 max-w-2xl">{project.summary}</p>}
         </header>
 
-        <section id="overview" className="scroll-mt-8 border-b py-8">
+        <section id="overview" className="scroll-mt-8 border-b border-gray-400 py-8">
           <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
             <div>
               <p>Role</p>
@@ -476,7 +580,7 @@ export default function CaseStudy() {
         </div>
 
         {moreProjects.length > 0 && (
-          <section className="border-t py-8">
+          <section className="border-t border-gray-400 py-8">
             <p className="mb-6 text-sm tracking-wide text-neutral-500 uppercase">
               More case studies
             </p>
@@ -488,10 +592,9 @@ export default function CaseStudy() {
           </section>
         )}
 
-        <footer className="border-t py-8">
+        <footer className="border-t border-gray-400 py-8">
           <p>
-            Last updated: {project.lastUpdated} —{" "}
-            <a href="mailto:nia.bieliavtseva@gmail.com" className="underline">
+            <a href={`mailto:${EMAIL}`} className="underline">
               <WiggleText>Let's design it!</WiggleText>
             </a>
           </p>
@@ -500,7 +603,7 @@ export default function CaseStudy() {
 
       <span
         aria-hidden
-        className={`pointer-events-none fixed z-50 flex -translate-x-1/2 -translate-y-1/2 items-center gap-1.5 rounded-full bg-[#e65f2e] px-4 py-2 text-sm font-medium text-white transition-[transform,opacity] duration-150 ease-out ${
+        className={`pointer-events-none fixed z-50 flex -translate-x-1/2 -translate-y-1/2 items-center gap-1.5 rounded-full bg-[#e65f2e] px-4 py-2 text-sm font-normal text-white transition-[transform,opacity] duration-150 ease-out ${
           cursorLabel.visible ? "scale-100 opacity-100" : "scale-75 opacity-0"
         }`}
         style={{ left: cursorLabel.x, top: cursorLabel.y }}
