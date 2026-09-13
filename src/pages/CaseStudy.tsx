@@ -19,7 +19,7 @@ const TOOL_ICONS: Record<string, string> = {
 
 function ToolList({ tools }: { tools: string[] }) {
   return (
-    <p className="flex flex-wrap items-center gap-x-6 gap-y-2 italic">
+    <p className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm">
       {tools.map((tool) => (
         <span key={tool} className="inline-flex items-center gap-2">
           {TOOL_ICONS[tool] && (
@@ -295,26 +295,32 @@ function Block({
 }) {
   switch (block.type) {
     case "paragraph":
-      return <p className="my-4">{block.text}</p>;
+      return <p className="my-4 max-w-[46rem]">{block.text}</p>;
     case "heading":
-      return <h3 className="mt-8 mb-2">{block.text}</h3>;
+      return (
+        <h3 className="mt-12 mb-3 max-w-[46rem] text-[1.375rem] font-semibold">{block.text}</h3>
+      );
     case "section":
       return (
-        <h2 id={block.id} className="mt-16 mb-4 scroll-mt-8 text-2xl font-medium">
+        <h2 id={block.id} className="mt-16 mb-4 scroll-mt-8 text-3xl font-medium">
           {block.title}
         </h2>
       );
     case "list":
       return (
-        <ul className="my-4 list-inside list-disc space-y-2">
+        // list-outside so wrapped lines align with the first line's text
+        // instead of sliding back under the bullet.
+        <ul className="my-4 max-w-[46rem] list-outside list-disc space-y-2 pl-5">
           {block.items.map((item, i) => (
-            <li key={i}>{item}</li>
+            <li key={i} className="pl-1">
+              {item}
+            </li>
           ))}
         </ul>
       );
     case "numbered-list":
       return (
-        <div className="my-8 flex flex-col gap-6">
+        <div className="my-8 flex max-w-[46rem] flex-col gap-6">
           {block.items.map((item, i) => (
             <div key={i} className="flex items-start gap-6">
               <p className="w-12 shrink-0 font-mono text-4xl leading-none text-neutral-200">
@@ -327,7 +333,7 @@ function Block({
       );
     case "quote":
       return (
-        <blockquote className="my-6 border-l-2 pl-4 italic">
+        <blockquote className="my-6 max-w-[46rem] border-l-2 pl-4 italic">
           <p>“{block.text}”</p>
           <footer className="mt-2 text-sm not-italic">— {block.attribution}</footer>
         </blockquote>
@@ -587,24 +593,32 @@ export default function CaseStudy() {
           <section id="overview" className="scroll-mt-8 border-b border-gray-200 py-8">
             <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
               <div>
-                <p>Role</p>
-                <p className="italic">{project.role}</p>
+                <p className="mb-1 font-mono text-xs tracking-widest text-gray-400 uppercase">
+                  Role
+                </p>
+                <p className="text-sm">{project.role}</p>
               </div>
               {project.team && (
                 <div>
-                  <p>Team</p>
-                  <p className="italic">{project.team}</p>
+                  <p className="mb-1 font-mono text-xs tracking-widest text-gray-400 uppercase">
+                    Team
+                  </p>
+                  <p className="text-sm">{project.team}</p>
                   {project.credits && project.credits.length > 0 && (
                     <CreditAvatars credits={project.credits} />
                   )}
                 </div>
               )}
               <div>
-                <p>Timeline</p>
-                <p className="italic">{project.duration}</p>
+                <p className="mb-1 font-mono text-xs tracking-widest text-gray-400 uppercase">
+                  Timeline
+                </p>
+                <p className="text-sm">{project.duration}</p>
               </div>
               <div>
-                <p>Tools</p>
+                <p className="mb-1 font-mono text-xs tracking-widest text-gray-400 uppercase">
+                  Tools
+                </p>
                 <ToolList tools={project.tools} />
               </div>
             </div>

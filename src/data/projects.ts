@@ -194,7 +194,7 @@ export const projects: Project[] = [
       },
       {
         type: "paragraph",
-        text: "The interview that reframed the problem for me was with a user who understood the science better than most of our marketing did. She'd watched our founder's conference talk, taken notes, downloaded the research papers, and written a blog post about it. She could recite the six-neurotransmitter framework word for word. And she still wouldn't pay for the app.",
+        text: "One interview changed how I saw the problem. The user understood the science better than most of our marketing did. She'd watched our founder's conference talk, taken notes, downloaded the research papers, and written a blog post about it. She could recite the six-neurotransmitter framework word for word. And she still wouldn't pay for the app.",
       },
       {
         type: "research-quotes",
@@ -212,11 +212,11 @@ export const projects: Project[] = [
       },
       {
         type: "paragraph",
-        text: "We were selling comprehension when people wanted to feel a change. And you can't feel a change from a product you never really started using — which brings us back to that 39%.",
+        text: "We were selling understanding when people wanted to feel a difference. And you can't feel a difference from a product you never really started using. Which brings us back to that 39%.",
       },
       {
         type: "paragraph",
-        text: "So what was actually stopping people? Not the science. Three navigation problems wearing a lab coat.",
+        text: "So what was stopping people? Not the science. Three problems with how the app was laid out.",
       },
       {
         type: "callouts",
@@ -295,7 +295,7 @@ export const projects: Project[] = [
       },
       {
         type: "paragraph",
-        text: "The bet we made in a team workshop — me, the PM, the iOS engineers, the founder who owns the neuroscience, and the community lead who reads every support ticket — was to make the app answer instead of display. Open it and you land in a conversation. The coach asks how your day went. What you say determines what it offers next, so the explanation arrives at the moment it's relevant rather than all at once on a dashboard.",
+        text: "We ran a workshop: me, the PM, the iOS engineers, the founder who owns the neuroscience, and the community lead who reads every support ticket. We decided to make the app answer instead of display. You open it and land in a conversation. The coach asks how your day went, and your answer decides what comes next. The science arrives when it is relevant, instead of all at once on a dashboard.",
       },
       {
         type: "paragraph",
@@ -321,11 +321,11 @@ export const projects: Project[] = [
       { type: "heading", text: "Iterating on the progress card" },
       {
         type: "paragraph",
-        text: "The hardest piece wasn't the conversation — it was telling someone where they stand without going back to a dashboard. Progress had to surface inside the chat, in a card small enough not to interrupt.",
+        text: "The conversation was the easy part. The hard part was telling someone where they stand without sending them back to a dashboard. Progress had to show up inside the chat, in a card small enough not to interrupt.",
       },
       {
         type: "paragraph",
-        text: "The first versions praised you. “Great job!” and “You are making huge progress!” over a percentage bar. Reviewing them next to each other, the problem was obvious: a percentage of an unnamed total is the same unexplained metric we'd just spent months removing from the home screen. Pleasant, and no help deciding what to do next.",
+        text: "The first versions praised you. “Great job!” and “You are making huge progress!” over a percentage bar. Put side by side, the problem was obvious. A percentage of an unnamed total is the same unexplained number we had just spent months taking off the home screen. Nice to read, no help at all.",
       },
       {
         type: "image",
@@ -336,38 +336,38 @@ export const projects: Project[] = [
       },
       {
         type: "paragraph",
-        text: "The shipped card names the thing you're moving toward — your weekly Happiness Report — and counts the memories remaining in whole numbers. Tap it and a sheet expands with the level bar and the report progress together. It's the same fix as the home screen, applied at card scale: replace an unexplained number with a named next step.",
+        text: "The card that shipped names what you are working toward, your weekly Happiness Report, and counts the memories left in whole numbers. Tap it and a sheet opens with the level bar and the report progress together. Same fix as the home screen, one size down: swap an unexplained number for a named next step.",
       },
 
       { type: "heading", text: "What we cut" },
       {
         type: "paragraph",
-        text: "A fair amount, and mostly on purpose. Shipping an AI-first pivot means resisting the urge to make everything AI-first at once.",
+        text: "Quite a lot. Going AI-first doesn't mean making everything AI-first at once.",
       },
       {
         type: "list",
         items: [
-          "The photo-suggestion card didn't ship as the coach's opening message. It enters mid-conversation instead, so it can't disrupt the one routine we'd just proven worked. First-message placement was deferred to an A/B test once we had real click-through data.",
-          "The persistent quick-access button was cut back to a single entry point in the input bar, rather than living everywhere in the app, until the sheet behind it earned its keep.",
-          "The neuroscience annotation on workouts was dropped entirely from V1. It was the kind of detail that reads as rigour to us and as more text to everyone else.",
-          "Our own target came down. The team had proposed 40% of users tapping the card at least once per session; an earlier 50% was talked down as optimistic rather than quietly kept as a stretch goal.",
+          "We didn't let the photo-suggestion card open the conversation. It shows up later instead, so it can't get in the way of the opening we'd just got working. We'll test it as a first message once we have click-through data.",
+          "The quick-access button only lives in the chat input, not all over the app. It can spread once the sheet behind it proves useful.",
+          "We dropped the neuroscience note on workouts. It reads as rigour to us and as more text to everyone else.",
+          "We lowered our own target. We wanted half of users to tap the card each session; we settled on 40%, because 50% wasn't realistic.",
         ],
       },
       {
         type: "paragraph",
-        text: "The level system got the same treatment. The founder's original framework needed 50 memories to clear Level 1, thousands of sent gifts, and brain imaging to pass the upper levels. We cut Level 1 to 10 memories, made the scans optional at every level, and drip-fed the rules one level at a time. Same science, reachable first milestone.",
+        text: "We did the same to the level system. The original framework asked for 50 memories before you cleared Level 1, thousands of sent gifts, and brain scans to reach the top levels. We cut Level 1 to 10 memories, made the scans optional, and introduced the rules one level at a time. Same science, but you can actually reach the first milestone.",
       },
 
       { type: "section", id: "final-design", title: "Final design" },
       {
         type: "paragraph",
-        text: "Four surfaces shipped. The coach and the drawer went live on 7 May 2026, which is the change the numbers above measure; the level system and the You page landed after that measurement window, so they don't have cohort data of their own yet.",
+        text: "Four surfaces shipped. The coach and the drawer went live on 7 May 2026, and those are what the numbers above measure. The level system and the You page landed after that window, so neither has cohort data yet.",
       },
 
       { type: "heading", text: "1. What you see when you open the app" },
       {
         type: "paragraph",
-        text: "The old home screen led with a composite wellbeing score that nothing on the page explained, then stacked photos from today, three neurotransmitter suggestions, and a prompt to add a past memory — four unrelated asks before a new user had any idea what the app wanted from them. The new one asks a single question and waits.",
+        text: "The old home screen led with a wellbeing score that nothing on the page explained. Under it sat photos from today, three neurotransmitter suggestions, and a prompt to add a past memory. Four unrelated asks, before a new user had any idea what the app wanted. The new one asks a single question and waits.",
       },
       {
         // Exported via scripts/figma-export.py. Both are 786×1704 — the before
@@ -392,7 +392,7 @@ export const projects: Project[] = [
 
       {
         type: "paragraph",
-        text: "First-memory creation went from 39% to 60% of trial starters, because the screen now makes exactly one request and the answer to it is a sentence rather than a decision about which of four modules to touch.",
+        text: "First-memory creation went from 39% to 60% of trial starters. The screen makes one request now, and answering it means writing a sentence instead of choosing between four modules.",
       },
       {
         type: "image",
@@ -405,11 +405,11 @@ export const projects: Project[] = [
       { type: "heading", text: "2. The progress page, rebuilt as one place" },
       {
         type: "paragraph",
-        text: "The old Stats tab opened on a chart of a composite score across a week, with the explanation of what you were looking at sitting underneath the graph. Below that came score-versus-neurotransmitter breakdowns, and the rest of your progress lived on three other tabs.",
+        text: "The old Stats tab opened on a chart of a composite score across the week, with a paragraph underneath explaining what you were looking at. Below that came score-versus-neurotransmitter breakdowns. The rest of your progress lived on three other tabs.",
       },
       {
         type: "paragraph",
-        text: "The rebuilt You page is ordered by what someone actually wants to know, in that order: who you are, how far you've come, what your balance looks like, and what to read next. The charts are still there — they're just no longer the first thing, and each unfamiliar element carries an info icon that explains it in place.",
+        text: "The rebuilt You page follows what someone actually wants to know: who you are, how far you have come, how your balance looks, and what to read next. The charts are still there, just not first. Anything that isn't obvious has an info icon that explains it in place.",
       },
       {
         type: "before-after",
@@ -428,7 +428,7 @@ export const projects: Project[] = [
       { type: "heading", text: "3. Levels, with the science kept optional" },
       {
         type: "paragraph",
-        text: "Each level names what you're training, what's left to reach the next one, and the real methods behind the claim — structural MRI, fNIRS imaging, standardised personality and cognitive testing. The tests are offered, never required, so the progression stays honest about what it has actually measured about you and what it hasn't.",
+        text: "Each level names what you are training, what is left to reach the next one, and the science behind the claim: structural MRI, fNIRS imaging, standardised personality and cognitive tests. The tests are offered, never required. That keeps the progression honest about what it has actually measured and what it hasn't.",
       },
       {
         type: "image",
@@ -442,7 +442,7 @@ export const projects: Project[] = [
       { type: "heading", text: "4. A design system built to hand straight to AI" },
       {
         type: "paragraph",
-        text: "None of this ships on the old design system. The previous one had grown around the four-tab app and carried its assumptions; rather than bend it, I built a new one — Optic — small enough to hold only what the chat-first product needed. Around 64 primitive colours and 34 semantic aliases, nine spacing values, three radii, eight text styles.",
+        text: "None of this runs on the old design system. That one grew around the four-tab app and carried its assumptions, so rather than bend it I built a new one. Optic is small enough to hold only what the chat-first product needs: about 64 primitive colours and 34 semantic aliases, nine spacing values, three radii, eight text styles.",
       },
       {
         type: "paragraph",
@@ -450,7 +450,7 @@ export const projects: Project[] = [
       },
       {
         type: "paragraph",
-        text: "That was deliberate, and it's the part I'd defend hardest. The team was moving toward AI-assisted implementation, which means the design system's real audience is now partly a model reading design context. A token that needs a translation table to understand is a token that gets ignored. The two systems ran side by side — new screens on Optic, old screens migrating only when touched — so nothing needed a big-bang rewrite.",
+        text: "That was deliberate. The team was moving toward AI-assisted implementation, so part of the design system's audience is now a model reading design context. A token that needs a translation table gets ignored. Optic and the old system ran side by side, with new screens on Optic and old ones moving over when someone touched them, so nothing needed a big rewrite.",
       },
       {
         type: "image",
@@ -463,11 +463,11 @@ export const projects: Project[] = [
       { type: "heading", text: "Also shipped: the store listing and the icon set" },
       {
         type: "paragraph",
-        text: "Two pieces of work either side of the app itself.",
+        text: "Two more pieces of work, either side of the app.",
       },
       {
         type: "paragraph",
-        text: "I designed the App Store screenshot set — the pitch, the brain visualisation, the social proof — translating the same six-system science into three screens someone scrolls past in five seconds. It's part of what got the app selected as Apple's App of the Day.",
+        text: "I designed the App Store screenshot set: the pitch, the brain visualisation, the social proof. The same six-system science, rewritten as three screens someone scrolls past in five seconds. It is part of what got the app selected as Apple's App of the Day.",
       },
       {
         type: "image",
@@ -479,7 +479,7 @@ export const projects: Project[] = [
 
       {
         type: "paragraph",
-        text: "And each neurotransmitter system needed an icon that read clearly at nav-bar size while sitting next to five siblings — endurance, flexibility, strength, coordination, speed, balance. The fitness analogy does the explaining the old screen never did: you already know what training flexibility means.",
+        text: "Each neurotransmitter system also needed an icon that reads at nav-bar size next to five siblings: endurance, flexibility, strength, coordination, speed, balance. The fitness analogy does the explaining the old screen never did. You already know what training flexibility means.",
       },
       {
         type: "image",
@@ -492,7 +492,7 @@ export const projects: Project[] = [
       { type: "section", id: "results", title: "Results" },
       {
         type: "paragraph",
-        text: "The AI coach shipped on 7 May 2026. These are the cohorts either side of that date — people who started before it existed, against people who started after.",
+        text: "The AI coach shipped on 7 May 2026. These are the cohorts either side of that date: people who started before it existed, against people who started after.",
       },
       {
         // Figures from the May 2026 internal product review. Activation is
@@ -508,11 +508,11 @@ export const projects: Project[] = [
       },
       {
         type: "paragraph",
-        text: "The activation number is the one that matters. Every other thing the product does — the six systems, the levels, the weekly report — is computed from memories, so a user who never logs one never sees any of it. Moving that from four in ten to six in ten means half again as many people actually reached the product.",
+        text: "Activation is the number that matters. Everything else the product does is calculated from memories: the six systems, the levels, the weekly report. A user who never logs one never sees any of it. Going from four in ten to six in ten means half again as many people reached the product at all.",
       },
       {
         type: "paragraph",
-        text: "Retention moved for a related reason: opening the app now produces a reply, so there's a reason to come back tomorrow that isn't a number you don't understand.",
+        text: "Retention moved for the same reason. Opening the app gets you a reply now, so there is a reason to come back tomorrow that isn't a number you don't understand.",
       },
       {
         type: "paragraph",
@@ -535,7 +535,7 @@ export const projects: Project[] = [
       { type: "heading", text: "What didn't work" },
       {
         type: "paragraph",
-        text: "Two things, and they're the same thing from opposite directions.",
+        text: "Two things, and they're the same problem from opposite ends.",
       },
       {
         type: "list",
@@ -546,7 +546,7 @@ export const projects: Project[] = [
       },
       {
         type: "paragraph",
-        text: "Both fed the next round of work — the mood check-in, the level system, and the progress cards that tell you where you are without being asked.",
+        text: "Both fed the next round of work: the mood check-in, the level system, and the progress cards that tell you where you are without being asked.",
       },
 
       { type: "heading", text: "Beyond the numbers" },
@@ -560,7 +560,7 @@ export const projects: Project[] = [
       },
       {
         type: "paragraph",
-        text: "The redesign didn't just make six systems fit on one screen — it kept the neuroscience credible enough to hold up in a documentary and, now, in clinical research settings.",
+        text: "The redesign fit six systems onto one screen without losing the science. It held up well enough for a documentary, and now for clinical research.",
       },
     ],
   },
