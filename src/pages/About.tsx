@@ -1,6 +1,19 @@
 import { Link } from "react-router-dom";
 import Nav from "../components/Nav";
 import Journey from "../components/Journey";
+import PhotoCarousel from "../components/PhotoCarousel";
+
+const playPhotos = [
+  { src: "/photos/play/play-01.webp", alt: "A child cutting foam blocks on a hot-wire cutter" },
+  { src: "/photos/play/play-02.webp", alt: "Foam sculptures built by kids, displayed in a shop window" },
+  { src: "/photos/play/play-03.webp", alt: "A structure of skewers and yellow clay balls" },
+  { src: "/photos/play/play-04.webp", alt: "A geometric frame built from straws and clay joints" },
+  { src: "/photos/play/play-05.webp", alt: "A skewer-and-clay tower on a white board" },
+  { src: "/photos/play/play-06.webp", alt: "Hand-painted pink and blue pots arranged on grass" },
+  { src: "/photos/play/play-07.webp", alt: "Paper silhouette cut-outs hung along a black outdoor wall" },
+  { src: "/photos/play/play-08.webp", alt: "Orange painted cardboard animals laid out on a wooden deck" },
+  { src: "/photos/play/play-09.webp", alt: "Painted animal cut-outs and paint pots on a table" },
+];
 
 export default function About() {
   return (
@@ -80,17 +93,20 @@ export default function About() {
         <p className="mb-6 max-w-xl">Work isn't the whole file.</p>
         <div className="flex flex-col gap-8 md:flex-row">
           <div className="md:flex-1">
-            {/* Wikimedia Commons, CC BY 2.0 — https://commons.wikimedia.org/wiki/File:Child_engaged_in_creative_play_with_wooden_building_blocks_on_a_pink_play_mat_in_a_cozy_indoor_space.jpg */}
-            <img src="/photos/blocks.jpg" alt="" className="mb-3 h-40 w-full object-cover" />
-            <p>I'm a bit obsessed with how kids learn to make things.</p>
+            <PhotoCarousel photos={playPhotos} className="mb-3 h-40 w-full" />
+            <p>
+              I have kids, which reorganised my life around them for a good while — and turned out
+              to be some of the best design training I've had.
+            </p>
             <p className="mt-2 font-mono text-xs tracking-widest text-neutral-400 uppercase">
               Play
             </p>
             <p className="mt-2 text-sm">
-              Long before software, most of us learned to build by playing — blocks, scribbles,
-              taking stuff apart to see how it worked. I spend time thinking about how that kind
-              of learning survives past age six [volunteer/mentor detail — TK], and it quietly
-              shapes how I think about onboarding a total beginner into anything.
+              I ran creative workshops for children, then built a camp in Odesa where artists,
+              musicians and directors came from across Ukraine to make something together with the
+              kids rather than for them. It hadn't been done before. The workshops continued in
+              Berlin, and now it's quieter and more private: our own kids, small performances,
+              invented projects, an ordinary life built around making things.
             </p>
           </div>
           <div className="md:flex-1">
