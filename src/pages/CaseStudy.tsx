@@ -389,11 +389,11 @@ export default function CaseStudy() {
       <Nav />
       <div className="mx-auto max-w-4xl pt-10">
         <header className="border-b pb-8">
-          <p className="my-2 font-mono text-xs tracking-widest text-neutral-400 uppercase">
+          <p className="mb-4 font-mono text-xs tracking-widest text-neutral-400 uppercase">
             {project.client}
           </p>
-          <h1 className="mt-2 mb-2 text-3xl font-medium lg:text-5xl">{project.title}</h1>
-          {project.summary && <p className="mt-2 max-w-2xl italic">{project.summary}</p>}
+          <h1 className="mb-4 text-3xl font-medium lg:text-5xl">{project.title}</h1>
+          {project.summary && <p className="mt-4 max-w-2xl">{project.summary}</p>}
         </header>
 
         <section id="overview" className="scroll-mt-8 border-b py-8">
