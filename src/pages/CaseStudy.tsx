@@ -403,6 +403,9 @@ function Block({
             beforeLabel={block.beforeLabel}
             afterLabel={block.afterLabel}
             maxWidth={block.maxWidth}
+            viewportHeight={block.viewportHeight}
+            onImageClick={onImageClick}
+            zoomCursor={zoomCursor}
           />
           {block.caption && (
             <p className="mt-2 text-sm italic text-gray-400">{block.caption}</p>
@@ -445,7 +448,13 @@ export default function CaseStudy() {
     const list: { src: string; alt: string }[] = [];
     for (const block of project?.content ?? []) {
       if (block.type === "image") list.push({ src: block.src, alt: block.alt });
-      else if (block.type === "gallery") {
+      else if (block.type === "annotated-image") {
+        list.push({ src: block.src, alt: block.alt });
+      } else if (block.type === "before-after") {
+        // Both states, so the lightbox opens whichever one the toggle is showing.
+        list.push({ src: block.before, alt: block.beforeAlt });
+        list.push({ src: block.after, alt: block.afterAlt });
+      } else if (block.type === "gallery") {
         for (const img of block.images) list.push({ src: img.src, alt: img.alt });
       }
     }

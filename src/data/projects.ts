@@ -35,7 +35,7 @@ export type ContentBlock =
     }
   | { type: "gallery"; images: { src: string; alt: string; caption?: string }[] }
   /**
-   * Drag-to-reveal comparison of one surface before and after the redesign.
+   * Toggle between one surface before and after the redesign.
    * Both images must share an aspect ratio — see BeforeAfter.
    */
   | {
@@ -48,6 +48,8 @@ export type ContentBlock =
       afterLabel?: string;
       /** Cap the rendered width, in px — phone screenshots need this. */
       maxWidth?: number;
+      /** Height of the scroll window, in px. Taller screens scroll inside it. */
+      viewportHeight?: number;
       caption?: string;
     }
   /** Big standalone numbers (page views, MAU, usability score…), no card/border. */
@@ -102,11 +104,17 @@ export interface Project {
 
 export const projects: Project[] = [
   {
-    // Rewritten against case-study.md (the Ben Shih framework). See PR/commit notes —
-    // Problem framing and Solution are intentionally thin: the original content had no
-    // documented research process (no named frictions, no interview count, no funnel
-    // data), so nothing was invented to fill that gap. Real research notes or a
-    // stakeholder/user quote would strengthen this more than any further copy pass.
+    // Written against case-study.md (the Ben Shih framework). Metrics come from the
+    // May 2026 internal product review and are cleared for publication; the client
+    // stays anonymous, which includes in-product nouns — grep for the product name
+    // before shipping copy, and blur it in any screenshot that displays it.
+    //
+    // Still outstanding:
+    //   - problem-activation-funnel.png is a placeholder for a real Amplitude export
+    //   - the You page and the level system shipped after the May measurement
+    //     window, so neither has per-surface cohort data yet
+    //   - the progress-card iteration is argued from design reasoning; if usage
+    //     data on those card variants exists, it belongs in the Solution section
     slug: "ios-app",
     category: "iOS App, AI",
     name: "Wellness AI Companion",
@@ -123,8 +131,8 @@ export const projects: Project[] = [
     duration: "Dec 2025 – Sep 2026 · 10 months",
     tools: ["Figma", "Claude", "Figjam", "Notion"],
     screenshots: [
-      { src: "/projects/ios-app/1.png", alt: "Wellness AI app screens" },
-      { src: "/projects/ios-app/3.png", alt: "Emotional fitness app progression screen" },
+      { src: "/projects/ios-app/1.webp", alt: "Wellness AI app screens" },
+      { src: "/projects/ios-app/3.webp", alt: "Emotional fitness app progression screen" },
     ],
     lastUpdated: "Sep, 2026",
     // Figures are from the May 2026 internal product review, cleared for
@@ -149,7 +157,7 @@ export const projects: Project[] = [
     content: [
       {
         type: "image",
-        src: "/projects/ios-app/1.png",
+        src: "/projects/ios-app/1.webp",
         alt: "Wellness app home screen showing an AI coach prompt and a single progress bar across six neurotransmitter systems",
         caption:
           "One question from the coach, one progress bar for all six systems — instead of a home screen split six ways.",
@@ -168,7 +176,7 @@ export const projects: Project[] = [
         // PLACEHOLDER — swap for the real Amplitude export at 1460×820.
         // The figure in the caption is from the May 2026 product review.
         type: "image",
-        src: "/projects/ios-app/problem-activation-funnel.png",
+        src: "/projects/ios-app/problem-activation-funnel.webp",
         alt: "Funnel showing 133 trial starts against 52 first memories created in the pre-redesign cohort",
         caption:
           "52 of 133 trial starters (39.1%) ever created a first memory. Everything downstream — the six systems, the levels, the weekly report — is computed from memories, so a user who never logs one never sees the product work.",
@@ -239,9 +247,11 @@ export const projects: Project[] = [
         // percentage of frame height — see node 12568:31610 in the iOS (Copy)
         // file. Don't eyeball these if the screenshot is ever re-exported.
         type: "annotated-image",
-        src: "/projects/ios-app/problem-today-annotated.png",
+        src: "/projects/ios-app/before-today.webp",
         alt: "The old home screen at full length: score ring, neurotransmitter suggestions, today's photos, an add-a-past-memory prompt, and a five-item tab bar",
-        maxWidth: 420,
+        // 786px source — keep the render at/below 393 so it stays above 2x on
+        // a retina display.
+        maxWidth: 380,
         pins: [
           {
             x: 93,
@@ -301,7 +311,7 @@ export const projects: Project[] = [
       },
       {
         type: "image",
-        src: "/projects/ios-app/solution-drawer.png",
+        src: "/projects/ios-app/solution-drawer.webp",
         alt: "The new navigation drawer showing Coaching, You, Team and Memories, with Settings at the bottom",
         maxWidth: 360,
         caption:
@@ -319,7 +329,7 @@ export const projects: Project[] = [
       },
       {
         type: "image",
-        src: "/projects/ios-app/solution-card-iterations.png",
+        src: "/projects/ios-app/solution-card-iterations.webp",
         alt: "Four progress card variants — two praise-led with percentage bars, two naming the Happiness Report with a five-segment counter — next to the expanded progress sheet and its empty state",
         caption:
           "Top row: praise over a percentage. Bottom row: a named destination over a five-segment counter, so “3/5” tells you exactly how many memories are left. The version that shipped is the one that answers “and then what?”",
@@ -349,8 +359,12 @@ export const projects: Project[] = [
       },
 
       { type: "section", id: "final-design", title: "Final design" },
+      {
+        type: "paragraph",
+        text: "Four surfaces shipped. The coach and the drawer went live on 7 May 2026, which is the change the numbers above measure; the level system and the You page landed after that measurement window, so they don't have cohort data of their own yet.",
+      },
 
-      { type: "heading", text: "What you see when you open the app" },
+      { type: "heading", text: "1. What you see when you open the app" },
       {
         type: "paragraph",
         text: "The old home screen led with a composite wellbeing score that nothing on the page explained, then stacked photos from today, three neurotransmitter suggestions, and a prompt to add a past memory — four unrelated asks before a new user had any idea what the app wanted from them. The new one asks a single question and waits.",
@@ -362,74 +376,114 @@ export const projects: Project[] = [
         //   before: iOS (Copy) KCR6CITRUDpaBFFnqgYbWG  12568:31610
         //   after:  Production 4cBNswIEFN0tLHhntFYcry  3161:12164
         type: "before-after",
-        before: "/projects/ios-app/before-today.png",
-        after: "/projects/ios-app/after-coaching.png",
+        before: "/projects/ios-app/before-today.webp",
+        after: "/projects/ios-app/after-coaching.webp",
         beforeAlt:
           "The old Today screen: an unexplained composite wellbeing score, neurotransmitter suggestion pills, photos from today, and an add-a-past-memory prompt",
         afterAlt:
-          "The new Coaching screen: six neurotransmitter progress dots, one message from the coach, and a Share a moment input",
+          "The new Coaching screen: six neurotransmitter progress dots, the coach naming which systems a logged memory affected, and two action cards offering to share it or answer a follow-up",
         maxWidth: 360,
+        // Tall enough that the coaching screen — one phone viewport — is fully
+        // visible without scrolling. The old home screen still runs past it.
+        viewportHeight: 782,
         caption:
-          "Drag to compare. Same moment in the app — opening it cold — before and after the redesign.",
+          "The same moment in the app — opening it cold. Scroll either screen inside the frame, toggle between them, or click to open one full size. The old one keeps going for a while.",
       },
 
-      { type: "heading", text: "One dashboard for six neurotransmitter systems" },
       {
         type: "paragraph",
-        text: "The home screen asks one question at a time and keeps the six-system progress bar visible but out of the way. Share a memory, and the app tags it to the systems it affects and explains the reasoning in plain language instead of a lab printout.",
-      },
-      {
-        type: "gallery",
-        images: [
-          {
-            src: "/projects/ios-app/2.png",
-            alt: "AI coaching screen tagging a shared memory to the opioid and cannabinoid systems, with a plain-language explanation",
-            caption:
-              "Every memory a user logs gets tagged to the systems it affects and explained in plain language, not a lab report.",
-          },
-          {
-            src: "/projects/ios-app/3.png",
-            alt: "Level progression screens — Learner, Apprentice, and Practitioner — each showing progress bars and the scientific methods behind them",
-            caption:
-              "Every level names the real methods behind it — 3T structural MRI, FNIRS brain imaging, MoCA cognitive testing — so the gamification never reads as made up.",
-          },
-        ],
-      },
-
-      { type: "heading", text: "A design system built to hand straight to AI" },
-      {
-        type: "paragraph",
-        text: "I built a lightweight token system — primitive and semantic colors, spacing, radius, typography, one color per level — with names that map directly from Figma variables to code. That was deliberate: the product was moving toward AI-assisted implementation, and a token named levels/level-3 shouldn't need a separate handoff doc to make sense to a model or an engineer.",
+        text: "First-memory creation went from 39% to 60% of trial starters, because the screen now makes exactly one request and the answer to it is a sentence rather than a decision about which of four modules to touch.",
       },
       {
         type: "image",
-        src: "/projects/ios-app/4.png",
+        src: "/projects/ios-app/2.webp",
+        alt: "The coach tagging a shared memory to the opioid and cannabinoid systems with a plain-language explanation",
+        caption:
+          "The six systems didn't disappear, they moved behind the conversation. Log a memory and the coach names which systems it affected and why — in a sentence, not a lab report.",
+      },
+
+      { type: "heading", text: "2. The progress page, rebuilt as one place" },
+      {
+        type: "paragraph",
+        text: "The old Stats tab opened on a chart of a composite score across a week, with the explanation of what you were looking at sitting underneath the graph. Below that came score-versus-neurotransmitter breakdowns, and the rest of your progress lived on three other tabs.",
+      },
+      {
+        type: "paragraph",
+        text: "The rebuilt You page is ordered by what someone actually wants to know, in that order: who you are, how far you've come, what your balance looks like, and what to read next. The charts are still there — they're just no longer the first thing, and each unfamiliar element carries an info icon that explains it in place.",
+      },
+      {
+        type: "before-after",
+        before: "/projects/ios-app/before-you.webp",
+        after: "/projects/ios-app/after-you.webp",
+        beforeAlt:
+          "The old Stats tab: a composite score chart across a week, with a paragraph explaining the chart underneath it",
+        afterAlt:
+          "The rebuilt You page: profile, level and streaks, molecular balance across six systems, then joyalties",
+        maxWidth: 360,
+        viewportHeight: 782,
+        caption:
+          "The same question — how am I doing? — answered first by a chart you have to interpret, then by a page ordered from identity to detail. Scroll inside either frame to see the full screen.",
+      },
+
+      { type: "heading", text: "3. Levels, with the science kept optional" },
+      {
+        type: "paragraph",
+        text: "Each level names what you're training, what's left to reach the next one, and the real methods behind the claim — structural MRI, fNIRS imaging, standardised personality and cognitive testing. The tests are offered, never required, so the progression stays honest about what it has actually measured about you and what it hasn't.",
+      },
+      {
+        type: "image",
+        src: "/projects/ios-app/final-level.webp",
+        alt: "Level 4 Practitioner screen showing progress toward Level 5 broken into total memories, per-neurotransmitter counts, peak memories, balanced weeks and joyalties sent",
+        maxWidth: 380,
+        caption:
+          "Progress to the next level is broken into five countable things rather than one percentage — the same move as the progress card, at screen scale.",
+      },
+
+      { type: "heading", text: "4. A design system built to hand straight to AI" },
+      {
+        type: "paragraph",
+        text: "None of this ships on the old design system. The previous one had grown around the four-tab app and carried its assumptions; rather than bend it, I built a new one — Optic — small enough to hold only what the chat-first product needed. Around 64 primitive colours and 34 semantic aliases, nine spacing values, three radii, eight text styles.",
+      },
+      {
+        type: "paragraph",
+        text: "The naming was the real design decision. Every token name maps to its Swift constant by one predictable transform: drop the Figma folder, camelCase the rest. levels/level-2 becomes Color.level2. spacing/32 becomes CGFloat.spacing32. A script reads Figma's own JSON export and rewrites the Swift files in place.",
+      },
+      {
+        type: "paragraph",
+        text: "That was deliberate, and it's the part I'd defend hardest. The team was moving toward AI-assisted implementation, which means the design system's real audience is now partly a model reading design context. A token that needs a translation table to understand is a token that gets ignored. The two systems ran side by side — new screens on Optic, old screens migrating only when touched — so nothing needed a big-bang rewrite.",
+      },
+      {
+        type: "image",
+        src: "/projects/ios-app/4.webp",
         alt: "Design system token table showing semantic background, text, and per-level color tokens",
         caption:
-          "Token names map directly from Figma variables to code, so implementation didn't need a separate handoff document.",
+          "Token names map from Figma variable to Swift constant by one rule, so implementation needs no handoff document — for an engineer or a model.",
       },
 
-      { type: "heading", text: "Turning the science into App Store creative" },
+      { type: "heading", text: "Also shipped: the store listing and the icon set" },
       {
         type: "paragraph",
-        text: "I designed the App Store screenshot set — the pitch, the brain visualization, the social proof — translating the same six-system science into three screens someone scrolls past in five seconds. It's part of what got the app selected as Apple's App of the Day.",
+        text: "Two pieces of work either side of the app itself.",
+      },
+      {
+        type: "paragraph",
+        text: "I designed the App Store screenshot set — the pitch, the brain visualisation, the social proof — translating the same six-system science into three screens someone scrolls past in five seconds. It's part of what got the app selected as Apple's App of the Day.",
       },
       {
         type: "image",
-        src: "/projects/ios-app/5.png",
+        src: "/projects/ios-app/5.webp",
         alt: "App Store marketing screenshots for the wellness app, including Apple's App of the Day badge",
         caption:
           "The same six-system science, rewritten as marketing screenshots — this set contributed to the app being selected as Apple's App of the Day.",
       },
 
-      { type: "heading", text: "Icons for six ways of training your brain" },
       {
         type: "paragraph",
-        text: "Each neurotransmitter system needed an icon that read clearly at nav-bar size and held up next to five others that all needed to feel like they belonged to the same family — endurance, flexibility, strength, coordination, speed, balance.",
+        text: "And each neurotransmitter system needed an icon that read clearly at nav-bar size while sitting next to five siblings — endurance, flexibility, strength, coordination, speed, balance. The fitness analogy does the explaining the old screen never did: you already know what training flexibility means.",
       },
       {
         type: "image",
-        src: "/projects/ios-app/6.png",
+        src: "/projects/ios-app/6.webp",
         alt: "Six training-dimension cards — endurance, flexibility, strength, coordination, speed, balance — with their icon set",
         caption:
           "Each neurotransmitter system got a physical-fitness analogy people already understand, and an icon distinct enough to read at a glance in the nav bar.",

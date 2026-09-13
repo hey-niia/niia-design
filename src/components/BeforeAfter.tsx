@@ -1,16 +1,24 @@
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 const ACCENT = "#e65f2e";
-const KEY_STEP = 2;
-const KEY_STEP_LARGE = 10;
+/** Treat "within this many px of the end" as scrolled through. */
+const END_SLOP = 24;
+
+export interface ZoomCursorHandlers {
+  onMouseMove: (e: React.MouseEvent) => void;
+  onMouseLeave: () => void;
+}
 
 /**
- * Drag-to-reveal comparison between two screenshots of the same surface.
+ * Before/after comparison as a labelled switch rather than a drag handle.
  *
- * Left of the divider is `before`, right is `after`. The two images MUST share
- * an aspect ratio — `before` renders normally and sets the box height, `after`
- * is absolutely positioned on top and clipped, so a mismatch silently crops the
- * after state instead of erroring.
+ * A toggle shows each state whole — you compare two complete screens instead
+ * of two halves — and it leaves the image clickable, so it can open in the
+ * page's lightbox at full size.
+ *
+ * Each state scrolls inside a fixed-height window and keeps its own scroll
+ * position. How far a screen scrolls is part of what the comparison shows, so
+ * set `viewportHeight` to fit the shorter state and let the longer one run.
  */
 export default function BeforeAfter({
   before,
@@ -19,7 +27,10 @@ export default function BeforeAfter({
   afterAlt,
   beforeLabel = "Before",
   afterLabel = "After",
-  maxWidth,
+  maxWidth = 360,
+  viewportHeight = 620,
+  onImageClick,
+  zoomCursor,
 }: {
   before: string;
   after: string;
@@ -27,123 +38,130 @@ export default function BeforeAfter({
   afterAlt: string;
   beforeLabel?: string;
   afterLabel?: string;
-  /** Cap the rendered width, in px — phone screenshots need this or they tower. */
+  /** Cap the rendered width, in px — phone screenshots need this. */
   maxWidth?: number;
+  /** Height of the scroll window, in px. Taller screens scroll inside it. */
+  viewportHeight?: number;
+  onImageClick?: (src: string) => void;
+  zoomCursor?: ZoomCursorHandlers;
 }) {
-  const [position, setPosition] = useState(50);
-  const [dragging, setDragging] = useState(false);
-  const frameRef = useRef<HTMLDivElement>(null);
-  const handleRef = useRef<HTMLDivElement>(null);
+  const [showAfter, setShowAfter] = useState(true);
+  // Per-pane, because the two states are rarely the same length.
+  const [hasMore, setHasMore] = useState<[boolean, boolean]>([false, false]);
+  const boxRef = useRef<HTMLDivElement>(null);
 
-  const setFromClientX = useCallback((clientX: number) => {
-    const frame = frameRef.current;
-    if (!frame) return;
-    const { left, width } = frame.getBoundingClientRect();
-    if (width === 0) return;
-    const pct = ((clientX - left) / width) * 100;
-    setPosition(Math.min(100, Math.max(0, pct)));
+  // Panes are read off the container at call time rather than held in refs, so
+  // there's no stale closure to get wrong.
+  const measure = useCallback(() => {
+    const panes = boxRef.current?.children;
+    if (!panes) return;
+    const more = [0, 1].map((i) => {
+      const el = panes[i] as HTMLElement | undefined;
+      if (!el) return false;
+      return el.scrollHeight - el.clientHeight - el.scrollTop > END_SLOP;
+    });
+    setHasMore([more[0], more[1]]);
   }, []);
 
-  // Pointer capture keeps the drag alive when the cursor leaves the frame,
-  // so a fast swipe past the edge doesn't drop the handle mid-gesture. It also
-  // suppresses the click-to-focus the handle would otherwise get, so focus has
-  // to be moved by hand — without this, arrow keys do nothing after a drag.
-  const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
-    // The mousedown that follows would otherwise blur the handle again, since
-    // its ancestor isn't focusable — preventDefault keeps the focus we set.
-    e.preventDefault();
-    e.currentTarget.setPointerCapture(e.pointerId);
-    handleRef.current?.focus();
-    setDragging(true);
-    setFromClientX(e.clientX);
-  };
+  // Measured after a frame rather than in the images' onLoad: onLoad fires
+  // when an image is decoded, which can be before it has been laid out, so
+  // measuring there reports the pane as non-scrolling. Re-runs when the shown
+  // state changes, since the two screens are different lengths.
+  useEffect(() => {
+    const raf = requestAnimationFrame(() => requestAnimationFrame(measure));
+    window.addEventListener("resize", measure);
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener("resize", measure);
+    };
+  }, [measure, showAfter]);
 
-  const onPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (!dragging) return;
-    setFromClientX(e.clientX);
-  };
-
-  const endDrag = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (e.currentTarget.hasPointerCapture(e.pointerId)) {
-      e.currentTarget.releasePointerCapture(e.pointerId);
-    }
-    setDragging(false);
-  };
-
-  const onKeyDown = (e: React.KeyboardEvent) => {
-    const step = e.shiftKey ? KEY_STEP_LARGE : KEY_STEP;
-    let next: number | null = null;
-    if (e.key === "ArrowLeft") next = position - step;
-    else if (e.key === "ArrowRight") next = position + step;
-    else if (e.key === "Home") next = 0;
-    else if (e.key === "End") next = 100;
-    if (next === null) return;
-    e.preventDefault();
-    setPosition(Math.min(100, Math.max(0, next)));
-  };
+  const states = [
+    { src: before, alt: beforeAlt, shown: !showAfter },
+    { src: after, alt: afterAlt, shown: showAfter },
+  ];
 
   return (
-    <div className="mx-auto" style={maxWidth ? { maxWidth } : undefined}>
-      {/* Labels sit outside the frame: these are dark app screenshots with their
-          own status bars, so anything overlaid on the top edge both fights for
-          contrast and reads as part of the UI being shown. */}
-      <div className="mb-2 flex justify-between font-mono text-[10px] tracking-wider text-gray-400 uppercase">
-        <span className={`transition-opacity ${position < 12 ? "opacity-30" : "opacity-100"}`}>
-          {beforeLabel}
-        </span>
-        <span className={`transition-opacity ${position > 88 ? "opacity-30" : "opacity-100"}`}>
-          {afterLabel}
-        </span>
+    <div>
+      <div className="bg-neutral-100 px-4 py-8 sm:px-10 sm:py-10">
+        <div
+          ref={boxRef}
+          className="relative mx-auto overflow-hidden rounded-xl ring-1 ring-black/10"
+          style={{ maxWidth, height: viewportHeight }}
+        >
+          {states.map((state) => (
+            <div
+              key={state.src}
+              aria-hidden={!state.shown}
+              onScroll={measure}
+              className="absolute inset-0 overflow-y-auto overscroll-contain transition-opacity duration-200"
+              style={{
+                opacity: state.shown ? 1 : 0,
+                pointerEvents: state.shown ? "auto" : "none",
+              }}
+            >
+              <img
+                src={state.src}
+                alt={state.alt}
+                onLoad={() => requestAnimationFrame(measure)}
+                className={`block w-full ${onImageClick ? "cursor-none" : ""}`}
+                onClick={onImageClick ? () => onImageClick(state.src) : undefined}
+                onMouseMove={zoomCursor?.onMouseMove}
+                onMouseLeave={zoomCursor?.onMouseLeave}
+              />
+            </div>
+          ))}
+        </div>
+
+        <p
+          aria-hidden={!hasMore[showAfter ? 1 : 0]}
+          className={`mx-auto mt-2 text-center font-mono text-[10px] tracking-wider text-gray-400 uppercase transition-opacity ${
+            hasMore[showAfter ? 1 : 0] ? "opacity-100" : "opacity-0"
+          }`}
+          style={{ maxWidth }}
+        >
+          Scroll to see more ↓
+        </p>
       </div>
 
-      <div
-        ref={frameRef}
-        onPointerDown={onPointerDown}
-        onPointerMove={onPointerMove}
-        onPointerUp={endDrag}
-        onPointerCancel={endDrag}
-        className="relative touch-none select-none overflow-hidden"
-      >
-        <img src={before} alt={beforeAlt} className="block w-full" draggable={false} />
-
-        <img
-          src={after}
-          alt={afterAlt}
-          draggable={false}
-          className="absolute inset-0 block h-full w-full"
-          style={{ clipPath: `inset(0 0 0 ${position}%)` }}
-        />
-
-        {/* The handle owns the slider semantics; the frame around it is just a
-            bigger hit target for pointers. */}
-        <div
-          ref={handleRef}
-          role="slider"
-          tabIndex={0}
-          aria-label={`Reveal ${afterLabel.toLowerCase()} — drag or use arrow keys`}
-          aria-valuemin={0}
-          aria-valuemax={100}
-          aria-valuenow={Math.round(position)}
-          aria-valuetext={`${Math.round(position)}% ${beforeLabel.toLowerCase()}`}
-          onKeyDown={onKeyDown}
-          className="group absolute inset-y-0 z-10 w-px cursor-ew-resize bg-white/80 focus:outline-none"
-          style={{ left: `${position}%` }}
+      <div className="mt-4 flex items-center justify-center gap-3">
+        <button
+          type="button"
+          onClick={() => setShowAfter(false)}
+          className={`text-sm font-medium transition-colors ${
+            showAfter ? "text-gray-400" : "text-black"
+          }`}
         >
-          <div
-            className="absolute top-1/2 left-1/2 flex h-9 w-9 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-white shadow-md transition-transform group-focus-visible:ring-2 group-focus-visible:ring-[#e65f2e] group-focus-visible:ring-offset-2"
-            style={{ transform: `translate(-50%, -50%) scale(${dragging ? 1.1 : 1})` }}
-          >
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-              <path
-                d="M6.5 4 3 8l3.5 4M9.5 4 13 8l-3.5 4"
-                stroke={ACCENT}
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </div>
-        </div>
+          {beforeLabel}
+        </button>
+
+        <button
+          type="button"
+          role="switch"
+          aria-checked={showAfter}
+          aria-label={`Show ${showAfter ? beforeLabel.toLowerCase() : afterLabel.toLowerCase()}`}
+          onClick={() => setShowAfter((v) => !v)}
+          className="relative h-6 w-11 shrink-0 cursor-pointer rounded-full border transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
+          style={{
+            backgroundColor: showAfter ? ACCENT : "#d4d4d4",
+            borderColor: showAfter ? ACCENT : "#d4d4d4",
+          }}
+        >
+          <span
+            className="absolute top-1/2 h-5 w-5 -translate-y-1/2 rounded-full bg-white transition-all"
+            style={{ left: showAfter ? 22 : 2, boxShadow: "0 2px 6px rgba(16,24,40,0.18)" }}
+          />
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setShowAfter(true)}
+          className={`text-sm font-medium transition-colors ${
+            showAfter ? "text-black" : "text-gray-400"
+          }`}
+        >
+          {afterLabel}
+        </button>
       </div>
     </div>
   );
