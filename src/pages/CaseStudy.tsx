@@ -377,10 +377,10 @@ export default function CaseStudy() {
 
           {/* Sits in the page margin, outside the reading column, so the column
               itself never has to shrink to make room for it. Needs real estate
-              beyond max-w-4xl on both sides, hence the wide `xl:` gate. */}
+              beyond max-w-4xl on both sides, hence the wide custom breakpoint. */}
           {hasToc && (
-            <aside className="hidden xl:absolute xl:inset-y-0 xl:left-full xl:ml-6 xl:block xl:w-36">
-              <div className="xl:sticky xl:top-24 xl:pt-8">
+            <aside className="hidden min-[1360px]:absolute min-[1360px]:inset-y-0 min-[1360px]:left-full min-[1360px]:ml-12 min-[1360px]:block min-[1360px]:w-36">
+              <div className="min-[1360px]:sticky min-[1360px]:top-24 min-[1360px]:pt-8">
                 <p className="mb-4 text-sm tracking-wide text-neutral-500 uppercase">
                   On this page
                 </p>
