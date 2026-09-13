@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState, type MouseEvent } from "react";
 import { Link, useParams } from "react-router-dom";
-import { getProject, type ContentBlock, type Credit } from "../data/projects";
+import { getProject, projects, type ContentBlock, type Credit } from "../data/projects";
 import Nav from "../components/Nav";
 import WiggleText from "../components/WiggleText";
+import WorkGridCard from "../components/WorkGridCard";
 
 // Keyed by the exact strings used in `tools` across projects.ts.
 const TOOL_ICONS: Record<string, string> = {
@@ -57,7 +58,18 @@ const ZOOM_STEP = 0.5;
 const LIGHTBOX_PADDING = 32;
 const LIGHTBOX_CONTROLS_SPACE = 96;
 
-function Lightbox({ src, alt, onClose }: { src: string; alt: string; onClose: () => void }) {
+function Lightbox({
+  images,
+  index,
+  onClose,
+  onNavigate,
+}: {
+  images: { src: string; alt: string }[];
+  index: number;
+  onClose: () => void;
+  onNavigate: (index: number) => void;
+}) {
+  const { src, alt } = images[index];
   const [natural, setNatural] = useState<{ w: number; h: number } | null>(null);
   const [zoom, setZoom] = useState(ZOOM_MIN);
   const [viewport, setViewport] = useState({ w: window.innerWidth, h: window.innerHeight });
@@ -68,13 +80,21 @@ function Lightbox({ src, alt, onClose }: { src: string; alt: string; onClose: ()
     return () => window.removeEventListener("resize", onResize);
   }, []);
 
+  // A fresh image needs its own measurements and starts back at fit-to-screen.
+  useEffect(() => {
+    setZoom(ZOOM_MIN);
+    setNatural(null);
+  }, [index]);
+
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
+      else if (e.key === "ArrowLeft") onNavigate((index - 1 + images.length) % images.length);
+      else if (e.key === "ArrowRight") onNavigate((index + 1) % images.length);
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [onClose]);
+  }, [onClose, onNavigate, index, images.length]);
 
   // Scale the image to its real box size (not a CSS transform) so the
   // overflow-auto container actually gets scrollable content once zoomed —
@@ -112,29 +132,42 @@ function Lightbox({ src, alt, onClose }: { src: string; alt: string; onClose: ()
       </div>
 
       <div
-        className="fixed bottom-6 left-1/2 z-[60] flex -translate-x-1/2 items-center gap-2 border bg-white px-3 py-2 text-black"
+        className="fixed bottom-6 left-1/2 z-[60] flex -translate-x-1/2 items-center gap-1 rounded-full border border-white/15 bg-white/10 px-2 py-1.5 text-white shadow-[0_8px_30px_rgba(0,0,0,0.35)] backdrop-blur-xl"
         onClick={(e) => e.stopPropagation()}
       >
         <button
           type="button"
           onClick={() => setZoom((z) => Math.max(ZOOM_MIN, +(z - ZOOM_STEP).toFixed(2)))}
           disabled={zoom <= ZOOM_MIN}
-          className="px-2 disabled:opacity-30"
+          className="rounded-full px-2.5 py-1.5 transition-colors hover:bg-white/10 disabled:opacity-30"
           aria-label="Zoom out"
         >
           −
         </button>
-        <span className="w-12 text-center text-sm">{Math.round(zoom * 100)}%</span>
+        <span className="w-12 text-center text-sm tabular-nums">{Math.round(zoom * 100)}%</span>
         <button
           type="button"
           onClick={() => setZoom((z) => Math.min(ZOOM_MAX, +(z + ZOOM_STEP).toFixed(2)))}
           disabled={zoom >= ZOOM_MAX}
-          className="px-2 disabled:opacity-30"
+          className="rounded-full px-2.5 py-1.5 transition-colors hover:bg-white/10 disabled:opacity-30"
           aria-label="Zoom in"
         >
           +
         </button>
-        <button type="button" onClick={onClose} className="ml-2 border-l pl-3 text-sm underline">
+        {images.length > 1 && (
+          <>
+            <span aria-hidden className="mx-1 h-4 w-px bg-white/15" />
+            <span className="w-14 text-center text-sm tabular-nums text-white/70">
+              {index + 1} / {images.length}
+            </span>
+          </>
+        )}
+        <span aria-hidden className="mx-1 h-4 w-px bg-white/15" />
+        <button
+          type="button"
+          onClick={onClose}
+          className="rounded-full px-3 py-1.5 text-sm transition-colors hover:bg-white/10"
+        >
           Close
         </button>
       </div>
@@ -153,7 +186,7 @@ function Block({
   zoomCursor,
 }: {
   block: ContentBlock;
-  onImageClick: (src: string, alt: string) => void;
+  onImageClick: (src: string) => void;
   zoomCursor: ZoomCursorHandlers;
 }) {
   switch (block.type) {
@@ -195,6 +228,33 @@ function Block({
           <footer className="mt-2 text-sm not-italic">— {block.attribution}</footer>
         </blockquote>
       );
+    case "stat-row":
+      return (
+        <div className="my-10 grid grid-cols-2 gap-8 sm:grid-cols-3">
+          {block.stats.map((stat, i) => (
+            <div key={i}>
+              <p className="text-5xl font-medium tracking-tight">{stat.value}</p>
+              <p className="mt-2 text-sm text-neutral-500">{stat.label}</p>
+            </div>
+          ))}
+        </div>
+      );
+    case "callouts":
+      return (
+        <div className="my-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
+          {block.items.map((item, i) => (
+            <div key={i} className="bg-neutral-100 p-6">
+              <p className="mb-3 font-mono text-xs text-neutral-400">
+                {String(i + 1).padStart(2, "0")}
+              </p>
+              <p className="font-medium">{item.title}</p>
+              {item.description && (
+                <p className="mt-2 text-sm text-neutral-500">{item.description}</p>
+              )}
+            </div>
+          ))}
+        </div>
+      );
     case "image":
       return (
         <div className="my-4">
@@ -202,7 +262,7 @@ function Block({
             src={block.src}
             alt={block.alt}
             className="w-full cursor-none"
-            onClick={() => onImageClick(block.src, block.alt)}
+            onClick={() => onImageClick(block.src)}
             onMouseMove={zoomCursor.onMouseMove}
             onMouseLeave={zoomCursor.onMouseLeave}
           />
@@ -220,7 +280,7 @@ function Block({
                 src={img.src}
                 alt={img.alt}
                 className="w-full cursor-none"
-                onClick={() => onImageClick(img.src, img.alt)}
+                onClick={() => onImageClick(img.src)}
                 onMouseMove={zoomCursor.onMouseMove}
                 onMouseLeave={zoomCursor.onMouseLeave}
               />
@@ -237,14 +297,32 @@ function Block({
 export default function CaseStudy() {
   const { slug } = useParams<{ slug: string }>();
   const project = slug ? getProject(slug) : undefined;
-  const [lightbox, setLightbox] = useState<{ src: string; alt: string } | null>(null);
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const [activeId, setActiveId] = useState("overview");
+
+  // Every image/gallery block's images, in document order, so the lightbox
+  // can step through them regardless of which block a screenshot came from.
+  const images = useMemo(() => {
+    const list: { src: string; alt: string }[] = [];
+    for (const block of project?.content ?? []) {
+      if (block.type === "image") list.push({ src: block.src, alt: block.alt });
+      else if (block.type === "gallery") {
+        for (const img of block.images) list.push({ src: img.src, alt: img.alt });
+      }
+    }
+    return list;
+  }, [project]);
   const [cursorLabel, setCursorLabel] = useState({ x: 0, y: 0, visible: false });
 
   const zoomCursor: ZoomCursorHandlers = {
     onMouseMove: (e) => setCursorLabel({ x: e.clientX, y: e.clientY, visible: true }),
     onMouseLeave: () => setCursorLabel((c) => ({ ...c, visible: false })),
   };
+
+  const moreProjects = useMemo(
+    () => projects.filter((p) => p.slug !== slug).slice(0, 2),
+    [slug],
+  );
 
   const toc = useMemo(() => {
     const items = [{ id: "overview", title: "Overview" }];
@@ -364,41 +442,54 @@ export default function CaseStudy() {
         </section>
 
         <div className="relative">
+          {/* Sits in the page margin, outside the reading column, so the column
+              itself never has to shrink to make room for it. Needs real estate
+              beyond max-w-4xl on both sides, hence the wide custom breakpoint. */}
+          {hasToc && (
+            <aside className="hidden min-[1360px]:absolute min-[1360px]:inset-y-0 min-[1360px]:right-full min-[1360px]:mr-12 min-[1360px]:block min-[1360px]:w-32">
+              <nav className="min-[1360px]:sticky min-[1360px]:top-24 min-[1360px]:pt-8">
+                <ul className="flex flex-col gap-3">
+                  {toc.map((item) => (
+                    <li key={item.id}>
+                      <a
+                        href={`#${item.id}`}
+                        className={`text-sm ${
+                          activeId === item.id ? "font-medium text-black" : "text-neutral-400"
+                        }`}
+                      >
+                        {item.title}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </nav>
+            </aside>
+          )}
+
           <section className="py-8">
             {project.content.map((block, i) => (
               <Block
                 key={i}
                 block={block}
-                onImageClick={(src, alt) => setLightbox({ src, alt })}
+                onImageClick={(src) => setLightboxIndex(images.findIndex((img) => img.src === src))}
                 zoomCursor={zoomCursor}
               />
             ))}
           </section>
-
-          {/* Sits in the page margin, outside the reading column, so the column
-              itself never has to shrink to make room for it. Needs real estate
-              beyond max-w-4xl on both sides, hence the wide custom breakpoint. */}
-          {hasToc && (
-            <aside className="hidden min-[1360px]:absolute min-[1360px]:inset-y-0 min-[1360px]:left-full min-[1360px]:ml-12 min-[1360px]:block min-[1360px]:w-36">
-              <div className="min-[1360px]:sticky min-[1360px]:top-24 min-[1360px]:pt-8">
-                <p className="mb-4 text-sm tracking-wide text-neutral-500 uppercase">
-                  On this page
-                </p>
-                <nav className="flex flex-col gap-3 border-l pl-4">
-                  {toc.map((item) => (
-                    <a
-                      key={item.id}
-                      href={`#${item.id}`}
-                      className={`text-sm ${activeId === item.id ? "nav-active" : ""}`}
-                    >
-                      {item.title}
-                    </a>
-                  ))}
-                </nav>
-              </div>
-            </aside>
-          )}
         </div>
+
+        {moreProjects.length > 0 && (
+          <section className="border-t py-8">
+            <p className="mb-6 text-sm tracking-wide text-neutral-500 uppercase">
+              More case studies
+            </p>
+            <div className="columns-1 gap-8 sm:columns-2">
+              {moreProjects.map((p) => (
+                <WorkGridCard key={p.slug} project={p} />
+              ))}
+            </div>
+          </section>
+        )}
 
         <footer className="border-t py-8">
           <p>
@@ -425,8 +516,13 @@ export default function CaseStudy() {
         Click to zoom
       </span>
 
-      {lightbox && (
-        <Lightbox src={lightbox.src} alt={lightbox.alt} onClose={() => setLightbox(null)} />
+      {lightboxIndex !== null && (
+        <Lightbox
+          images={images}
+          index={lightboxIndex}
+          onNavigate={setLightboxIndex}
+          onClose={() => setLightboxIndex(null)}
+        />
       )}
     </main>
   );

@@ -8,7 +8,11 @@ export type ContentBlock =
   | { type: "numbered-list"; items: string[] }
   | { type: "quote"; text: string; attribution: string }
   | { type: "image"; src: string; alt: string; caption?: string }
-  | { type: "gallery"; images: { src: string; alt: string; caption?: string }[] };
+  | { type: "gallery"; images: { src: string; alt: string; caption?: string }[] }
+  /** Big standalone numbers (page views, MAU, usability score…), no card/border. */
+  | { type: "stat-row"; stats: { value: string; label: string }[] }
+  /** Numbered short-form callouts (frictions, concepts) — 2-4 items, gray fill. */
+  | { type: "callouts"; items: { title: string; description?: string }[] };
 
 export interface ProjectScreenshot {
   src: string;
@@ -227,36 +231,120 @@ export const projects: Project[] = [
     summary:
       "Data-rich dashboard for an enterprise workflow — dense information made legible at a glance.",
     client: "Client (NDA)",
-    role: "UI/UX Designer",
+    role: "Product design, information architecture, design systems",
+    team: "Founder, Head of Operations",
     duration: "2.5 months",
     tools: ["Figma", "Claude", "Figjam"],
     screenshots: [
       { src: "/projects/enterprise-dashboard.png", alt: "Enterprise dashboard overview" },
     ],
     lastUpdated: "Nov, 2025",
+    // Real qualitative story (Airtable replacement, KFC/Apple-store scale, founder+ops
+    // collaboration) is documented below. What's still missing before this fully matches
+    // case-study.md: hard metrics for a Results stat-row (e.g. time-to-quote, adoption,
+    // error/rework rate) and a real attributed quote. Don't invent numbers to fill that gap.
     content: [
+      { type: "section", id: "problem", title: "Problem" },
       {
         type: "paragraph",
-        text: "I worked on a comprehensive workflow management system designed to replace an Airtable-based process for a company managing digital signage installations across major retail chains like KFC and Apple stores. The platform handles the complete lifecycle from initial quotations through deployment, maintenance, and inventory tracking, serving internal teams, partner companies, and customers across multiple brands and locations.",
+        text: "The client runs digital signage installations for major retail chains — KFC, Apple stores — across quoting, deployment, maintenance, and inventory. All of it lived in Airtable: one flat, general-purpose tool asked to hold a multi-stage lifecycle it was never built for.",
       },
       {
         type: "paragraph",
-        text: "I joined as the sole product designer in early 2025, taking the project from initial concept through to engineering implementation over three months. Working directly with the founder and head of operations, I conducted user research with internal deployment managers to understand pain points in their existing workflows, then designed the complete information architecture and interface system.",
+        text: "That created real friction for the internal deployment managers who lived in it every day. I spent time with them early on to see exactly where it broke down, before drawing a single screen.",
+      },
+      {
+        type: "callouts",
+        items: [
+          {
+            title: "Scattered state",
+            description:
+              "A job's status lived across disconnected views instead of one lifecycle, so nothing showed where a deployment actually stood.",
+          },
+          {
+            title: "One view, three audiences",
+            description:
+              "Internal teams, partner companies, and customers all needed a different slice of the same data — a flat spreadsheet couldn't shape itself for any of them.",
+          },
+          {
+            title: "No structure for multi-step work",
+            description:
+              "Quoting-to-deployment is a sequence, but Airtable gave every stage the same flat rows, with nothing to signal what came next.",
+          },
+        ],
       },
       { type: "image", src: "/projects/enterprise-dashboard/1.png", alt: "Dashboard overview" },
+
+      { type: "section", id: "solution", title: "Solution" },
+      {
+        type: "paragraph",
+        text: "I worked directly with the founder and head of operations — the two people who understood the business end of this best — to turn what I'd learned from deployment managers into an information architecture that actually matched how the work moves.",
+      },
+      {
+        type: "list",
+        items: [
+          "Interactive HTML wireframes first, so the IA could get cheap, fast feedback before a single pixel was styled in Figma.",
+          "A modular component library, inspired by Linear's restraint, so every screen in a very information-dense product speaks the same visual language.",
+          "Progressive disclosure throughout — surfacing only what a step needs, instead of every field a record could ever hold.",
+        ],
+      },
+
+      { type: "section", id: "final-design", title: "Final design" },
+      { type: "heading", text: "One dashboard for the whole lifecycle" },
+      {
+        type: "paragraph",
+        text: "Quotes, deployment, maintenance, and inventory now live in one workflow-aware system instead of one flat base — each stage has its own view, shaped for what that step needs.",
+      },
       {
         type: "gallery",
         images: [
-          { src: "/projects/enterprise-dashboard/2.png", alt: "Dashboard workflow screen" },
-          { src: "/projects/enterprise-dashboard/3.png", alt: "Dashboard detail screen" },
-          { src: "/projects/enterprise-dashboard/4.png", alt: "Dashboard inventory screen" },
-          { src: "/projects/enterprise-dashboard/5.png", alt: "Dashboard component library" },
+          {
+            src: "/projects/enterprise-dashboard/2.png",
+            alt: "Dashboard workflow screen",
+            caption: "A deployment's stages are structured as a sequence, not a spreadsheet row.",
+          },
+          {
+            src: "/projects/enterprise-dashboard/3.png",
+            alt: "Dashboard detail screen",
+            caption: "Progressive disclosure keeps a dense record legible at a glance.",
+          },
+        ],
+      },
+      {
+        type: "image",
+        src: "/projects/enterprise-dashboard/4.png",
+        alt: "Dashboard inventory screen",
+        caption: "Inventory gets its own view, shaped around stock instead of jobs.",
+      },
+      { type: "heading", text: "A component library built for a dense product" },
+      {
+        type: "paragraph",
+        text: "I built a modular component library — inspired by Linear's minimalist aesthetic — so a genuinely data-heavy product would still read as one coherent system, not a pile of one-off screens.",
+      },
+      {
+        type: "image",
+        src: "/projects/enterprise-dashboard/5.png",
+        alt: "Dashboard component library",
+        caption: "One shared component library carries the whole product's visual language.",
+      },
+
+      { type: "section", id: "results", title: "Results" },
+      {
+        type: "list",
+        items: [
+          "Replaced a fully manual, Airtable-based process with one system spanning quoting through inventory.",
+          "Shipped a workflow-aware component library used consistently across the whole product.",
+          "Stayed on through engineering implementation, so the shipped product matched the design intent.",
         ],
       },
       {
         type: "paragraph",
-        text: "The design process involved creating interactive HTML wireframes for rapid iteration and feedback, which I then developed into high-fidelity designs in Figma with Claude AI assistance for prototyping and design system documentation. I established a modular component library inspired by Linear's minimalist aesthetic, focusing on progressive disclosure and workflow-aware features that guide users through complex multi-step processes. I continued collaborating with the engineering team through implementation, ensuring the design vision translated effectively into the final product.",
+        text: "The redesign didn't just move the same spreadsheet into Figma — it gave a multi-stage operations process a structure that actually matches how the work happens.",
       },
+      // TODO: swap the list above for a `stat-row` block once real numbers exist
+      // (e.g. time-to-quote, adoption, error/rework rate) — see the comment above
+      // this project's `content` array. A real attributed quote would also land
+      // well here, per case-study.md's Results section.
     ],
   },
   {
