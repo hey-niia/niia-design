@@ -94,19 +94,16 @@ export default function About() {
         <div className="flex flex-col gap-8 md:flex-row">
           <div className="md:flex-1">
             <PhotoCarousel photos={playPhotos} className="mb-3 h-40 w-full" />
-            <p>
-              I have kids, which reorganised my life around them for a good while — and turned out
-              to be some of the best design training I've had.
-            </p>
+            <p>My other design practice.</p>
             <p className="mt-2 font-mono text-xs tracking-widest text-neutral-400 uppercase">
               Play
             </p>
             <p className="mt-2 text-sm">
-              I ran creative workshops for children, then built a camp in Odesa where artists,
-              musicians and directors came from across Ukraine to make something together with the
-              kids rather than for them. It hadn't been done before. The workshops continued in
-              Berlin, and now it's quieter and more private: our own kids, small performances,
-              invented projects, an ordinary life built around making things.
+              I have kids, which reorganised my life around them — and turned out to be some of
+              the best design training I've had. I ran creative workshops, then built a camp in
+              Odesa where artists, musicians and directors from across Ukraine made things with
+              kids rather than for them. It hadn't been done before. Now, in Berlin, it's
+              quieter: our own kids, small performances, invented projects.
             </p>
           </div>
           <div className="md:flex-1">
