@@ -15,6 +15,8 @@ const TOOL_ICONS: Record<string, string> = {
   Figjam: "/icons/tools/figjam.svg",
   Claude: "/icons/tools/claude.svg",
   Notion: "/icons/tools/notion.svg",
+  // Generic analytics glyph, not the Amplitude brand mark — see notes.
+  Amplitude: "/icons/tools/amplitude.svg",
 };
 
 function ToolList({ tools }: { tools: string[] }) {
@@ -131,7 +133,16 @@ function Lightbox({
     ? Math.min(1, availableWidth / natural.w, availableHeight / natural.h)
     : 1;
   const canZoom = maxScale > minScale + 0.001;
-  const scale = Math.min(maxScale, Math.max(minScale, userScale ?? maxScale));
+  // Native size is the right opening view for a phone screenshot, but for
+  // something far larger than the viewport in either dimension — a workshop
+  // canvas, say, or a tall mobile screenshot on a short window — it drops you
+  // into a corner with no context. Those open fit-to-screen instead, and you
+  // zoom in.
+  const defaultScale =
+    natural && (natural.w > availableWidth * 1.6 || natural.h > availableHeight * 1.6)
+      ? minScale
+      : maxScale;
+  const scale = Math.min(maxScale, Math.max(minScale, userScale ?? defaultScale));
   const overflowsHorizontally = natural ? natural.w * scale > availableWidth + 0.5 : false;
   const overflowsVertically = natural ? natural.h * scale > availableHeight + 0.5 : false;
 
@@ -284,6 +295,23 @@ interface ZoomCursorHandlers {
   onMouseLeave: () => void;
 }
 
+// Renders `backticked` spans as inline code. Token names read as noise in
+// running prose otherwise — Color.level2 looks like a typo, not an identifier.
+function withCode(text: string) {
+  return text.split(/(`[^`]+`)/g).map((part, i) =>
+    part.startsWith("`") && part.endsWith("`") && part.length > 2 ? (
+      <code
+        key={i}
+        className="rounded bg-neutral-100 px-1.5 py-0.5 font-mono text-[0.85em] text-neutral-700"
+      >
+        {part.slice(1, -1)}
+      </code>
+    ) : (
+      part
+    ),
+  );
+}
+
 function Block({
   block,
   onImageClick,
@@ -295,7 +323,7 @@ function Block({
 }) {
   switch (block.type) {
     case "paragraph":
-      return <p className="my-4 max-w-[46rem]">{block.text}</p>;
+      return <p className="my-4 max-w-[46rem]">{withCode(block.text)}</p>;
     case "heading":
       return (
         <h3 className="mt-12 mb-3 max-w-[46rem] text-[1.375rem] font-semibold">{block.text}</h3>
@@ -313,7 +341,7 @@ function Block({
         <ul className="my-4 max-w-[46rem] list-outside list-disc space-y-2 pl-5">
           {block.items.map((item, i) => (
             <li key={i} className="pl-1">
-              {item}
+              {withCode(item)}
             </li>
           ))}
         </ul>
@@ -390,6 +418,8 @@ function Block({
             alt={block.alt}
             pins={block.pins}
             maxWidth={block.maxWidth}
+            viewportHeight={block.viewportHeight}
+            onImageClick={onImageClick}
           />
           {block.caption && (
             <p className="mt-4 text-sm italic text-gray-400">{block.caption}</p>

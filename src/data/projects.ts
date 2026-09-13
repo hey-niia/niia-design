@@ -19,6 +19,8 @@ export type ContentBlock =
       src: string;
       alt: string;
       maxWidth?: number;
+      /** Height of the scroll window, in px. Omit to render full height. */
+      viewportHeight?: number;
       caption?: string;
       pins: { x: number; y: number; title: string; body: string }[];
     }
@@ -134,7 +136,7 @@ export const projects: Project[] = [
       { initials: "RA", label: "Neuroscience research advisors" },
     ],
     duration: "Dec 2025 – Sep 2026 · 10 months",
-    tools: ["Figma", "Claude", "Figjam", "Notion", "Amplitude"],
+    tools: ["Figma", "Claude", "Notion", "Amplitude"],
     screenshots: [
       { src: "/projects/ios-app/hero-coaching.webp", alt: "Three coaching screens" },
       { src: "/projects/ios-app/3.webp", alt: "Emotional fitness app progression screen" },
@@ -254,9 +256,9 @@ export const projects: Project[] = [
         type: "annotated-image",
         src: "/projects/ios-app/before-today.webp",
         alt: "The old home screen at full length: score ring, neurotransmitter suggestions, today's photos, an add-a-past-memory prompt, and a five-item tab bar",
-        // 786px source — keep the render at/below 393 so it stays above 2x on
-        // a retina display.
+        // 1170px source — keep the render at/below 585 so it stays above 2x.
         maxWidth: 380,
+        viewportHeight: 620,
         pins: [
           {
             x: 93,
@@ -351,22 +353,9 @@ export const projects: Project[] = [
         text: "The card that shipped names what you are working toward, your weekly Happiness Report, and counts the memories left in whole numbers. Tap it and a sheet opens with the level bar and the report progress together. Same fix as the home screen, one size down: swap an unexplained number for a named next step.",
       },
 
-      { type: "heading", text: "Designing so a model can build it" },
       {
         type: "paragraph",
-        text: "The team was small and shipping fast, and a lot of the implementation was going to be AI-assisted. That changed who I was designing the handoff for. Not only an engineer reading a spec, but a model reading the design file.",
-      },
-      {
-        type: "paragraph",
-        text: "So I built the new design system around one rule: every name in Figma has to survive the trip into code unchanged. A colour called levels/level-2 becomes Color.level2. A spacing value called spacing/32 becomes CGFloat.spacing32. Drop the folder, camel-case the rest, and that is the whole mapping.",
-      },
-      {
-        type: "paragraph",
-        text: "The payoff is that there's no translation step. An agent reads the design context straight out of Figma, sees a token name, and already knows the constant to write. No handoff document, no naming table to keep in sync, nothing for either of us to misremember. A script pulls Figma's own export and rewrites the code files in place, so the two never drift.",
-      },
-      {
-        type: "paragraph",
-        text: "I worked the same way myself — prototyping screens as working code rather than static frames, so I could feel an interaction before asking anyone to build it. The hard part isn't getting a model to produce a screen. It's making the system underneath legible enough that what it produces is right.",
+        text: "I prototyped the shortlisted directions as working code rather than static frames, so I could feel an interaction before asking an engineer to build it. Most of what I learned that way was about timing, which a Figma prototype will not tell you.",
       },
 
       { type: "heading", text: "What we cut" },
@@ -397,7 +386,7 @@ export const projects: Project[] = [
       { type: "heading", text: "1. What you see when you open the app" },
       {
         type: "paragraph",
-        text: "The old home screen led with a wellbeing score that nothing on the page explained. Under it sat photos from today, three neurotransmitter suggestions, and a prompt to add a past memory. Four unrelated asks, before a new user had any idea what the app wanted. The new one asks a single question and waits.",
+        text: "Four competing asks became one question, and the screen waits for the answer.",
       },
       {
         // Exported via scripts/figma-export.py. Both are 786×1704 — the before
@@ -432,6 +421,7 @@ export const projects: Project[] = [
         type: "image",
         src: "/projects/ios-app/final-coach-tagging.webp",
         alt: "The coach confirming a saved memory and naming which neurotransmitters it affected, with Add memory and Recall memories cards",
+        maxWidth: 380,
         caption:
           "The six systems didn't disappear, they moved behind the conversation. Log a memory and the coach names which systems it affected and why — in a sentence, not a lab report.",
       },
@@ -473,10 +463,18 @@ export const projects: Project[] = [
           "Progress to the next level is broken into five countable things rather than one percentage — the same move as the progress card, at screen scale.",
       },
 
-      { type: "heading", text: "4. A design system built to hand straight to AI" },
+      { type: "heading", text: "4. Optic, the design system" },
       {
         type: "paragraph",
         text: "None of this runs on the old design system. That one grew around the four-tab app and carried its assumptions, so rather than bend it I built a new one. Optic is small enough to hold only what the chat-first product needs: about 64 primitive colours and 34 semantic aliases, nine spacing values, three radii, eight text styles.",
+      },
+      {
+        type: "paragraph",
+        text: "The team was shipping fast and much of the implementation was going to be AI-assisted, which changed who I was designing the handoff for: not only an engineer reading a spec, but a model reading the design file. So Optic has one rule. Every name in Figma survives the trip into code unchanged. `levels/level-2` becomes `Color.level2`. `spacing/32` becomes `CGFloat.spacing32`. Drop the folder, camel-case the rest, and that is the whole mapping.",
+      },
+      {
+        type: "paragraph",
+        text: "There's no translation step left. An agent reads the design context straight out of Figma, sees a token name, and already knows the constant to write — no handoff doc, no naming table to keep in sync. A script pulls Figma's own export and rewrites the code files in place, so the two can't drift. The hard part was never getting a model to produce a screen; it's making the system underneath legible enough that what it produces is right.",
       },
       {
         type: "paragraph",
@@ -493,18 +491,13 @@ export const projects: Project[] = [
       { type: "heading", text: "Also shipped: the store listing and the icon set" },
       {
         type: "paragraph",
-        text: "Two more pieces of work, either side of the app.",
-      },
-      {
-        type: "paragraph",
-        text: "I designed the App Store screenshot set: the pitch, the brain visualisation, the social proof. The same six-system science, rewritten as three screens someone scrolls past in five seconds. It is part of what got the app selected as Apple's App of the Day.",
+        text: "I designed the App Store screenshot set: the pitch, the brain visualisation, the social proof. The same science, rewritten as three screens someone scrolls past in five seconds.",
       },
       {
         type: "image",
         src: "/projects/ios-app/5.webp",
         alt: "App Store marketing screenshots for the wellness app, including Apple's App of the Day badge",
-        caption:
-          "The same six-system science, rewritten as marketing screenshots — this set contributed to the app being selected as Apple's App of the Day.",
+        caption: "This set is part of what got the app selected as Apple's App of the Day.",
       },
 
       {
@@ -538,11 +531,11 @@ export const projects: Project[] = [
       },
       {
         type: "paragraph",
-        text: "Activation is the number that matters. Everything else the product does is calculated from memories: the six systems, the levels, the weekly report. A user who never logs one never sees any of it. Going from four in ten to six in ten means half again as many people reached the product at all.",
+        text: "Activation is the one that matters. Going from four in ten to six in ten means half again as many people got far enough to see the product work at all.",
       },
       {
         type: "paragraph",
-        text: "Retention moved for the same reason. Opening the app gets you a reply now, so there is a reason to come back tomorrow that isn't a number you don't understand.",
+        text: "Retention moved for the same reason: there's now a reason to come back tomorrow that isn't a number you don't understand.",
       },
       {
         type: "paragraph",

@@ -26,14 +26,27 @@ export default function AnnotatedImage({
   alt,
   pins,
   maxWidth,
+  viewportHeight,
+  onImageClick,
 }: {
   src: string;
   alt: string;
   pins: Pin[];
   maxWidth?: number;
+  /** Height of the scroll window, in px. Omit to render the image full height. */
+  viewportHeight?: number;
+  onImageClick?: (src: string) => void;
 }) {
   const [open, setOpen] = useState<number | null>(null);
+  const [hasMore, setHasMore] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  const measure = () => {
+    const el = scrollRef.current;
+    if (!el) return;
+    setHasMore(el.scrollHeight - el.clientHeight - el.scrollTop > 24);
+  };
 
   // Tapping elsewhere should dismiss an open note, the way a popover does.
   useEffect(() => {
@@ -52,10 +65,32 @@ export default function AnnotatedImage({
     };
   }, [open]);
 
+  // Measured after a frame: the image's height isn't laid out yet at onLoad.
+  useEffect(() => {
+    const raf = requestAnimationFrame(() => requestAnimationFrame(measure));
+    window.addEventListener("resize", measure);
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener("resize", measure);
+    };
+  }, []);
+
   return (
     <div ref={rootRef}>
-      <div className="relative mx-auto" style={maxWidth ? { maxWidth } : undefined}>
-        <img src={src} alt={alt} className="block w-full" />
+      <div
+        ref={scrollRef}
+        onScroll={measure}
+        className={`relative mx-auto ${
+          viewportHeight ? "overflow-y-auto overscroll-contain rounded-xl ring-1 ring-black/10" : ""
+        }`}
+        style={{ maxWidth, height: viewportHeight }}
+      >
+        <img
+          src={src}
+          alt={alt}
+          className={`block w-full ${onImageClick ? "cursor-zoom-in" : ""}`}
+          onClick={onImageClick ? () => onImageClick(src) : undefined}
+        />
 
         {pins.map((pin, i) => {
           const isOpen = open === i;
@@ -97,6 +132,17 @@ export default function AnnotatedImage({
           );
         })}
       </div>
+
+      {viewportHeight && (
+        <p
+          className={`mx-auto mt-2 text-center font-mono text-[10px] tracking-wider text-gray-400 uppercase transition-opacity ${
+            hasMore ? "opacity-100" : "opacity-0"
+          }`}
+          style={{ maxWidth }}
+        >
+          Scroll to see more ↓
+        </p>
+      )}
 
       <ol className="mt-6 flex flex-col gap-4">
         {pins.map((pin, i) => (
