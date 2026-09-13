@@ -654,20 +654,19 @@ export default function CaseStudy() {
             </div>
 
             {project.impact && project.impact.length > 0 && (
-              // The block recruiters and summarisers read first, so it gets
-              // its own panel and near-body-size text. 14px here was the main
-              // reason it scanned worse than the prose around it.
-              <div className="mt-12 bg-neutral-50 p-5 sm:p-6">
-                <p className="mb-5 font-semibold">Impact</p>
-                <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
+              // Same treatment as the `callouts` block, so the two card rows
+              // on a page read as one family. Body stays near-legible size
+              // rather than the callouts' 14px — this is the block recruiters
+              // read first.
+              <div className="mt-12">
+                <p className="mb-4 text-sm tracking-wide text-gray-400 uppercase">Impact</p>
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                   {project.impact.map((stat) => (
-                    <div
-                      key={stat.metric}
-                      className="bg-white p-5 ring-1 ring-neutral-200"
-                    >
-                      <p className="mb-3 text-[1.0625rem] font-semibold">{stat.metric}</p>
-                      <p className="text-[1.0625rem] leading-relaxed">
-                        {stat.description} <strong className="font-semibold">{stat.result}</strong>
+                    <div key={stat.metric} className="bg-neutral-100 p-6">
+                      <p className="font-medium">{stat.metric}</p>
+                      <p className="mt-2 text-[1.0625rem] leading-relaxed text-gray-500">
+                        {stat.description}{" "}
+                        <strong className="font-medium text-black">{stat.result}</strong>
                       </p>
                     </div>
                   ))}

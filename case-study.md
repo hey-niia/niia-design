@@ -35,6 +35,29 @@ Results
   └─ Link to more case studies
 ```
 
+### Choosing the depth
+
+**Not every project earns the full structure, and forcing it is obvious.** The
+shape above is for a flagship: months of work, a research process, and numbers
+you're allowed to publish. Most projects aren't that. Pick the tier that matches
+the evidence you actually have.
+
+| Tier | Use when | Shape |
+|---|---|---|
+| **Full** | Months of work, documented research, publishable metrics | All five sections, per-surface before/after, metrics with causal clauses |
+| **Reduced** | It shipped and you know why it's better, but nobody measured it | Problem / Solution / Final design. No Results section at all — say what changed and stop |
+| **Short** | Small, old, or scoped work: a site, a brand, a single flow | One continuous piece, 3–6 paragraphs, images with real captions. No section headers |
+
+Two rules that matter more than the tiers:
+
+- **The structure follows the evidence, never the reverse.** If you find yourself
+  writing "we identified several pain points" without being able to name them,
+  you're in the wrong tier. Drop down one.
+- **An empty heading is worse than a missing one.** A "Results" section
+  containing "the client was happy" costs more credibility than having no
+  Results section. The reader notices the gap either way; only one version
+  looks like you tried to hide it.
+
 An "On This Page" side-nav anchors to exactly 5 sections: **Overview, Problem framing, Solution, Final design, Results**. Don't add more top-level sections than this — subdivide inside them instead.
 
 ---
@@ -127,11 +150,42 @@ The rules that stop a case study being quietly wrong.
 - **Don't report metrics that are artifacts.** A cohort that hasn't aged into
   week 6 shows 0% at week 6. Omit it and say why, or explain it — never let it
   stand as either a win or a loss.
+- **Screenshots must come from the build you're describing.** Design files
+  accumulate old versions of the same screen, and the stale one is often the
+  tidiest, so it's the one you reach for. Before shipping, check one detail you
+  know changed — a nav treatment, a control style — against the current
+  production file. Two of the images here showed a superseded component for
+  weeks, including the hero.
 - **Anonymisation is a craft task, not a find-and-replace.** If the client is
   anonymised, the product name also appears inside the screenshots: in-product
   nouns ("Matter Score"), body copy, and logo marks that no text search will
   find. Audit every asset at full length, not just the crop you're shipping,
   and caption the blurs once so they read as deliberate rather than as damage.
+
+---
+
+## 2c. Presentation
+
+Layout failures read as carelessness about the work itself.
+
+- **Sub-headings must outrank body text.** A heading rendering at or below the
+  size of the paragraph under it reads as broken, not as restraint.
+- **Cap the body measure** at roughly 45–75 characters. On a page with large
+  base type, a full-width column is a long way for the eye to travel back.
+- **Contain tall screenshots.** A phone screen rendered at column width becomes
+  1,500–2,000px of scrolling, and three of them make a case study feel
+  interminable. Put them in a fixed-height window that scrolls, with a visible
+  hint that there's more, and let the reader open the full thing.
+- **Every screenshot should be at least 2× its rendered width.** Exporting at 2×
+  and then scaling down in the layout silently undoes it — check the ratio at
+  the size it actually renders, not the size you exported.
+- **Identifiers belong in code styling.** `Color.level2` set in running prose
+  reads as a typo.
+- **One argument, one place.** If two sections make the same point, the reader
+  assumes they missed a distinction and re-reads both. Merge them.
+- **Name a section for what it contains,** not for the cleverest thing in it.
+  "Designing so a model can build it" tells the reader nothing; "Optic, the
+  design system" tells them whether to keep reading.
 
 ---
 
@@ -166,7 +220,13 @@ The reference case study reads like a person talking, not a report being filed. 
 
 ## 4. Audit checklist
 
-Use this to check a case study against the framework. Mark each row **Present / Weak / Missing**.
+Use this to check a case study against the framework. Mark each row **Present /
+Weak / Missing** — and check the tier first: rows below the tier you picked
+aren't failures, they're out of scope.
+
+### Before anything else
+- [ ] The tier matches the evidence available (Full / Reduced / Short)
+- [ ] No section exists that the material can't fill
 
 ### Overview
 - [ ] Team/role metadata matches the collaboration described in the body
@@ -213,6 +273,8 @@ Use this to check a case study against the framework. Mark each row **Present / 
 - [ ] Cohort artifacts are omitted or explained, never reported as results
 - [ ] Screenshots audited at full length for the client's name, including
       in-product nouns and logo marks; blurs captioned once as deliberate
+- [ ] Every screenshot verified against the current build, not an older
+      version sitting in the same design file
 - [ ] No placeholder assets left in the published page
 
 ### Process evidence
@@ -235,3 +297,8 @@ Use this to check a case study against the framework. Mark each row **Present / 
 - [ ] Sub-headings outrank body text in size and weight (a sub-head rendering
       smaller than the paragraph under it reads as broken)
 - [ ] Body measure capped (~45-75 characters); lists use hanging indent
+- [ ] Tall screenshots contained in a scrolling window, not rendered at full
+      height inline
+- [ ] Every image at least 2x its rendered width at the size it actually shows
+- [ ] Identifiers and token names set as inline code
+- [ ] No argument made in two different sections
