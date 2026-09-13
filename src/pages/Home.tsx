@@ -4,6 +4,7 @@ import DrawingPad from "../components/DrawingPad";
 import Nav from "../components/Nav";
 import WorkGridCard from "../components/WorkGridCard";
 import { projects } from "../data/projects";
+import { splitIntoColumns } from "../lib/columns";
 
 export default function Home() {
   const location = useLocation();
@@ -83,9 +84,13 @@ export default function Home() {
         </div>
       </section>
 
-      <section id="work" className="grid grid-cols-1 items-start gap-8 sm:grid-cols-2">
-        {projects.map((project) => (
-          <WorkGridCard key={project.slug} project={project} />
+      <section id="work" className="flex flex-col gap-8 sm:flex-row">
+        {splitIntoColumns(projects).map((column, i) => (
+          <div key={i} className="flex flex-1 flex-col gap-8">
+            {column.map((project) => (
+              <WorkGridCard key={project.slug} project={project} />
+            ))}
+          </div>
         ))}
       </section>
 

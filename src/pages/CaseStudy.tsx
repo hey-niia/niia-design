@@ -10,6 +10,7 @@ import ScrollableImage from "../components/ScrollableImage";
 import WiggleText from "../components/WiggleText";
 import WorkGridCard from "../components/WorkGridCard";
 import { useNiiaChat } from "../context/useNiiaChat";
+import { splitIntoColumns } from "../lib/columns";
 
 // Keyed by the exact strings used in `tools` across projects.ts.
 const TOOL_ICONS: Record<string, string> = {
@@ -735,9 +736,13 @@ export default function CaseStudy() {
             <p className="mb-6 text-sm tracking-wide text-gray-400 uppercase">
               More case studies
             </p>
-            <div className="grid grid-cols-1 items-start gap-8 sm:grid-cols-2">
-              {moreProjects.map((p) => (
-                <WorkGridCard key={p.slug} project={p} titleClassName="text-sm" />
+            <div className="flex flex-col gap-8 sm:flex-row">
+              {splitIntoColumns(moreProjects).map((column, i) => (
+                <div key={i} className="flex flex-1 flex-col gap-8">
+                  {column.map((p) => (
+                    <WorkGridCard key={p.slug} project={p} titleClassName="text-sm" />
+                  ))}
+                </div>
               ))}
             </div>
           </section>
