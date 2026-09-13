@@ -388,7 +388,7 @@ export default function CaseStudy() {
     <main className="pb-24">
       <Nav />
       <div className="mx-auto max-w-4xl pt-10">
-        <header className="border-b pb-8">
+        <header className="border-b border-gray-400 pb-8">
           <p className="mb-4 font-mono text-xs tracking-widest text-neutral-400 uppercase">
             {project.client}
           </p>
@@ -396,7 +396,7 @@ export default function CaseStudy() {
           {project.summary && <p className="mt-4 max-w-2xl">{project.summary}</p>}
         </header>
 
-        <section id="overview" className="scroll-mt-8 border-b py-8">
+        <section id="overview" className="scroll-mt-8 border-b border-gray-400 py-8">
           <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
             <div>
               <p>Role</p>
@@ -478,7 +478,7 @@ export default function CaseStudy() {
         </div>
 
         {moreProjects.length > 0 && (
-          <section className="border-t py-8">
+          <section className="border-t border-gray-400 py-8">
             <p className="mb-6 text-sm tracking-wide text-neutral-500 uppercase">
               More case studies
             </p>
@@ -490,9 +490,8 @@ export default function CaseStudy() {
           </section>
         )}
 
-        <footer className="border-t py-8">
+        <footer className="border-t border-gray-400 py-8">
           <p>
-            Last updated: {project.lastUpdated} —{" "}
             <a href="mailto:nia.bieliavtseva@gmail.com" className="underline">
               <WiggleText>Let's design it!</WiggleText>
             </a>
