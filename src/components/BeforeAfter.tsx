@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { FRAME_RADIUS, ScrollHint } from "./ScreenshotFrame";
 
 const ACCENT = "#e65f2e";
 /** Treat "within this many px of the end" as scrolled through. */
@@ -29,6 +30,7 @@ export default function BeforeAfter({
   afterLabel = "After",
   maxWidth = 360,
   viewportHeight = 620,
+  caption,
   onImageClick,
   zoomCursor,
 }: {
@@ -42,6 +44,8 @@ export default function BeforeAfter({
   maxWidth?: number;
   /** Height of the scroll window, in px. Taller screens scroll inside it. */
   viewportHeight?: number;
+  /** Rendered inside the panel, under the toggle. */
+  caption?: string;
   onImageClick?: (src: string) => void;
   zoomCursor?: ZoomCursorHandlers;
 }) {
@@ -86,7 +90,7 @@ export default function BeforeAfter({
       <div className="bg-neutral-100 px-4 py-8 sm:px-10 sm:py-10">
         <div
           ref={boxRef}
-          className="relative mx-auto overflow-hidden rounded-xl ring-1 ring-black/10"
+          className={`relative mx-auto overflow-hidden ring-1 ring-black/10 ${FRAME_RADIUS}`}
           style={{ maxWidth, height: viewportHeight }}
         >
           {states.map((state) => (
@@ -105,63 +109,66 @@ export default function BeforeAfter({
                 alt={state.alt}
                 onLoad={() => requestAnimationFrame(measure)}
                 className={`block w-full ${onImageClick ? "cursor-none" : ""}`}
-                onClick={onImageClick ? () => onImageClick(state.src) : undefined}
+                onClick={
+                  onImageClick ? () => onImageClick(state.src) : undefined
+                }
                 onMouseMove={zoomCursor?.onMouseMove}
                 onMouseLeave={zoomCursor?.onMouseLeave}
               />
             </div>
           ))}
+
+          <ScrollHint show={hasMore[showAfter ? 1 : 0]} />
         </div>
 
-        <p
-          aria-hidden={!hasMore[showAfter ? 1 : 0]}
-          className={`mx-auto mt-2 text-center font-mono text-[10px] tracking-wider text-gray-400 uppercase transition-opacity ${
-            hasMore[showAfter ? 1 : 0] ? "opacity-100" : "opacity-0"
-          }`}
-          style={{ maxWidth }}
-        >
-          Scroll to see more ↓
-        </p>
-      </div>
+        <div className="mt-5 flex items-center justify-center gap-3">
+          <button
+            type="button"
+            onClick={() => setShowAfter(false)}
+            className={`text-sm font-medium transition-colors ${
+              showAfter ? "text-gray-400" : "text-black"
+            }`}
+          >
+            {beforeLabel}
+          </button>
 
-      <div className="mt-4 flex items-center justify-center gap-3">
-        <button
-          type="button"
-          onClick={() => setShowAfter(false)}
-          className={`text-sm font-medium transition-colors ${
-            showAfter ? "text-gray-400" : "text-black"
-          }`}
-        >
-          {beforeLabel}
-        </button>
+          <button
+            type="button"
+            role="switch"
+            aria-checked={showAfter}
+            aria-label={`Show ${showAfter ? beforeLabel.toLowerCase() : afterLabel.toLowerCase()}`}
+            onClick={() => setShowAfter((v) => !v)}
+            className="relative h-6 w-11 shrink-0 cursor-pointer rounded-full border transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
+            style={{
+              backgroundColor: showAfter ? ACCENT : "#d4d4d4",
+              borderColor: showAfter ? ACCENT : "#d4d4d4",
+            }}
+          >
+            <span
+              className="absolute top-1/2 h-5 w-5 -translate-y-1/2 rounded-full bg-white transition-all"
+              style={{
+                left: showAfter ? 22 : 2,
+                boxShadow: "0 2px 6px rgba(16,24,40,0.18)",
+              }}
+            />
+          </button>
 
-        <button
-          type="button"
-          role="switch"
-          aria-checked={showAfter}
-          aria-label={`Show ${showAfter ? beforeLabel.toLowerCase() : afterLabel.toLowerCase()}`}
-          onClick={() => setShowAfter((v) => !v)}
-          className="relative h-6 w-11 shrink-0 cursor-pointer rounded-full border transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
-          style={{
-            backgroundColor: showAfter ? ACCENT : "#d4d4d4",
-            borderColor: showAfter ? ACCENT : "#d4d4d4",
-          }}
-        >
-          <span
-            className="absolute top-1/2 h-5 w-5 -translate-y-1/2 rounded-full bg-white transition-all"
-            style={{ left: showAfter ? 22 : 2, boxShadow: "0 2px 6px rgba(16,24,40,0.18)" }}
-          />
-        </button>
+          <button
+            type="button"
+            onClick={() => setShowAfter(true)}
+            className={`text-sm font-medium transition-colors ${
+              showAfter ? "text-black" : "text-gray-400"
+            }`}
+          >
+            {afterLabel}
+          </button>
+        </div>
 
-        <button
-          type="button"
-          onClick={() => setShowAfter(true)}
-          className={`text-sm font-medium transition-colors ${
-            showAfter ? "text-black" : "text-gray-400"
-          }`}
-        >
-          {afterLabel}
-        </button>
+        {caption && (
+          <p className="mx-auto mt-5 max-w-[30rem] text-center text-sm italic text-gray-500">
+            {caption}
+          </p>
+        )}
       </div>
     </div>
   );

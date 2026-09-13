@@ -3,8 +3,10 @@ import { Link, useParams } from "react-router-dom";
 import { getProject, projects, type ContentBlock, type Credit } from "../data/projects";
 import AnnotatedImage from "../components/AnnotatedImage";
 import BeforeAfter from "../components/BeforeAfter";
+import CardCarousel from "../components/CardCarousel";
 import Nav from "../components/Nav";
 import ResearchQuotes from "../components/ResearchQuotes";
+import ScrollableImage from "../components/ScrollableImage";
 import WiggleText from "../components/WiggleText";
 import WorkGridCard from "../components/WorkGridCard";
 import { useNiiaChat } from "../context/useNiiaChat";
@@ -395,24 +397,40 @@ function Block({
       );
     case "image":
       return (
-        <div className="my-4">
-          <img
+        // `panel` puts the image on the same neutral field the before/after
+        // toggles use. Screenshots with no background of their own float on
+        // white and read as a different kind of asset from the ones that do.
+        <div
+          className={
+            block.panel
+              ? `my-8 px-4 py-8 sm:px-10 sm:py-10 ${
+                  block.panel === "dark" ? "bg-neutral-900" : "bg-neutral-100"
+                }`
+              : "my-4"
+          }
+        >
+          <ScrollableImage
             src={block.src}
             alt={block.alt}
-            className={`w-full cursor-none${block.maxWidth ? " mx-auto" : ""}`}
-            style={block.maxWidth ? { maxWidth: block.maxWidth } : undefined}
-            onClick={() => onImageClick(block.src)}
-            onMouseMove={zoomCursor.onMouseMove}
-            onMouseLeave={zoomCursor.onMouseLeave}
+            maxWidth={block.maxWidth}
+            viewportHeight={block.viewportHeight}
+            onImageClick={onImageClick}
+            zoomCursor={zoomCursor}
           />
           {block.caption && (
-            <p className="mt-2 text-sm italic text-gray-400">{block.caption}</p>
+            <p
+              className={`mt-2 text-sm italic ${
+                block.panel === "dark" ? "text-gray-400" : "text-gray-400"
+              }${block.panel ? " mx-auto max-w-[46rem]" : ""}`}
+            >
+              {block.caption}
+            </p>
           )}
         </div>
       );
     case "annotated-image":
       return (
-        <div className="my-8">
+        <div className="my-8 bg-neutral-100 px-4 py-8 sm:px-10 sm:py-10">
           <AnnotatedImage
             src={block.src}
             alt={block.alt}
@@ -420,9 +438,19 @@ function Block({
             maxWidth={block.maxWidth}
             viewportHeight={block.viewportHeight}
             onImageClick={onImageClick}
+            zoomCursor={zoomCursor}
           />
           {block.caption && (
             <p className="mt-4 text-sm italic text-gray-400">{block.caption}</p>
+          )}
+        </div>
+      );
+    case "card-carousel":
+      return (
+        <div className="my-8">
+          <CardCarousel images={block.images} alt={block.alt} height={block.height} />
+          {block.caption && (
+            <p className="mt-2 text-sm italic text-gray-400">{block.caption}</p>
           )}
         </div>
       );
@@ -440,12 +468,10 @@ function Block({
             afterLabel={block.afterLabel}
             maxWidth={block.maxWidth}
             viewportHeight={block.viewportHeight}
+            caption={block.caption}
             onImageClick={onImageClick}
             zoomCursor={zoomCursor}
           />
-          {block.caption && (
-            <p className="mt-2 text-sm italic text-gray-400">{block.caption}</p>
-          )}
         </div>
       );
     case "gallery":

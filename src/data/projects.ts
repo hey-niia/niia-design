@@ -12,7 +12,18 @@ export type ContentBlock =
    * phone-shaped assets: the column is wider than they are, so without it they
    * upscale past 1:1 (soft) and eat thousands of pixels of scroll.
    */
-  | { type: "image"; src: string; alt: string; caption?: string; maxWidth?: number }
+  | {
+      type: "image";
+      src: string;
+      alt: string;
+      caption?: string;
+      maxWidth?: number;
+      /** Sit the image on a panel — for screenshots with no background of
+       *  their own. "dark" for light-coloured assets that vanish on white. */
+      panel?: boolean | "dark";
+      /** Scroll the image inside a fixed-height window instead of running full height. */
+      viewportHeight?: number;
+    }
   /** Screenshot with interactive numbered markers — see AnnotatedImage. */
   | {
       type: "annotated-image";
@@ -23,6 +34,14 @@ export type ContentBlock =
       viewportHeight?: number;
       caption?: string;
       pins: { x: number; y: number; title: string; body: string }[];
+    }
+  /** Auto-scrolling strip of card screenshots; pauses on hover. */
+  | {
+      type: "card-carousel";
+      images: string[];
+      alt: string;
+      height?: number;
+      caption?: string;
     }
   /** Interview evidence: hoverable initials avatar, quote, takeaway. */
   | {
@@ -117,12 +136,25 @@ export const projects: Project[] = [
     //     window, so neither has per-surface cohort data yet
     //   - the progress-card iteration is argued from design reasoning; if usage
     //     data on those card variants exists, it belongs in the Solution section
+    //
+    // Two claims here are inherited from the original brief and have never been
+    // verified against a source: the documentary coverage and the clinical
+    // research expansion. Confirm both before this is used in an application.
+    //
+    // App of the Day: the app won it several times before this work (the store
+    // creative in 5.webp dates one to 2025) and was selected again after the
+    // redesign shipped — per Illia, who was there. "Repeat"/"again" is the
+    // accurate framing; don't flatten it to a single post-redesign award.
+    //
+    // Deliberately NOT claimed: the download-to-trial lift. April→May is
+    // confounded by an App Store feature that the product review itself credits
+    // for the install surge.
     slug: "ios-app",
     category: "iOS App, AI",
     name: "Wellness AI Companion",
     title: "Turning six neuroscience systems into one AI coaching experience",
     summary:
-      "Redesigned a neuroscience-backed wellness app from a complex, multi-feature product into a single guided AI coach — selected as Apple's App of the Day across multiple countries.",
+      "Rebuilt an Apple App of the Day: a neuroscience-backed wellness app, taken from a complex multi-feature product to a single guided AI coach. First-memory activation went from 39% to 60%.",
     client: "Client (NDA)",
     role: "Product design, design systems, UX research, App Store creative",
     team: "Product manager, three engineers, a co-founder, and neuroscience research advisors from university partnerships",
@@ -157,8 +189,8 @@ export const projects: Project[] = [
       },
       {
         metric: "Recognition",
-        description: "After the redesign shipped,",
-        result: "the app was selected as Apple's App of the Day across multiple countries.",
+        description: "A repeat Apple App of the Day —",
+        result: "selected again, across multiple countries, after the redesign shipped.",
       },
     ],
     content: [
@@ -211,7 +243,7 @@ export const projects: Project[] = [
             name: "Alena S.",
             context: "London · interviewed on build 2.9.0, May 2026",
             quote:
-              "There is nothing tangible, and this is a very weird experience to pay for.",
+              "There is nothing tangible, and this is like a very quite weird experience to pay for.",
             takeaway:
               "She happily paid £30 for a paper journal but balked at the subscription. Understanding the science turned out to be no substitute for feeling the product work on you — “If I feel that I'm getting a real transformation in my behavior, I would pay for it.”",
           },
@@ -302,11 +334,12 @@ export const projects: Project[] = [
       },
       {
         type: "paragraph",
-        text: "We ran a workshop: me, the PM, the iOS engineers, the founder who owns the neuroscience, and the community lead who reads every support ticket. We decided to make the app answer instead of display. You open it and land in a conversation. The coach asks how your day went, and your answer decides what comes next. The science arrives when it is relevant, instead of all at once on a dashboard.",
+        text: "We ran a workshop: me, the PM, the iOS engineers, and the co-founder. We decided to make the app answer instead of display. You open it and land in a conversation. The coach asks how your day went, and your answer decides what comes next. The science arrives when it is relevant, instead of all at once on a dashboard.",
       },
       {
         type: "image",
         src: "/projects/ios-app/solution-exploration.webp",
+        panel: true,
         alt: "A working canvas of chat-screen explorations in dark UI, with reference screens from other wellbeing apps along the bottom",
         caption:
           "The canvas partway through. Chat directions across the top, apps we looked at along the bottom. Most of this didn't survive.",
@@ -326,6 +359,7 @@ export const projects: Project[] = [
       {
         type: "image",
         src: "/projects/ios-app/solution-drawer.webp",
+        panel: true,
         alt: "The new navigation drawer showing Coaching, You, Team and Memories, with Settings at the bottom",
         maxWidth: 360,
         caption:
@@ -344,6 +378,7 @@ export const projects: Project[] = [
       {
         type: "image",
         src: "/projects/ios-app/solution-card-iterations.webp",
+        panel: true,
         alt: "Four progress card variants — two praise-led with percentage bars, two naming the Happiness Report with a five-segment counter — next to the expanded progress sheet and its empty state",
         caption:
           "Top row: praise over a percentage. Bottom row: a named destination over a five-segment counter, so “3/5” tells you exactly how many memories are left. The version that shipped is the one that answers “and then what?”",
@@ -355,7 +390,7 @@ export const projects: Project[] = [
 
       {
         type: "paragraph",
-        text: "I prototyped the shortlisted directions as working code rather than static frames, so I could feel an interaction before asking an engineer to build it. Most of what I learned that way was about timing, which a Figma prototype will not tell you.",
+        text: "I prototyped the shortlisted directions as working code rather than static frames, so I could feel an interaction before asking an engineer to build it.",
       },
 
       { type: "heading", text: "What we cut" },
@@ -380,7 +415,7 @@ export const projects: Project[] = [
       { type: "section", id: "final-design", title: "Final design" },
       {
         type: "paragraph",
-        text: "Four surfaces shipped. The coach and the drawer went live on 7 May 2026, and those are what the numbers above measure. The level system and the You page landed after that window, so neither has cohort data yet.",
+        text: "Four surfaces. The coach and the drawer went live on 7 May 2026, and those are what the numbers above measure. The level system and the You page were designed after that window and aren't covered by it.",
       },
 
       { type: "heading", text: "1. What you see when you open the app" },
@@ -420,6 +455,7 @@ export const projects: Project[] = [
       {
         type: "image",
         src: "/projects/ios-app/final-coach-tagging.webp",
+        panel: true,
         alt: "The coach confirming a saved memory and naming which neurotransmitters it affected, with Add memory and Recall memories cards",
         maxWidth: 380,
         caption:
@@ -457,6 +493,8 @@ export const projects: Project[] = [
       {
         type: "image",
         src: "/projects/ios-app/final-level.webp",
+        panel: true,
+        viewportHeight: 620,
         alt: "Level 4 Practitioner screen showing progress toward Level 5 broken into total memories, per-neurotransmitter counts, peak memories, balanced weeks and joyalties sent",
         maxWidth: 380,
         caption:
@@ -466,26 +504,36 @@ export const projects: Project[] = [
       { type: "heading", text: "4. Optic, the design system" },
       {
         type: "paragraph",
-        text: "None of this runs on the old design system. That one grew around the four-tab app and carried its assumptions, so rather than bend it I built a new one. Optic is small enough to hold only what the chat-first product needs: about 64 primitive colours and 34 semantic aliases, nine spacing values, three radii, eight text styles.",
+        text: "None of this runs on the old design system. That one grew around the four-tab app and carried its assumptions, so rather than bend it I built a new one. Optic holds only what the chat-first product needs — about 64 primitive colours and 34 semantic aliases, nine spacing values, three radii, eight text styles — and ran alongside the old system, so nothing needed a big rewrite.",
       },
       {
         type: "paragraph",
-        text: "The team was shipping fast and much of the implementation was going to be AI-assisted, which changed who I was designing the handoff for: not only an engineer reading a spec, but a model reading the design file. So Optic has one rule. Every name in Figma survives the trip into code unchanged. `levels/level-2` becomes `Color.level2`. `spacing/32` becomes `CGFloat.spacing32`. Drop the folder, camel-case the rest, and that is the whole mapping.",
+        text: "Much of the implementation was going to be AI-assisted, which changed who I was designing the handoff for: not only an engineer reading a spec, but a model reading the design file. So Optic has one rule — every name survives the trip into code unchanged. `levels/level-2` becomes `Color.level2`, `spacing/32` becomes `CGFloat.spacing32`. An agent reads a token name and already knows the constant to write, so there's no handoff doc and no naming table to keep in sync.",
       },
       {
         type: "paragraph",
-        text: "There's no translation step left. An agent reads the design context straight out of Figma, sees a token name, and already knows the constant to write — no handoff doc, no naming table to keep in sync. A script pulls Figma's own export and rewrites the code files in place, so the two can't drift. The hard part was never getting a model to produce a screen; it's making the system underneath legible enough that what it produces is right.",
+        text: "The cards use slots rather than variants. One insight card has two open regions, one above the text and one for the buttons, and whatever you drop in decides what the card is: a photo strip makes it a memory prompt, a progress meter makes it the weekly report, two image tiles make it a science tour.",
       },
       {
-        type: "paragraph",
-        text: "Optic and the old system ran side by side. New screens used Optic, old ones moved over when somebody touched them, so nothing needed a big rewrite.",
+        type: "card-carousel",
+        images: [
+          "/projects/ios-app/cards/card1.webp",
+          "/projects/ios-app/cards/card2.webp",
+          "/projects/ios-app/cards/card3.webp",
+          "/projects/ios-app/cards/card4.webp",
+          "/projects/ios-app/cards/card5.webp",
+          "/projects/ios-app/cards/card6.webp",
+        ],
+        alt: "Six instances of the same insight card, each filled differently: a memory-recall prompt with a photo strip, two weekly-report states with progress meters, two report cards with photo strips, and a science tour with image tiles",
+        caption:
+          "Six cards, one component. Everything that differs is slot content, so a new kind of card costs a fill rather than a build. Hover to stop the strip.",
       },
       {
         type: "image",
-        src: "/projects/ios-app/4.webp",
-        alt: "Design system token table showing semantic background, text, and per-level color tokens",
+        src: "/projects/ios-app/final-token-mapping.webp",
+        alt: "A zoomed section of the token sheet: each level colour listed with its hex value and the primitive alias it points at, such as levels/level-2 mapping to colors/purple/100",
         caption:
-          "Token names map from Figma variable to Swift constant by one rule, so implementation needs no handoff document — for an engineer or a model.",
+          "The Figma side of the mapping. Each semantic token points at a primitive, and the name it carries is the name the code uses.",
       },
 
       { type: "heading", text: "Also shipped: the store listing and the icon set" },
@@ -496,8 +544,10 @@ export const projects: Project[] = [
       {
         type: "image",
         src: "/projects/ios-app/5.webp",
-        alt: "App Store marketing screenshots for the wellness app, including Apple's App of the Day badge",
-        caption: "This set is part of what got the app selected as Apple's App of the Day.",
+        panel: true,
+        alt: "App Store marketing screenshots for the wellness app",
+        caption:
+          "Three screens to carry the same six-system science past someone who is scrolling.",
       },
 
       {
@@ -506,7 +556,7 @@ export const projects: Project[] = [
       },
       {
         type: "image",
-        src: "/projects/ios-app/6.webp",
+        src: "/projects/ios-app/final-training-cards.webp",
         alt: "Six training-dimension cards — endurance, flexibility, strength, coordination, speed, balance — with their icon set",
         caption:
           "Each neurotransmitter system got a physical-fitness analogy people already understand, and an icon distinct enough to read at a glance in the nav bar.",
@@ -515,7 +565,7 @@ export const projects: Project[] = [
       { type: "section", id: "results", title: "Results" },
       {
         type: "paragraph",
-        text: "The AI coach shipped on 7 May 2026. These are the cohorts either side of that date: people who started before it existed, against people who started after.",
+        text: "The AI coach shipped on 7 May 2026. These are the cohorts either side of that date: people who started before it existed, against people who started after. Both are drawn from the same in-app analytics, so they measure the change rather than the month's marketing.",
       },
       {
         // Figures from the May 2026 internal product review. Activation is
@@ -526,7 +576,6 @@ export const projects: Project[] = [
         stats: [
           { value: "39% → 60%", label: "Trial starters who logged a first memory" },
           { value: "28% → 49%", label: "Week-one retention, paid subscribers" },
-          { value: "9% → 12.7%", label: "Download-to-trial conversion" },
         ],
       },
       {
@@ -572,18 +621,9 @@ export const projects: Project[] = [
         text: "Both fed the next round of work: the mood check-in, the level system, and the progress cards that tell you where you are without being asked.",
       },
 
-      { type: "heading", text: "Beyond the numbers" },
-      {
-        type: "numbered-list",
-        items: [
-          "Selected as Apple's App of the Day across multiple countries.",
-          "Featured in a documentary series on the science of happiness.",
-          "Now expanding into clinical research applications.",
-        ],
-      },
       {
         type: "paragraph",
-        text: "The redesign fit six systems onto one screen without losing the science. It held up well enough for a documentary, and now for clinical research.",
+        text: "The science underneath went on being taken seriously either way: the product has been covered in a documentary series on happiness, and the same model is moving into clinical research settings.",
       },
     ],
   },

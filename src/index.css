@@ -134,6 +134,21 @@
   animation: niia-pill-in 0.2s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
+@keyframes niia-tooltip-in {
+  from {
+    opacity: 0;
+    transform: translateX(1rem) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(1rem) scale(1);
+  }
+}
+
+.niia-tooltip-in {
+  animation: niia-tooltip-in 0.15s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
 @keyframes niia-dot-bounce {
   0%,
   80%,
@@ -155,8 +170,20 @@
   .niia-sidebar,
   .niia-fade-in-up,
   .niia-pill-in,
+  .niia-tooltip-in,
   .niia-typing-dot {
     animation: none !important;
     transition: none !important;
+  }
+}
+
+/* Seamless marquee for CardCarousel: the track holds the set twice, so moving
+   it exactly half its width lands on an identical frame. */
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
   }
 }
