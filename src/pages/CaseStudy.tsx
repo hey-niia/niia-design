@@ -641,7 +641,7 @@ export default function CaseStudy() {
 
           <header className="border-b border-gray-200 pb-8">
             <p className="mb-4 font-mono text-xs tracking-widest text-gray-400 uppercase">
-              {project.client}
+              {project.name} · {project.client}
             </p>
             <h1 className="mb-4 text-3xl font-medium lg:text-5xl">{project.title}</h1>
             {project.summary && <p className="mt-4 max-w-2xl">{project.summary}</p>}

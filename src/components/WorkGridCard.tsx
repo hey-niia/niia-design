@@ -9,7 +9,7 @@ export default function WorkGridCard({
   /** Override the title's text size — e.g. a smaller size for a denser grid. */
   titleClassName?: string;
 }) {
-  const { slug, title, client, lastUpdated, screenshots } = project;
+  const { slug, name, title, client, lastUpdated, screenshots } = project;
   const cover = screenshots[0];
 
   return (
@@ -18,7 +18,12 @@ export default function WorkGridCard({
         <img src={cover.src} alt={cover.alt} className={slug === "ios-app" ? "w-4/5" : "w-full"} />
       </div>
       <div className="mt-3 flex items-baseline justify-between gap-4">
-        <p className={titleClassName}>{title}</p>
+        <div>
+          <p className="font-mono text-[11px] tracking-widest text-neutral-400 uppercase">
+            {name}
+          </p>
+          <p className={titleClassName}>{title}</p>
+        </div>
         <p className="shrink-0 font-mono text-xs tracking-widest text-neutral-400 uppercase">
           {client} · {lastUpdated}
         </p>
