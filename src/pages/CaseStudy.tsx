@@ -99,20 +99,20 @@ function Lightbox({
   // Scale the image to its real box size (not a CSS transform) so the
   // overflow-auto container actually gets scrollable content once zoomed —
   // a transform only repaints, it never grows the scrollable area.
-  const fitScale = natural
-    ? Math.min(
-        1,
-        (viewport.w - LIGHTBOX_PADDING * 2) / natural.w,
-        (viewport.h - LIGHTBOX_PADDING * 2 - LIGHTBOX_CONTROLS_SPACE) / natural.h,
-      )
-    : 1;
+  //
+  // Fit is by width only, capped so we never upscale past the real
+  // resolution (which would just pixelate it). A tall screenshot — a
+  // full-page capture, say — stays readable at full width and scrolls
+  // vertically instead of shrinking to fit its whole height on screen.
+  const fitScale = natural ? Math.min(1, (viewport.w - LIGHTBOX_PADDING * 2) / natural.w) : 1;
   const scale = fitScale * zoom;
-  const zoomedIn = zoom > ZOOM_MIN;
+  const availableHeight = viewport.h - LIGHTBOX_PADDING * 2 - LIGHTBOX_CONTROLS_SPACE;
+  const overflows = natural ? natural.h * scale > availableHeight : false;
 
   return (
     <div className="fixed inset-0 z-50 overflow-auto bg-black/90" onClick={onClose}>
       <div
-        className={`flex min-h-full p-8 ${zoomedIn ? "items-start justify-start" : "items-center justify-center"}`}
+        className={`flex min-h-full p-8 ${overflows ? "items-start justify-start" : "items-center justify-center"}`}
         style={{ paddingBottom: LIGHTBOX_CONTROLS_SPACE }}
       >
         <img
@@ -389,11 +389,8 @@ export default function CaseStudy() {
       <Nav />
       <div className="mx-auto max-w-4xl">
         <header className="border-b pb-8">
-          <Link to="/" className="underline">
-            <WiggleText>← Back to work</WiggleText>
-          </Link>
           <p className="my-2">{project.client}</p>
-          <h1>{project.title}</h1>
+          <h1 className="mt-2 mb-2 text-3xl font-medium lg:text-5xl">{project.title}</h1>
           {project.summary && <p className="mt-2 max-w-2xl italic">{project.summary}</p>}
         </header>
 
@@ -498,21 +495,17 @@ export default function CaseStudy() {
               <WiggleText>Let's design it!</WiggleText>
             </a>
           </p>
-          <p className="my-2">
-            <Link to="/" className="underline">
-              <WiggleText>← Back to work</WiggleText>
-            </Link>
-          </p>
         </footer>
       </div>
 
       <span
         aria-hidden
-        className={`pointer-events-none fixed z-50 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#e65f2e] px-4 py-2 text-sm font-medium text-white transition-[transform,opacity] duration-150 ease-out ${
+        className={`pointer-events-none fixed z-50 flex -translate-x-1/2 -translate-y-1/2 items-center gap-1.5 rounded-full bg-[#e65f2e] px-4 py-2 text-sm font-medium text-white transition-[transform,opacity] duration-150 ease-out ${
           cursorLabel.visible ? "scale-100 opacity-100" : "scale-75 opacity-0"
         }`}
         style={{ left: cursorLabel.x, top: cursorLabel.y }}
       >
+        <span className="text-base leading-none">+</span>
         Click to zoom
       </span>
 
