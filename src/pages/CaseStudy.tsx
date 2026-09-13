@@ -398,7 +398,10 @@ export default function CaseStudy() {
           {hasToc && (
             <aside className="hidden min-[1360px]:absolute min-[1360px]:inset-y-0 min-[1360px]:right-full min-[1360px]:mr-20 min-[1360px]:block min-[1360px]:w-32">
               <div className="min-[1360px]:sticky min-[1360px]:top-24">
-                <Link to="/" className="mb-6 block text-sm text-gray-400">
+                <Link
+                  to="/"
+                  className="mb-6 block text-sm text-gray-400 hover:text-[#e65f2e]"
+                >
                   <WiggleText>← Back</WiggleText>
                 </Link>
                 <nav>
@@ -407,7 +410,7 @@ export default function CaseStudy() {
                       <li key={item.id}>
                         <a
                           href={`#${item.id}`}
-                          className={`text-sm ${
+                          className={`text-sm hover:text-[#e65f2e] ${
                             activeId === item.id ? "font-medium text-black" : "text-gray-400"
                           }`}
                         >
