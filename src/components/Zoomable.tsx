@@ -10,6 +10,7 @@ export default function Zoomable({
   className?: string;
 }) {
   const [open, setOpen] = useState(false);
+  const [naturalWidth, setNaturalWidth] = useState<number | null>(null);
 
   useEffect(() => {
     if (!open) return;
@@ -26,7 +27,13 @@ export default function Zoomable({
         src={src}
         alt={alt}
         onClick={() => setOpen(true)}
+        onLoad={(e) => setNaturalWidth(e.currentTarget.naturalWidth)}
         className={`cursor-zoom-in ${className ?? ""}`}
+        // `className` typically passes a fill-width utility (e.g. `w-full`),
+        // which on a page with no max-width wrapper stretches to the full
+        // viewport — past the image's own resolution on a wide screen,
+        // which upscales and visibly softens it. This caps it at 1:1.
+        style={naturalWidth ? { maxWidth: naturalWidth } : undefined}
       />
       {open && (
         <div

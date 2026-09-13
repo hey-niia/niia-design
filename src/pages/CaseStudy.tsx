@@ -78,7 +78,9 @@ function Lightbox({
   const { src, alt } = images[index];
   const [natural, setNatural] = useState<{ w: number; h: number } | null>(null);
   // Absolute scale, not a multiplier — 1 means the image's real pixel size.
-  // Null until the image loads, at which point it's set to fitWidthScale.
+  // Null means "use the default" (native size), so it re-derives correctly
+  // as soon as `natural` and `viewport` are known, without needing an effect
+  // to go set it.
   const [userScale, setUserScale] = useState<number | null>(null);
   const [viewport, setViewport] = useState({ w: window.innerWidth, h: window.innerHeight });
   const [pillOnLight, setPillOnLight] = useState(false);
@@ -92,7 +94,7 @@ function Lightbox({
     return () => window.removeEventListener("resize", onResize);
   }, []);
 
-  // A fresh image needs its own measurements and starts back at fit-to-screen.
+  // A fresh image needs its own measurements and starts back at native size.
   useEffect(() => {
     setUserScale(null);
     setNatural(null);
@@ -113,23 +115,19 @@ function Lightbox({
   // a transform only repaints, it never grows the scrollable area.
   const availableWidth = viewport.w - LIGHTBOX_PADDING * 2;
   const availableHeight = viewport.h - LIGHTBOX_PADDING * 2 - LIGHTBOX_CONTROLS_SPACE;
-  // Default view: fit by width only, capped so we never upscale past the
-  // real resolution. A tall screenshot — a full-page capture, say — stays
-  // readable at full width and scrolls vertically instead of shrinking to
-  // fit its whole height on screen.
-  const fitWidthScale = natural ? Math.min(1, availableWidth / natural.w) : 1;
-  // The smallest useful scale: the whole image visible at once, no
-  // scrolling. Below fitWidthScale for anything tall enough (or, as here,
-  // just proportioned awkwardly for the viewport) to still overflow the
-  // height even at fit-by-width — zooming out this far is what lets you see
-  // all of it in one glance.
-  const minScale = natural
-    ? Math.min(fitWidthScale, availableHeight / natural.h)
-    : 1;
-  // Never upscale past native resolution — that just pixelates it.
+  // Default view: the image's true native size. Upscaling past that just
+  // pixelates it, so that's also the ceiling — there's nowhere to zoom in
+  // to, only out.
   const maxScale = 1;
+  // The smallest useful scale: the whole image visible at once, no
+  // scrolling — for a screenshot too big or too tall to fit the viewport at
+  // native size, zooming out this far is what lets you see all of it in one
+  // glance.
+  const minScale = natural
+    ? Math.min(1, availableWidth / natural.w, availableHeight / natural.h)
+    : 1;
   const canZoom = maxScale > minScale + 0.001;
-  const scale = Math.min(maxScale, Math.max(minScale, userScale ?? fitWidthScale));
+  const scale = Math.min(maxScale, Math.max(minScale, userScale ?? maxScale));
   const overflowsHorizontally = natural ? natural.w * scale > availableWidth + 0.5 : false;
   const overflowsVertically = natural ? natural.h * scale > availableHeight + 0.5 : false;
 
