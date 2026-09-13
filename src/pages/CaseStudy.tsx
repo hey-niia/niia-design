@@ -735,7 +735,7 @@ export default function CaseStudy() {
             <p className="mb-6 text-sm tracking-wide text-gray-400 uppercase">
               More case studies
             </p>
-            <div className="columns-1 gap-8 sm:columns-2">
+            <div className="grid grid-cols-1 items-start gap-8 sm:grid-cols-2">
               {moreProjects.map((p) => (
                 <WorkGridCard key={p.slug} project={p} titleClassName="text-sm" />
               ))}

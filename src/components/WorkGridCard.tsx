@@ -13,7 +13,7 @@ export default function WorkGridCard({
   const cover = screenshots[0];
 
   return (
-    <Link to={`/work/${slug}`} className="mb-8 block break-inside-avoid">
+    <Link to={`/work/${slug}`} className="block">
       <div className={slug === "ios-app" ? "flex justify-center bg-neutral-100 p-10" : undefined}>
         <img src={cover.src} alt={cover.alt} className={slug === "ios-app" ? "w-4/5" : "w-full"} />
       </div>

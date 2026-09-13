@@ -83,7 +83,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section id="work" className="columns-1 gap-8 sm:columns-2">
+      <section id="work" className="grid grid-cols-1 items-start gap-8 sm:grid-cols-2">
         {projects.map((project) => (
           <WorkGridCard key={project.slug} project={project} />
         ))}

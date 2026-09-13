@@ -151,7 +151,7 @@ export const projects: Project[] = [
     // for the install surge.
     slug: "ios-app",
     category: "iOS App, AI",
-    name: "Wellness AI Companion",
+    name: "Popular Wellness App's AI Pivot",
     title: "Turning six neuroscience systems into one AI coaching experience",
     summary:
       "Rebuilt an Apple App of the Day: a neuroscience-backed wellness app, taken from a complex multi-feature product to a single guided AI coach. First-memory activation went from 39% to 60%.",
@@ -752,80 +752,6 @@ export const projects: Project[] = [
     ],
   },
   {
-    // Rewritten against case-study.md. Source material here is much thinner than
-    // ios-app/enterprise-dashboard: no documented research process, named frictions,
-    // launch metrics, or client quote — only the two original descriptive paragraphs.
-    // The section structure below is applied honestly on top of that; nothing beyond
-    // what was already written is invented. See TODO near Results.
-    slug: "digitalscreen",
-    category: "Website",
-    name: "Digital Screen Co.",
-    title: "Corporate website for a digital signage company",
-    summary:
-      "Narrative corporate website for a digital signage company, built to explain a technical product simply.",
-    client: "Client (NDA)",
-    role: "UI/UX design, information architecture, visual identity",
-    team: "Founder, Operations team",
-    duration: "1 month",
-    tools: ["Figma"],
-    screenshots: [
-      { src: "/projects/digitalscreen.png", alt: "Digital signage company website" },
-      {
-        src: "/projects/digitalscreen/1.png",
-        alt: "Digital signage company website, full page",
-        tall: true,
-      },
-    ],
-    lastUpdated: "Nov, 2025",
-    content: [
-      { type: "section", id: "problem", title: "Problem" },
-      {
-        type: "paragraph",
-        text: "The client needed a website that could explain a technical product — digital signage technology — to potential customers, alongside its services and team. There was nothing to build on: no site, no visual identity yet.",
-      },
-      {
-        type: "paragraph",
-        text: "The brief was mostly about credibility: give a technical product a modern, trustworthy web presence that communicates innovation and reliability, not just a spec sheet.",
-      },
-
-      { type: "section", id: "solution", title: "Solution" },
-      {
-        type: "paragraph",
-        text: "Starting from zero, I built the information architecture, layout system, and visual identity together, then worked with the founder and operations team to refine the messaging and user flow.",
-      },
-      {
-        type: "list",
-        items: [
-          "Information architecture and layout system built to hold both marketing and technical content.",
-          "A visual identity designed to read as modern and credible without going generic.",
-          "Modular, responsive components so desktop and mobile stayed consistent instead of diverging.",
-        ],
-      },
-
-      { type: "section", id: "final-design", title: "Final design" },
-      { type: "heading", text: "One narrative site, from hero to team" },
-      {
-        type: "paragraph",
-        text: "The site walks a visitor from what the product does, through services, to the team behind it — a single narrative page rather than a stack of disconnected sections.",
-      },
-      {
-        type: "image",
-        src: "/projects/digitalscreen/1.png",
-        alt: "Digital signage company website, full page",
-        caption: "One scrolling narrative, not a set of disconnected marketing sections.",
-      },
-
-      { type: "section", id: "results", title: "Results" },
-      {
-        type: "paragraph",
-        text: "In about a month, working solo, this took the client from no web presence to a full, responsive site that explains a technical product in plain language.",
-      },
-      // TODO: no launch metrics (traffic, lead volume) or client quote are documented
-      // for this project — add them here if/when available, per case-study.md's
-      // Results section. Don't invent numbers to fill the gap.
-    ],
-  },
-  {
     // Rewritten against case-study.md. Same caveat as digitalscreen: no documented
     // research process, named frictions, usage metrics, or quote exist for this
     // project — only the two original descriptive paragraphs. Structure is applied
@@ -908,6 +834,80 @@ export const projects: Project[] = [
       },
       // TODO: no usage metrics, launch numbers, or a client/user quote are documented
       // for this project yet — add them here if/when available, per case-study.md's
+      // Results section. Don't invent numbers to fill the gap.
+    ],
+  },
+  {
+    // Rewritten against case-study.md. Source material here is much thinner than
+    // ios-app/enterprise-dashboard: no documented research process, named frictions,
+    // launch metrics, or client quote — only the two original descriptive paragraphs.
+    // The section structure below is applied honestly on top of that; nothing beyond
+    // what was already written is invented. See TODO near Results.
+    slug: "digitalscreen",
+    category: "Website",
+    name: "Digital Screen Co.",
+    title: "Corporate website for a digital signage company",
+    summary:
+      "Narrative corporate website for a digital signage company, built to explain a technical product simply.",
+    client: "Client (NDA)",
+    role: "UI/UX design, information architecture, visual identity",
+    team: "Founder, Operations team",
+    duration: "1 month",
+    tools: ["Figma"],
+    screenshots: [
+      { src: "/projects/digitalscreen.png", alt: "Digital signage company website" },
+      {
+        src: "/projects/digitalscreen/1.png",
+        alt: "Digital signage company website, full page",
+        tall: true,
+      },
+    ],
+    lastUpdated: "Nov, 2025",
+    content: [
+      { type: "section", id: "problem", title: "Problem" },
+      {
+        type: "paragraph",
+        text: "The client needed a website that could explain a technical product — digital signage technology — to potential customers, alongside its services and team. There was nothing to build on: no site, no visual identity yet.",
+      },
+      {
+        type: "paragraph",
+        text: "The brief was mostly about credibility: give a technical product a modern, trustworthy web presence that communicates innovation and reliability, not just a spec sheet.",
+      },
+
+      { type: "section", id: "solution", title: "Solution" },
+      {
+        type: "paragraph",
+        text: "Starting from zero, I built the information architecture, layout system, and visual identity together, then worked with the founder and operations team to refine the messaging and user flow.",
+      },
+      {
+        type: "list",
+        items: [
+          "Information architecture and layout system built to hold both marketing and technical content.",
+          "A visual identity designed to read as modern and credible without going generic.",
+          "Modular, responsive components so desktop and mobile stayed consistent instead of diverging.",
+        ],
+      },
+
+      { type: "section", id: "final-design", title: "Final design" },
+      { type: "heading", text: "One narrative site, from hero to team" },
+      {
+        type: "paragraph",
+        text: "The site walks a visitor from what the product does, through services, to the team behind it — a single narrative page rather than a stack of disconnected sections.",
+      },
+      {
+        type: "image",
+        src: "/projects/digitalscreen/1.png",
+        alt: "Digital signage company website, full page",
+        caption: "One scrolling narrative, not a set of disconnected marketing sections.",
+      },
+
+      { type: "section", id: "results", title: "Results" },
+      {
+        type: "paragraph",
+        text: "In about a month, working solo, this took the client from no web presence to a full, responsive site that explains a technical product in plain language.",
+      },
+      // TODO: no launch metrics (traffic, lead volume) or client quote are documented
+      // for this project — add them here if/when available, per case-study.md's
       // Results section. Don't invent numbers to fill the gap.
     ],
   },
