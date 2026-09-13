@@ -14,6 +14,8 @@ export interface NiiaChatContextValue {
   isTyping: boolean;
   /** Selection staged as context for the next question, shown as a dismissible chip. */
   pendingQuote: string | null;
+  /** Suggested questions to offer right now — the welcome set, then a fresh blend after each answer. */
+  suggestions: string[];
   openWelcome: () => void;
   openWithQuote: (quote: string) => void;
   close: () => void;

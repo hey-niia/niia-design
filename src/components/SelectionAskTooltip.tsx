@@ -7,7 +7,7 @@ interface Pill {
   left: number;
 }
 
-/** Floating "Ask NiiaLLM" pill that appears above any text the visitor selects
+/** Floating "Ask Niia AI" pill that appears above any text the visitor selects
  * on the page, mirroring rachelchen.tech's select-to-ask affordance. */
 export default function SelectionAskTooltip() {
   const { openWithQuote } = useNiiaChat();
@@ -71,7 +71,7 @@ export default function SelectionAskTooltip() {
         setPill(null);
       }}
     >
-      <span aria-hidden>✦</span> Ask NiiaLLM
+      <span aria-hidden>✦</span> Ask Niia AI
     </button>
   );
 }

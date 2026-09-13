@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useRef, useState, type ReactNode } from "react";
-import { getCannedAnswer } from "../lib/niiaLLM";
+import { getCannedAnswer, pickFollowUps, SUGGESTED_QUESTIONS } from "../lib/niiaLLM";
 import { NiiaChatContext, type ChatMessage } from "./chatContext";
 
 export function NiiaChatProvider({ children }: { children: ReactNode }) {
@@ -7,7 +7,11 @@ export function NiiaChatProvider({ children }: { children: ReactNode }) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [pendingQuote, setPendingQuote] = useState<string | null>(null);
   const [isTyping, setIsTyping] = useState(false);
+  const [suggestions, setSuggestions] = useState<string[]>(SUGGESTED_QUESTIONS);
   const typingTimeout = useRef<number | null>(null);
+  // Every suggestion ever shown (welcome set + every follow-up batch), so a
+  // visitor never sees the same suggested question twice in one session.
+  const shownSuggestions = useRef<Set<string>>(new Set(SUGGESTED_QUESTIONS));
 
   const clearTypingTimeout = useCallback(() => {
     if (typingTimeout.current !== null) {
@@ -32,6 +36,8 @@ export function NiiaChatProvider({ children }: { children: ReactNode }) {
     setIsTyping(false);
     setMessages([]);
     setPendingQuote(null);
+    setSuggestions(SUGGESTED_QUESTIONS);
+    shownSuggestions.current = new Set(SUGGESTED_QUESTIONS);
   }, [clearTypingTimeout]);
 
   const clearPendingQuote = useCallback(() => setPendingQuote(null), []);
@@ -43,6 +49,7 @@ export function NiiaChatProvider({ children }: { children: ReactNode }) {
       const quote = pendingQuote ?? undefined;
       setMessages((prev) => [...prev, { role: "user", text: trimmed, quote }]);
       setPendingQuote(null);
+      setSuggestions([]);
 
       // A brief "typing" beat before the canned answer lands — makes the
       // reveal feel considered rather than instant, since it's not a real
@@ -56,6 +63,10 @@ export function NiiaChatProvider({ children }: { children: ReactNode }) {
           setMessages((prev) => [...prev, { role: "bot", text: answer }]);
           setIsTyping(false);
           typingTimeout.current = null;
+
+          const nextSuggestions = pickFollowUps(shownSuggestions.current);
+          nextSuggestions.forEach((q) => shownSuggestions.current.add(q));
+          setSuggestions(nextSuggestions);
         },
         500 + Math.random() * 400,
       );
@@ -69,6 +80,7 @@ export function NiiaChatProvider({ children }: { children: ReactNode }) {
       messages,
       isTyping,
       pendingQuote,
+      suggestions,
       openWelcome,
       openWithQuote,
       close,
@@ -81,6 +93,7 @@ export function NiiaChatProvider({ children }: { children: ReactNode }) {
       messages,
       isTyping,
       pendingQuote,
+      suggestions,
       openWelcome,
       openWithQuote,
       close,
