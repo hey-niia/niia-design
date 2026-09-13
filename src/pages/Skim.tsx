@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import Nav from "../components/Nav";
 import WiggleText from "../components/WiggleText";
+import Zoomable from "../components/Zoomable";
 
 export default function Skim() {
   return (
@@ -19,7 +20,7 @@ export default function Skim() {
         </p>
 
         <div className="mb-12 bg-black">
-          <img
+          <Zoomable
             src="/experiments/skim-cover.png"
             alt="Skim showing a Pitchfork headline digested into a main idea and numbered key points"
             className="w-full"

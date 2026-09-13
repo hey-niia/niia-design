@@ -25,11 +25,11 @@ export default function AIExperiments() {
                 {exp.image &&
                   (exp.link ? (
                     exp.link.startsWith("/") ? (
-                      <Link to={exp.link} className="block bg-black">
+                      <Link to={exp.link} className="block h-56 bg-black lg:h-72">
                         <img
                           src={exp.image}
                           alt={`${exp.name} screenshot`}
-                          className="w-full"
+                          className="h-full w-full object-cover"
                         />
                       </Link>
                     ) : (
@@ -37,18 +37,22 @@ export default function AIExperiments() {
                         href={exp.link}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="block bg-black"
+                        className="block h-56 bg-black lg:h-72"
                       >
                         <img
                           src={exp.image}
                           alt={`${exp.name} screenshot`}
-                          className="w-full"
+                          className="h-full w-full object-cover"
                         />
                       </a>
                     )
                   ) : (
-                    <div className="bg-black">
-                      <img src={exp.image} alt={`${exp.name} screenshot`} className="w-full" />
+                    <div className="h-56 bg-black lg:h-72">
+                      <img
+                        src={exp.image}
+                        alt={`${exp.name} screenshot`}
+                        className="h-full w-full object-cover"
+                      />
                     </div>
                   ))}
                 <div className="p-4">

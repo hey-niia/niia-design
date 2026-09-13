@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import Nav from "../components/Nav";
 import WiggleText from "../components/WiggleText";
+import Zoomable from "../components/Zoomable";
 
 export default function CatEight() {
   return (
@@ -20,7 +21,7 @@ export default function CatEight() {
         </p>
 
         <div className="mb-12 bg-black">
-          <img
+          <Zoomable
             src="/experiments/08-cover.png"
             alt="08, Biscuit, Ash, and Mocha wandering the screen with the tray menu open, showing Number of cats, Show every, and Stay on screen"
             className="w-full"

@@ -1,4 +1,189 @@
-# Design System — niia.design (v3)
+# Design System — niia.design (v7)
+
+**v7 supersedes several of v6's specifics below** (Experience layout, Selected Work layout, hover treatment, typeface) while keeping v6's overall header/About shape and brutalist spirit. Read "v7" first — it's the current, live-in-code spec. Treat v6 as the record of how we got here (stefanietam.com reference, the border-bottom hover idea, the Inter typeface call) rather than the current truth; v3–v5 remain historical below that.
+
+## v7 — Rachel Chen–inspired Experience/Work layout, Geist fonts, color hover
+
+Driven by a client-supplied reference, **[rachelchen.tech](https://www.rachelchen.tech/)** (screenshots of her Experience table and Selected Work grid, not live-inspected via tooling), plus two follow-up decisions (typeface, hover color) made independently of that reference. This section documents what's actually built in `Home.tsx` / `Nav.tsx` / `WorkGridCard.tsx` / `index.css` today, superseding the parts of v6 below that don't match.
+
+**Header (`Nav.tsx`) — matches v6's intent, one detail resolved.** Single sticky row (`sticky top-0`, not the "non-sticky" v6 assumed), no bottom border/divider. Left: `Niia Bieliavtseva` (bold, plain sans — Geist Mono was tried for the name and reverted, "revert back to where it was") followed inline by `Senior Product Designer, AI Design Engineer` (plain weight, same line, space-separated, no dash). Right: `About` / `AI Experiments` / `Contact` nav links.
+
+**About — unchanged from v6's plan.** Centered `max-w-xl` column, two plain paragraphs, no heading. Only top padding (`pt-6 md:pt-24`) — no bottom padding, so the gap down to Experience is controlled entirely by Experience's own top padding (kept equal to the gap from Experience down to Selected Work; see "spacing" note below).
+
+**Experience — replaced v6's "centered heading + freeform" plan with a compact stacked list, no heading at all.** After three iterations (a rigid 3-col year/company/role grid, then an inline flex row — both rejected as not matching About's column width or not "looking good"), the shipped pattern reuses `WorkGridCard`'s own caption vocabulary instead of inventing a new one:
+- Centered `max-w-xl` column — same exact width as About, not a separate `max-w-2xl` (the mismatch that got both earlier attempts rejected).
+- The word "Experience" itself is dropped (explicit ask) — the section has no title, just three entries.
+- Each entry (Freelance / Overspace / Leap): company name at `text-base` (a plain "title" line, not bold — bold was tried and explicitly rejected: "don't use this bold color"), then a `mt-2 font-mono text-xs tracking-widest text-neutral-400 uppercase` line combining role + years (e.g. `Senior Product Designer, AI Design Engineer · 2022–Present`), then a `mt-2 text-sm` description paragraph — plain weight, not italic, not gray (both tried earlier in the session and reverted).
+- Unlike the rachelchen.tech reference (which drops descriptions entirely for a denser table), **descriptions are explicitly kept** per direct instruction — the reference is a *density/format* cue, not a content cue.
+
+**Selected Work — replaced v6's "stacked full-width rows" plan with an off-balance 2-column masonry grid, matching the reference's compactness.** `WorkGridCard.tsx` replaces `WorkGridItem.tsx` (v3's fixed-aspect crop grid) and the never-built `WorkRow.tsx` (v6's planned full-width-row component):
+- Section is `columns-1 gap-8 sm:columns-2` — a CSS multi-column masonry, not a CSS grid — so card heights vary naturally with each screenshot's own aspect ratio (the "off-balance" quality of the reference) with zero JS.
+- Each card: screenshot first (`w-full`, `break-inside-avoid`), then a caption row below it — `project.title` on the left (a short, ambitious one-line overview, e.g. copy in the spirit of "the future of AI and hardware"), `project.client · project.lastUpdated` right-aligned in the same gray `font-mono text-xs tracking-widest uppercase` treatment used for Experience's role/year line. No per-case description paragraph (matches the reference; unlike Experience, nothing is kept here).
+- The whole card is a `<Link to="/work/:slug">` — click-to-case-study behavior carried over unchanged from v3/v6.
+- One special case: the `ios-app` project's screenshots render inside a `bg-neutral-100 p-10` frame at reduced width (`w-4/5`) rather than full-bleed — a one-off treatment for that project's dark-UI screenshots, not a general pattern to extend to other cards without asking first.
+- Shortcut worth revisiting: the caption's left-side copy currently reuses the existing `project.title` field rather than new Rachel-Chen-style ambitious taglines written per project — fine for now, flagged here so custom copy can replace it later without re-deriving the plan.
+
+**Spacing note.** About/Experience/Work no longer each carry their own symmetric top+bottom padding (which used to compound into uneven gaps). Instead each section contributes padding on only one side, so the visual gap between About↔Experience equals the gap between Experience↔Work — both are exactly Experience's own `py-12`.
+
+**Hover + selection — superseded again, this time to a color change (contradicts v6's border-bottom "no color change" rule).** `src/index.css`'s `a:hover` is `color: #e65f2e` (a burnt orange), `.nav-active` holds the same color statically for the current page, and `::selection` uses the same orange at low opacity — all matching rachelchen.tech's own treatment rather than the border-bottom brutalism v6 specified. This was applied outside an explicit request in this design's own conversation thread and has not been explicitly re-confirmed since, but no request since has asked to revert it, so treat it as the current resolved state until told otherwise — don't silently reintroduce border-bottom hover expecting it's still spec.
+
+**Typeface — superseded again: Geist + Geist Mono, not Inter, not ABC Diatype.** v6's Inter plan was never implemented; the site went straight from ABC Diatype to Geist:
+- `ABC Diatype` fully removed — `public/fonts/diatype/` deleted, all 14 `@font-face` declarations gone from `src/index.css`. The unresolved trial-license question that dogged it throughout v1–v6 is now moot.
+- **Geist** (sans) and **Geist Mono** are self-hosted via `@font-face` (variable, `font-weight: 100 900`), sourced from the `geist` npm package's `.woff2` files under `public/fonts/geist/`. Both are SIL OFL-licensed — no trial/license flag, unlike Diatype.
+- `--font-sans` / `--font-mono` in the `@theme` block point at Geist / Geist Mono respectively. `font-mono` utilities — Experience's role/year captions, `WorkGridCard`'s client/date captions, `Journey.tsx`'s year captions, `About.tsx`'s numbered labels — now render in Geist Mono automatically; this is consistent and desired, not something to "fix."
+- The one place Geist Mono was tried and reverted: the header name (`Nav.tsx`). At the tested size it visually ran into the position text on some renders and didn't read better than plain Geist bold — left as plain sans, bold.
+
+### Explicitly unchanged from v6
+
+- Site structure — still Home (`/`), About (`/about`), AI Experiments (`/ai-experiments`), Contact (`mailto:`), plus per-project case-study pages.
+- No section dividers/borders between About/Experience/Work, no "Selected Work" heading — both v6 calls, still true.
+- White background, two-tone-in-spirit color system (now with the orange hover accent layered on top, see above).
+
+### Open questions carried forward
+
+- Whether to write real per-project taglines for `WorkGridCard`'s left caption instead of reusing `project.title` (flagged above).
+- Whether the orange hover/selection treatment should eventually get an explicit sign-off, or whether it's already considered final by virtue of no revert request.
+
+### Addendum — homepage `DrawingPad` (draw-on-canvas easter egg)
+
+Reference: [floraghnassia.com](https://www.floraghnassia.com/)'s "Now your turn =)" section. The live site's TLS handshake rejected every direct fetch/browser attempt from this session, but a March 2025 Wayback Machine snapshot was reachable and — unusually — its Webflow custom-code JS bundle (`florag-webflow-animation.umd.cjs`, hosted on GitHub Pages) was still fully retrievable, so the actual pen/stroke implementation was inspected from real (minified) source rather than guessed.
+
+- New component `src/components/DrawingPad.tsx`, rendered as the last section of `Home.tsx`, below Selected Work, with its own `mt-20 md:mt-32` gap above it (on top of the section's internal `py-16 md:py-24`) so the colored band doesn't crowd the Work grid above it.
+- **Full-bleed layout** (`-mx-4` cancelling `body`'s `p-4` gutter), unlike the rest of the page's `max-w-xl` centered columns — matches the reference's own full-width treatment for this section.
+- **No standalone heading — collapsed into the placeholder.** Went through three passes: a big bold `text-4xl`–`text-6xl` display heading, then Experience's `text-base` company-name treatment, then `Nav.tsx`'s plain position-text style — each tried and each rejected in turn as not minimal enough. Final call: drop the separate heading entirely and fold copy into the `Click to start drawing` placeholder itself, as three short stacked lines (`flex-col`, same caption styling as before) building from personal statement to the call to action:
+  1. "I love to draw and have been doing it all my life."
+  2. "I love to inspire other people."
+  3. "Click to start drawing."
+  (client's own drafted wording, first-person in Niia's established "I design..."/"I help..." voice — not Flora's "Now your turn =)" copy, which was only ever a tonal reference, never reused verbatim). Once armed, the canvas is blank again except for `Clear`/`Download` — no persistent label.
+- **Section background is solid `#f07c57`** (a client-specified, slightly softer/darker orange than the site's own `#e65f2e` accent — deliberately a different hex, not a tint of it) — covering the *entire* section including the canvas itself, not just a wrapper around a white canvas box. Went through several passes: a `0.12` tint, a `0.3` tint, solid `#e65f2e`, then solid `#eb6134` — each rejected in turn (too pale, still too pale, too bright, then — once the three-line placeholder copy landed — hard to read at `text-black/40` against it). Settled on `#f07c57` (a touch lighter/softer than `#eb6134`) **and** bumped the placeholder text to `text-black/70` (from `/40`) — the color alone wasn't enough of a legibility fix on its own. The canvas's own fill (in `redrawAll`, via the `BACKGROUND_COLOR` constant) matches the section background exactly so the drawable area is visually continuous — no boxed-off white rectangle — and downloads inherit the same backdrop. Black ink stays legible on it.
+- **No gap before the footer**: the section carries `-mb-24` to cancel out `Home.tsx`'s `<main className="pb-24">` (needed on every other page so the fixed `Footer` doesn't overlap page content, but here it left a visible white strip between the orange section and the footer). Scoped to this section only — `pb-24` is left untouched on `<main>` and on every other page.
+- **Deliberate deviation from the reference**: the canvas starts inert behind the placeholder line above instead of drawing on the very first pointer contact like Flora's site (whose canvas tracks the mouse and draws continuously on hover, no click needed). One click/tap arms ours; a press-drag-release gesture then draws a discrete stroke — kept as our own interaction model rather than adopting the hover-draws-immediately behavior.
+- **The ink itself is a faithful port of Flora's algorithm**, found in the inspected bundle (function `lb`): each stroke is a solid `10px` (`MAX_STROKE_WIDTH`) round-cap/round-join black line, except its last `100px` (`TAPER_LENGTH`) tapers the width down to a point via `width = maxWidth * (1 - (1 - distFromTip/taperWindow) ** 1.5)` — no bezier smoothing is involved anywhere in her code (despite GSAP elsewhere in the bundle using easing curves); the "soft" look people notice is entirely this length-based taper plus round caps. Our port (`renderTaperedStroke` in `DrawingPad.tsx`) generalizes her live per-frame version into one function reused for both the in-progress stroke and redrawing finished strokes from scratch, so a finished stroke keeps its pointed tip permanently and a window resize can safely re-run the same taper math.
+- `Clear` and `Download` controls appear above the canvas once armed (same ids/behavior as Flora's `#reset-btn`/`#download-btn`: wipe history / `canvas.toBlob` → `<a download>`), styled as plain-text buttons in the site's gray/orange-hover caption treatment.
+- Implementation note: strokes are stored as arrays of *normalized* (0–1) points rather than raw pixels (Flora's version instead does a crude `getImageData`/`putImageData` on resize), so a window resize can re-scale and redraw the full history — taper recomputed per stroke — onto a freshly-sized canvas without losing or distorting the drawing.
+
+---
+
+# Design System — niia.design (v6, historical — see v7 above for the current direction)
+
+**v6 was the pass that introduced the stefanietam.com-driven brutalist direction** (Cargo-template references before it, v1–v5, are further below). Read this section for the reasoning behind the current header/About shape; its Experience layout, Selected Work layout, hover treatment, and typeface call were each superseded by v7 above.
+
+## v6 — brutalist single-type-size system, driven by stefanietam.com
+
+### Reference analysis — inspected live (computed styles + fetched CSS, not guessed)
+
+Stefanie Tam's site is a Cargo-style portfolio but far more restrained than the earlier Cargo references: **one typeface, one font-size, one weight, everywhere.** Hierarchy comes entirely from layout position, spacing, and a hover-only border, not from a type scale.
+
+**Typography**
+- One custom face (`sansNarrow`, actually Helvetica LT Narrow) at a single `22px / 24px line-height`, `400` weight, `0.75px` letter-spacing, `-1px` word-spacing, applied to literally every piece of text on the site — nav, intro paragraphs, project metadata, captions, footer, index numbers. No h1/h2/h3 scale at all.
+- `-webkit-text-stroke: 0.35px black` on the root — a hairline stroke added because a narrow/condensed grotesk at body size reads a little too light otherwise; effectively a fake font-weight nudge.
+- Color is flat black on white throughout. No opacity-based hierarchy, no gray ramp.
+
+**Spacing — a small set of CSS custom properties drive the entire layout:**
+
+| Token | Value | Used for |
+|---|---|---|
+| `--horizontalMargin` | 16px | Page gutter, left/right |
+| `--verticalMargin` | 14px | Page gutter top/bottom; gap between a project's meta row and its image |
+| `--lineHeight` | 24px | Base line-height; also the vertical margin around block text |
+| `--projNumWidth` | 45px (35px on mobile, ≤800px) | Width reserved for the leading index number column (e.g. `01`) |
+| `--rightsideButtonWidth` | 40px | Width reserved for the trailing "view" link |
+| `--centeredTextWidth` | 556px | Fixed width of every centered text column (intro, footer bio) |
+| `--maxContentWidth` | `calc(100% - 2 × projNumWidth)` | Caps image/content width so it stays symmetric with the indented project number |
+
+Nothing is guessed/eyeballed on that site — every gap is one of these six numbers. That's the "pay attention to padding" lesson to actually take from it: pick a handful of spacing constants up front (gutter, row gap, label gap) and reuse them everywhere, rather than ad-hoc `mt-4`/`mt-6` per section like today.
+
+**Header pattern** — `#headerContainer { display: flex; justify-content: space-between }`: a single-line flex row, left content vs. right content, nothing centered in the row itself. On stefanietam.com: left = a time-of-day/date sentence, right = an `info` link.
+
+**Hover pattern — the "brutalism" the client called out explicitly:**
+```css
+a { color: currentColor; text-decoration: none; }
+.projectView, #infoButton { border-bottom: 2px solid white; } /* reserved, invisible */
+@media (any-hover: hover) {
+  .projectView:hover, #infoButton:hover { border-bottom: 2px solid currentColor; }
+}
+```
+Never `text-decoration: underline` — instead a `2px solid` border-bottom that's present-but-transparent (`white`, i.e. matches the page background) by default, so no layout shift, and swaps to `currentColor` on hover. Color never changes on hover or on active/current state. **This directly contradicts our current CSS** (`src/index.css`: `a:hover { color: #fbbaac }`, `.nav-active { color: #fbbaac }`) — both need to be replaced by this border-bottom technique when this ships.
+
+**Case-study row pattern** — each project is one `.project` block:
+1. A meta row: `01` (index, fixed 45px column, floated left) — `Inventing ELIZA` (name) — `2026` `MIT Press` `Publication` (year/client/category, hidden below the `desktop` breakpoint) — `01/11` (slide counter) — all as inline `<span class="projectLabel">` with `margin-right: 20px` between them — and `view` floated to the far right of the row, in its own hoverable underline.
+2. Directly below, one full-bleed-height-capped image, **centered** (not left/right aligned, not full page width): `width: 1101px` capped by `maxContentWidth`, aspect ratio ~1.5 (landscape) or `.shortened` at 825px/0.75× for taller/portrait assets — margin `14px` top and bottom.
+3. A caption/description paragraph is available (shown on hover as an overlay in the reference's interactive carousel — we don't need the hover-reveal mechanic, just the row+image structure).
+4. Rows repeat, one under the other, each its own full-width block — exactly the "each case study occupies one row of content" structure requested.
+
+**Footer(s)** — two separate things on the reference, worth keeping distinct:
+- A bio/credits block at the very end of the scroll, in the same centered 556px column as the intro (not a spread-out bar).
+- A **separate, actually-pinned bottom bar** (`#bottom-nav { position: fixed; bottom: 0; display: flex; justify-content: space-between }`) — this is the "letters spread around the bottom" pattern the client means. On the reference it holds a project-jump index + a "top↑" button; the *idle-screensaver* caption line under it is a `.marquee` (a scrolling ticker) — the one animated/running element on the whole site. Client explicitly wants the pinned-bar structure **without** the marquee's running motion.
+
+### How this maps onto niia.design
+
+**1. Header (`Nav.tsx`) — replaces the current centered `Hero.tsx` block entirely.**
+Single-line, `justify-content: space-between`, non-sticky-huge, sitting where the reference's date sentence + `info` link sit:
+- **Left:** `Niia Bieliavtseva` — `Senior Product Designer, AI Design Engineer` (the two lines currently centered mid-page move up here, left-aligned, stacked or run in one line — not centered, not huge display type; same 1-size-fits-all treatment as the reference).
+- **Right:** our real nav links — `About`, `AI Experiments`, `Contact` — in place of the reference's single `info` link. Same hover rule as below.
+- This means `Hero.tsx` is retired as a big centered block; its content (name, position, mail/LinkedIn) folds into this header. Mail/LinkedIn can live here too, or move to the footer bar (see below) — leaning toward footer, since the header should stay a single terse line like the reference's.
+
+**2. About — takes the reference's centered intro slot.**
+Where the reference centers its three `ST specializes in…` / `ST designs with…` / `ST art directs at…` lines in a fixed `556px` column with generous (`191px` desktop / `48px` mobile) top/bottom padding, we put our own About copy in that exact slot:
+> "I help startups and scale-ups turn complex, AI-driven products into interfaces people actually use."
+> "I design interfaces and build them into working products with AI — from narrative websites to data-rich dashboards, closing the gap between idea and shipped."
+
+Same treatment: one centered column, generous vertical whitespace, flat text, no card/border. The reference's hanging `"ST"` label-per-line (`li::before { content: "ST" }`) is a nice detail but optional — skip it unless it reads well once built; the two-paragraph copy doesn't obviously need a per-line label the way three parallel "ST ___" bullets do.
+
+**3. Experience — sits directly under About, title centered.**
+"Title in the center, right below the About section, and then the description" — open layout call per the client, not derived from the reference 1:1. Simplest version consistent with the rest of the system: a centered `Experience` heading (same weight/size as everything else — no bigger), then the existing Freelance/Overspace/Leap content below it, left-aligned in the same centered column width (or full-width — decide once About is built and this can be judged against it). Not over-engineered — this is the one section where "however you feel like, without going too crazy" applies.
+
+**4. Selected Work → "case studies" — replaces the current 4-col cropped grid (`WorkGridItem.tsx` / the `grid-cols-2 sm:grid-cols-4` grid in `Home.tsx`) with stacked full-width rows, reference-accurate:**
+- Drop the "Selected Work" section title entirely (explicit ask).
+- Each project = one full-width row:
+  - **Name on the left**, **`view` (lowercase) on the right** — same line, matching the reference's name-row/view-link pairing (`.projectView { float: right }` equivalent).
+  - Below that row, the **screenshot, centered** (not stretched full-width, not cropped into a grid cell) — sized by its own aspect ratio like the reference's `carouselArea` (~1.5 landscape default, a taller/narrower variant for portrait captures), capped by a max content width so it never runs edge-to-edge.
+  - A second meta line using the reference's "labels with padding between strings" idea, built from data already in `projects.ts` — same `margin-right` gap technique (`.projectLabel` = `20px` gap) applied to: **category** (`iOS App, AI`) — **name** (`Wellness AI Companion`) — **summary** (`AI-first iOS wellness app…`). Client's own example ("`01 padding, Inventing Eliza padding, 2026 padding`" → "`Wellness iOS Wellness AI Companion padding, iOS app AI padding, short description`") maps directly to `project.category` / `project.name` / `project.summary` — no new data fields needed, just a new layout for the existing ones. This is explicitly a "let's try it and see" per the client — if the three-strings-in-a-row reads cluttered once built with real content, collapse to two lines instead of fighting the pattern.
+  - Rows stack vertically, one under the next, each full width — replacing the current 2-up/4-up grid entirely.
+  - Click behavior unchanged from v3: whole row/image navigates to `/work/:slug` (kept — no lightbox, we have real destination pages, that part of v3's reasoning still holds).
+- `WorkGridItem.tsx` is retired in favor of a new row-shaped component (name TBD, e.g. `WorkRow.tsx`).
+
+**5. Footer — static "letters spread around the bottom," not a marquee.**
+Adopt the reference's `#bottom-nav` structure (`position: fixed; bottom: 0; display: flex; justify-content: space-between`) but with static content instead of a project-jump index, and explicitly **no running/marquee motion**:
+- `Email` — `LinkedIn` — `Résumé`, spread across the fixed bottom bar (`space-between`, matching what `Footer.tsx` already does structurally — this mostly validates the existing component's layout, just needs the hover treatment fixed per point 6 below, and Mail/LinkedIn could consolidate here if dropped from the header per point 1).
+
+**6. Hover state — resolved, applies site-wide, replaces the current tint.**
+Every link (nav, footer, "view", in-copy links) switches from the current color-tint hover (`a:hover { color: #fbbaac }` in `src/index.css`) to the reference's border-bottom technique:
+```css
+a {
+  color: inherit;
+  text-decoration: none;
+  border-bottom: 2px solid transparent; /* reserve the space, no shift on hover */
+  padding-bottom: 1px;
+}
+a:hover {
+  border-bottom-color: currentColor;
+}
+```
+No color change, ever — on hover or on `.nav-active`/current-page state. `WiggleText.tsx`'s wiggle animation is a separate, unrelated interaction and can stay layered on top of this if still wanted — worth a quick gut-check once this ships, since "brutalism, nothing moves except the underline" is somewhat in tension with a wiggling nav label; flag it rather than silently dropping either.
+
+### Typeface — reopened: Inter, not ABC Diatype
+
+Per explicit direction, drop ABC Diatype (which was also blocked on an unresolved trial-license question, see v1/v2 notes below) and start with **Inter** — one weight, one size, site-wide, matching the reference's single-face philosophy. Inter is open-source (SIL OFL), so the trial-license flag that blocked Diatype doesn't apply. Concretely:
+- Load Inter (variable font, self-hosted or `@fontsource/inter`) at one weight (400, maybe 500 for the header/name) — resist the urge to reintroduce the v3-era 300–950 multi-weight scale; the whole point of this direction is one size/weight carrying everything, exactly like the reference.
+- Client floated possibly pairing **Courier** (monospace) in later for a Diatype-Mono-style caption/index role, "but let's start with Inter side by side" — i.e. not yet. Revisit once the Inter-only pass is built and there's a real caption/index-number use case (e.g. the `01/11`-style counter) to justify a second face.
+- `public/fonts/diatype/` and the 14 `@font-face` declarations in `src/index.css` get removed once Inter is wired in; `--font-sans` in the `@theme` block points at Inter instead.
+
+### Explicitly unchanged
+
+- **Site structure** — still four destinations: Home (`/`), About (`/about`), AI Experiments (`/ai-experiments`), Contact (`mailto:` link, not a page). Nothing here adds or removes a route.
+- **Case-study page internals** (`CaseStudy.tsx`, `Zoomable.tsx`, per-project content in `projects.ts`) — this pass is about the homepage's header/about/work-list/footer, not the project detail pages.
+- **White background, two-tone (black/white) color system** — the reference reinforces this again, third reference in a row to do so.
+
+### Open questions / judgment calls left for the build pass
+
+- Exactly how Mail/LinkedIn split between the new header and the footer bar (both currently exist in `Hero.tsx` and `Footer.tsx`) — leaning footer-only to keep the header a single terse line, but not decided.
+- Whether the case-study three-label row (category / name / summary) needs the reference's responsive collapse (hide category+summary below a breakpoint, show only name) the way `.desktop`-class labels hide on the reference's mobile — likely yes, same reasoning (a name-only row prevents wrapping chaos on narrow screens).
+- Whether Experience's centered title should share the About column's `556px`-equivalent max-width or run full-width — "decide it later" per client.
+
+---
+
+# Design System — niia.design (v3, historical — see v6 above for the current direction)
 
 Direction change, driven by a reference site: **[719301.cargo.site](https://719301.cargo.site/)** (a Cargo "Graphic X808" demo template). This supersedes the brutalist bordered-card system documented previously (see "What changed from v1" at the bottom). The v2 spec below is now built. See "v3 — site structure & footer" at the bottom for what changed since, driven by a second reference: **[830822-a.cargo.site](https://830822-a.cargo.site/)** (Cargo "Template B421").
 
@@ -127,3 +312,21 @@ Adds a full `/about` page alongside (not replacing) the homepage's short About s
 **`Journey.tsx`** (new component) — a brutalist reinterpretation of a "career timeline with hover states" (the reference point was benshih.design/about's staggered, hover-expanding role list, adapted to this site's two-tone system instead of copying its colored pills). Each milestone is a full-width hairline-bordered row, progressively indented via inline `marginLeft` (staircase effect, capped small enough to survive mobile). On hover the row inverts to solid black/white and a detail panel (description + bullets) expands open using the CSS grid `grid-template-rows: 0fr → 1fr` height-animation technique — no JS state, no color introduced. Milestone copy reuses the same three real chapters as the homepage Experience section (Leap, Overspace, Freelance/AI) but is not literally duplicated text.
 
 Content still uses the established `[bracketed — TK]` convention (e.g. `[Notable client outcome — TK]`, `[Medium — TK]`) for placeholder specifics the same way Home.tsx's Leap blurb already does — swap in real details before shipping.
+
+## v5 — AI Experiments polish
+
+- **`Zoomable.tsx`** (new component) — wraps a screenshot so clicking it opens a fullscreen lightbox (click backdrop or Escape to close). Applied to every screenshot inside a case study page (Taski, Skim, 08) — this is separate from the v3 decision not to lightbox the homepage's Selected Work grid, which still navigates straight to the case study instead.
+- **AI Experiments grid thumbnails** — cards previously showed each screenshot at its natural aspect ratio, which misaligned card heights when screenshots varied in shape. Thumbnails are now a fixed-height (`h-56`/`lg:h-72`) `object-cover` crop so every card lines up.
+- **Taski's origin story dropped the ADHD framing** — the "built for my wife, who has ADHD" framing (and the clinical light-sensitivity stat backing the theming decision) was written from her husband's point of view and doesn't fit the portfolio speaking as Niia. Reframed as built for "a few family members and friends," keeping the design reasoning (red-as-learned-convention, real theming over one "correct" palette) without the clinical specifics.
+- **Taski — first version (`TaskiV1.tsx`, `/taski-v1`)** — the original in-browser to-do list (routines + a daily list, saved to `localStorage`) that predated the native Mac app, restored as its own live AI Experiments entry rather than left to rot in git history. Framed explicitly as "the first version"; the current Taski page links back to it, and it links forward to the Mac app.
+
+### Addendum — NiiaLLM (select-to-ask chat sidebar)
+
+Reference: [rachelchen.tech](https://www.rachelchen.tech/)'s "RacheLLM" feature (live-inspected via the Browser tool, not guessed from screenshots) — a header link plus a floating "Ask ___LLM" pill that appears on text selection anywhere on the page, both opening a right-hand chat sidebar. No model is wired up yet, matching the client's explicit ask: canned, keyword-matched answers only, same as a rule-based FAQ bot pretending to be a chat.
+
+- **New files**: `src/context/chatContext.ts` (the `NiiaChatContext` object + shared types, kept in its own file per `react-refresh/only-export-components`), `src/context/NiiaChatContext.tsx` (the `NiiaChatProvider`, owns `isOpen` / `messages` / `pendingQuote` state), `src/context/useNiiaChat.ts` (the consumer hook), `src/lib/niiaLLM.ts` (keyword → canned-answer table plus the 3 welcome-state suggested questions), `src/components/NiiaChatSidebar.tsx` (the panel UI), `src/components/SelectionAskTooltip.tsx` (the floating pill).
+- **Entry points**: the header (`Nav.tsx`) gets a `✦ Niia LLM` button (styled like `AIExperimentsNavLink`'s siblings, not an `<a>` since it doesn't navigate — hover color added manually since the global `a:hover` CSS rule doesn't reach buttons) that opens the sidebar in its empty "welcome" state. Selecting any text on the page (except inside the sidebar itself, excluded via a `data-niia-chat-sidebar` attribute check) shows a floating orange pill, `✦ Ask NiiaLLM`, positioned above the selection (`selectionchange` + `getBoundingClientRect`, hidden on scroll); clicking it opens the sidebar with that text staged as a dismissible quote chip above the input, same two-entry-point structure as the reference.
+- **Layout — reflow, not overlay.** Matching the reference's own behavior (verified by opening it): the sidebar pushes the page rather than floating over it. `App.tsx` wraps the routed content in a div that gets `sm:mr-[380px]` when `isOpen`, and `Footer.tsx` (which is `fixed`, so a parent margin doesn't reach it) independently reads the same context to swap `right-0` for `sm:right-[380px]`. Full-width overlay below the `sm` breakpoint since there's no room to reflow on mobile.
+- **Canned answers, not a live model** — `getCannedAnswer()` in `niiaLLM.ts` does plain substring keyword matching (experience, process, project size/duration, AI tools, favorite project, hiring/availability, tools/stack, values, Leap, Overspace, contact) against real content already on the site (About's values, Home's Experience section, `projects.ts`), with an honest fallback ("I'm just a pre-written FAQ for now, not a live model...") pointing back to Niia's email rather than pretending to understand. The sidebar header's ⓘ icon states this same caveat on hover/title — deliberately not hidden, since the client's own framing was "we will not be wiring up Claude" yet.
+- **Quote handling**: a staged quote (`pendingQuote` in context) is shown as a chip with its own dismiss `✕`; sending a message attaches it to that one `ChatMessage` (rendered as an italic blockquote above the question) and clears the pending state — a fresh selection stages a new quote rather than accumulating multiple.
+- **Reset (`↺`) vs close (`✕`)** in the sidebar header: reset clears `messages`/`pendingQuote` back to the welcome suggestions without closing the panel; close hides it (`isOpen = false`) but the conversation isn't cleared, so reopening via either entry point resumes where it left off.

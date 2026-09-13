@@ -1,8 +1,10 @@
 import { Link, useLocation } from "react-router-dom";
 import AIExperimentsNavLink from "./AIExperimentsNavLink";
+import { useNiiaChat } from "../context/useNiiaChat";
 
 export default function Nav() {
   const { pathname } = useLocation();
+  const { openWelcome } = useNiiaChat();
 
   return (
     <header className="sticky top-0 z-20 -mx-4 flex flex-wrap items-start justify-between gap-x-8 gap-y-2 bg-white px-4 pt-3 pb-4">
@@ -18,6 +20,16 @@ export default function Nav() {
           About
         </Link>
         <AIExperimentsNavLink />
+        <Link to="/art" className={pathname === "/art" ? "nav-active" : undefined}>
+          Art
+        </Link>
+        <button
+          type="button"
+          onClick={openWelcome}
+          className="flex cursor-pointer items-center gap-1 hover:text-[#e65f2e]"
+        >
+          <span aria-hidden>✦</span> Niia LLM
+        </button>
         <a href="mailto:nia.bieliavtseva@gmail.com" target="_blank" rel="noopener noreferrer">
           Contact
         </a>

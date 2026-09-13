@@ -4,6 +4,8 @@ export type ContentBlock =
   /** Top-level narrative section (Problem framing, Solution, Final design, Results) — anchors the "On this page" TOC. */
   | { type: "section"; id: string; title: string }
   | { type: "list"; items: string[] }
+  /** Editorial alternative to a bullet list — large mono numerals, matching About's Values section. */
+  | { type: "numbered-list"; items: string[] }
   | { type: "quote"; text: string; attribution: string }
   | { type: "image"; src: string; alt: string; caption?: string }
   | { type: "gallery"; images: { src: string; alt: string; caption?: string }[] };
@@ -22,6 +24,16 @@ export interface ImpactStat {
   result: string;
 }
 
+/** One avatar in the team credit row next to `team` — placeholder initials, not real photos. */
+export interface Credit {
+  /** Short text shown inside the circle, e.g. "Me" or "RA". */
+  initials: string;
+  /** Full name/role shown in the hover tooltip. */
+  label: string;
+  /** Mark the primary author (Niia) with the accent color instead of black. */
+  highlight?: boolean;
+}
+
 export interface Project {
   slug: string;
   category: string;
@@ -32,6 +44,8 @@ export interface Project {
   role: string;
   /** Who else was involved, by function — omit if solo or not documented. */
   team?: string;
+  /** Placeholder avatar row for `team` — omit if there's nothing to show yet. */
+  credits?: Credit[];
   duration: string;
   tools: string[];
   screenshots: ProjectScreenshot[];
@@ -57,8 +71,12 @@ export const projects: Project[] = [
     client: "Client (NDA)",
     role: "Product design, design systems, UX research, App Store creative",
     team: "Neuroscience research advisors (university partnerships)",
+    credits: [
+      { initials: "Me", label: "Niia Bieliavtseva", highlight: true },
+      { initials: "RA", label: "Research Advisors" },
+    ],
     duration: "4 months · 2025",
-    tools: ["Figma", "Claude AI", "Figjam", "Notion"],
+    tools: ["Figma", "Claude", "Figjam", "Notion"],
     screenshots: [
       { src: "/projects/ios-app/1.png", alt: "Wellness AI app screens" },
       { src: "/projects/ios-app/3.png", alt: "Emotional fitness app progression screen" },
@@ -93,7 +111,7 @@ export const projects: Project[] = [
           "One question from the coach, one progress bar for all six systems — instead of a home screen split six ways.",
       },
 
-      { type: "section", id: "problem-framing", title: "Problem framing" },
+      { type: "section", id: "problem-framing", title: "Problem" },
       {
         type: "paragraph",
         text: "The platform is built on real neuroscience: university research partners ran structural MRI, FNIRS brain imaging, and cognitive testing to validate a model of emotional fitness across six neurotransmitter systems — dopamine, serotonin, testosterone, oxytocin, opioids, and cannabinoids. That's rare scientific grounding for a wellness app, and it's core to why the product works.",
@@ -186,7 +204,7 @@ export const projects: Project[] = [
 
       { type: "section", id: "results", title: "Results" },
       {
-        type: "list",
+        type: "numbered-list",
         items: [
           "Selected as Apple's App of the Day across multiple countries.",
           "Featured in a documentary series on the science of happiness.",
@@ -211,7 +229,7 @@ export const projects: Project[] = [
     client: "Client (NDA)",
     role: "UI/UX Designer",
     duration: "2.5 months",
-    tools: ["Figma", "Claude AI", "Figjam"],
+    tools: ["Figma", "Claude", "Figjam"],
     screenshots: [
       { src: "/projects/enterprise-dashboard.png", alt: "Enterprise dashboard overview" },
     ],

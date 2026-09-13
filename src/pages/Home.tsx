@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
+import DrawingPad from "../components/DrawingPad";
 import Nav from "../components/Nav";
 import WorkGridCard from "../components/WorkGridCard";
 import { projects } from "../data/projects";
@@ -87,6 +88,8 @@ export default function Home() {
           <WorkGridCard key={project.slug} project={project} />
         ))}
       </section>
+
+      <DrawingPad />
     </main>
   );
 }
