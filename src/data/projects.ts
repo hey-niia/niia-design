@@ -348,6 +348,11 @@ export const projects: Project[] = [
     ],
   },
   {
+    // Rewritten against case-study.md. Source material here is much thinner than
+    // ios-app/enterprise-dashboard: no documented research process, named frictions,
+    // launch metrics, or client quote — only the two original descriptive paragraphs.
+    // The section structure below is applied honestly on top of that; nothing beyond
+    // what was already written is invented. See TODO near Results.
     slug: "digitalscreen",
     category: "Website",
     name: "Digital Screen Co.",
@@ -355,7 +360,8 @@ export const projects: Project[] = [
     summary:
       "Narrative corporate website for a digital signage company, built to explain a technical product simply.",
     client: "Client (NDA)",
-    role: "UI/UX Designer",
+    role: "UI/UX design, information architecture, visual identity",
+    team: "Founder, Operations team",
     duration: "1 month",
     tools: ["Figma"],
     screenshots: [
@@ -368,18 +374,58 @@ export const projects: Project[] = [
     ],
     lastUpdated: "Nov, 2025",
     content: [
+      { type: "section", id: "problem", title: "Problem" },
       {
         type: "paragraph",
-        text: "I designed a corporate website for a digital signage company to present its technology, services, and team in a clear and engaging way. The goal was to build a modern and credible online presence that communicates innovation and reliability.",
+        text: "The client needed a website that could explain a technical product — digital signage technology — to potential customers, alongside its services and team. There was nothing to build on: no site, no visual identity yet.",
       },
       {
         type: "paragraph",
-        text: "Starting from zero, I worked on information architecture, layout systems, and visual identity. The design focused on modularity and responsive behavior, ensuring consistency across desktop and mobile. Collaboration with the founder and operations team helped refine messaging and user flow.",
+        text: "The brief was mostly about credibility: give a technical product a modern, trustworthy web presence that communicates innovation and reliability, not just a spec sheet.",
       },
-      { type: "image", src: "/projects/digitalscreen/1.png", alt: "Digital signage company website" },
+
+      { type: "section", id: "solution", title: "Solution" },
+      {
+        type: "paragraph",
+        text: "Starting from zero, I built the information architecture, layout system, and visual identity together, then worked with the founder and operations team to refine the messaging and user flow.",
+      },
+      {
+        type: "list",
+        items: [
+          "Information architecture and layout system built to hold both marketing and technical content.",
+          "A visual identity designed to read as modern and credible without going generic.",
+          "Modular, responsive components so desktop and mobile stayed consistent instead of diverging.",
+        ],
+      },
+
+      { type: "section", id: "final-design", title: "Final design" },
+      { type: "heading", text: "One narrative site, from hero to team" },
+      {
+        type: "paragraph",
+        text: "The site walks a visitor from what the product does, through services, to the team behind it — a single narrative page rather than a stack of disconnected sections.",
+      },
+      {
+        type: "image",
+        src: "/projects/digitalscreen/1.png",
+        alt: "Digital signage company website, full page",
+        caption: "One scrolling narrative, not a set of disconnected marketing sections.",
+      },
+
+      { type: "section", id: "results", title: "Results" },
+      {
+        type: "paragraph",
+        text: "In about a month, working solo, this took the client from no web presence to a full, responsive site that explains a technical product in plain language.",
+      },
+      // TODO: no launch metrics (traffic, lead volume) or client quote are documented
+      // for this project — add them here if/when available, per case-study.md's
+      // Results section. Don't invent numbers to fill the gap.
     ],
   },
   {
+    // Rewritten against case-study.md. Same caveat as digitalscreen: no documented
+    // research process, named frictions, usage metrics, or quote exist for this
+    // project — only the two original descriptive paragraphs. Structure is applied
+    // honestly on top of that. See TODO near Results.
     slug: "hirement",
     category: "AI Tooling, Web App",
     name: "Hirement",
@@ -387,29 +433,78 @@ export const projects: Project[] = [
     summary:
       "AI-first hiring tool — interaction design and prototyping across the end-to-end recruiting flow.",
     client: "Hirement",
-    role: "UI/UX Designer",
+    role: "Product design, brand identity, design systems",
+    team: "Founder",
     duration: "2.5 months",
     tools: ["Figma"],
     screenshots: [{ src: "/projects/hirement.png", alt: "Hirement interview flow builder" }],
     lastUpdated: "Nov, 2025",
     content: [
+      { type: "section", id: "problem", title: "Problem" },
       {
         type: "paragraph",
-        text: "Hirement is a web platform that helps employers streamline their hiring process by creating structured, customizable interview flows. Each hiring flow consists of multiple rounds with tailored question types: checklists, ratings, or open-ended responses — allowing different interviewers to evaluate candidates with notes and 1–5 star scores.",
+        text: "Hirement's founder came to me with an early idea, not a product: give hiring teams a way to run structured, repeatable interview loops instead of ad hoc rounds with no shared rubric.",
       },
       {
         type: "paragraph",
-        text: "As the sole designer, I collaborated directly with the founder to translate an early idea into a functional product vision. I designed the logo, a clean and modern interface, and a lightweight design system that emphasized clarity, spaciousness, and ease of collaboration for hiring teams.",
+        text: "Each hiring flow needed multiple rounds, each with its own question types — checklists, ratings, open-ended — so different interviewers could evaluate the same candidate consistently, with notes and a 1–5 star score.",
+      },
+
+      { type: "section", id: "solution", title: "Solution" },
+      {
+        type: "paragraph",
+        text: "As the sole designer, I worked directly with the founder to turn that idea into a functional product vision — logo, interface, and the design system underneath it, built together rather than bolted on after.",
+      },
+      {
+        type: "list",
+        items: [
+          "A lightweight design system built for clarity and spaciousness, so a dense, multi-round flow stayed easy to scan.",
+          "Interview rounds structured as a sequence of typed questions — checklist, rating, open-ended — instead of one freeform form.",
+          "Scoring built around notes plus a 1–5 star rating, so interviewers could leave both a number and the reasoning behind it.",
+        ],
+      },
+
+      { type: "section", id: "final-design", title: "Final design" },
+      { type: "heading", text: "A flow builder for structured hiring" },
+      {
+        type: "paragraph",
+        text: "The flow builder, scoring screens, and design system shipped as one coherent product — built for hiring teams who need consistency across rounds and interviewers, not just a nicer form.",
       },
       {
         type: "gallery",
         images: [
-          { src: "/projects/hirement/1.png", alt: "Hirement interview flow builder" },
-          { src: "/projects/hirement/2.png", alt: "Hirement candidate evaluation screen" },
-          { src: "/projects/hirement/3.png", alt: "Hirement scoring interface" },
-          { src: "/projects/hirement/4.png", alt: "Hirement design system" },
+          {
+            src: "/projects/hirement/1.png",
+            alt: "Hirement interview flow builder",
+            caption: "Each hiring flow is built as a sequence of rounds, not one long form.",
+          },
+          {
+            src: "/projects/hirement/2.png",
+            alt: "Hirement candidate evaluation screen",
+            caption: "Interviewers evaluate candidates with notes alongside a 1–5 star score.",
+          },
+          {
+            src: "/projects/hirement/3.png",
+            alt: "Hirement scoring interface",
+            caption: "Scoring stays consistent across interviewers, even across question types.",
+          },
         ],
       },
+      {
+        type: "image",
+        src: "/projects/hirement/4.png",
+        alt: "Hirement design system",
+        caption: "A lightweight design system carries the same clarity across every screen.",
+      },
+
+      { type: "section", id: "results", title: "Results" },
+      {
+        type: "paragraph",
+        text: "In 2.5 months, working solo alongside the founder, this took Hirement from an early idea to a shipped product with its own logo, interface, and design system.",
+      },
+      // TODO: no usage metrics, launch numbers, or a client/user quote are documented
+      // for this project yet — add them here if/when available, per case-study.md's
+      // Results section. Don't invent numbers to fill the gap.
     ],
   },
 ];

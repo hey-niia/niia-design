@@ -4,6 +4,7 @@ import { getProject, projects, type ContentBlock, type Credit } from "../data/pr
 import Nav from "../components/Nav";
 import WiggleText from "../components/WiggleText";
 import WorkGridCard from "../components/WorkGridCard";
+import { useNiiaChat } from "../context/useNiiaChat";
 
 // Keyed by the exact strings used in `tools` across projects.ts.
 const TOOL_ICONS: Record<string, string> = {
@@ -397,6 +398,7 @@ function Block({
 export default function CaseStudy() {
   const { slug } = useParams<{ slug: string }>();
   const project = slug ? getProject(slug) : undefined;
+  const { openWelcome } = useNiiaChat();
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const [activeId, setActiveId] = useState("overview");
 
@@ -419,10 +421,14 @@ export default function CaseStudy() {
     onMouseLeave: () => setCursorLabel((c) => ({ ...c, visible: false })),
   };
 
-  const moreProjects = useMemo(
-    () => projects.filter((p) => p.slug !== slug).slice(0, 2),
-    [slug],
-  );
+  const moreProjects = useMemo(() => {
+    const currentIndex = projects.findIndex((p) => p.slug === slug);
+    if (currentIndex === -1) return projects.slice(0, 2);
+    // Walk the list starting right after the current project and wrap around,
+    // instead of always taking the first two — otherwise a project near the
+    // end of the array (e.g. the last one) never gets surfaced here.
+    return [1, 2].map((offset) => projects[(currentIndex + offset) % projects.length]);
+  }, [slug]);
 
   const toc = useMemo(() => {
     const items = [{ id: "overview", title: "Overview" }];
@@ -485,7 +491,7 @@ export default function CaseStudy() {
   const hasToc = toc.length > 1;
 
   return (
-    <main className="pb-24">
+    <main>
       <Nav />
       <div className="mx-auto max-w-4xl pt-10">
         <div className="relative">
@@ -595,18 +601,27 @@ export default function CaseStudy() {
             </p>
             <div className="columns-1 gap-8 sm:columns-2">
               {moreProjects.map((p) => (
-                <WorkGridCard key={p.slug} project={p} />
+                <WorkGridCard key={p.slug} project={p} titleClassName="text-sm" />
               ))}
             </div>
           </section>
         )}
 
-        <footer className="border-t border-gray-200 py-8">
-          <p>
-            <a href={`mailto:${EMAIL}`} className="underline">
-              <WiggleText>Let's design it!</WiggleText>
+        <footer className="border-t border-gray-200 pt-16 pb-12">
+          <div className="flex items-center justify-center gap-8">
+            <a href={`mailto:${EMAIL}`} className="flex items-center gap-1.5 underline">
+              <span aria-hidden>✉</span>
+              <WiggleText>Email</WiggleText>
             </a>
-          </p>
+            <button
+              type="button"
+              onClick={openWelcome}
+              className="flex cursor-pointer items-center gap-1.5 underline"
+            >
+              <span aria-hidden>✦</span>
+              <WiggleText>Talk to Niia AI</WiggleText>
+            </button>
+          </div>
         </footer>
       </div>
 
