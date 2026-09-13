@@ -1,10 +1,13 @@
 import { createContext } from "react";
+import type { AnswerCard } from "../lib/niiaLLM";
 
 export interface ChatMessage {
   role: "user" | "bot";
   text: string;
-  /** Selected-text context the user was asking about, shown as a quote above their message. */
+  /** Selected-text context the user was asking about, shown as a quote above their question. */
   quote?: string;
+  /** Case-study/AI-experiment cards to render under a bot answer, if any. */
+  cards?: AnswerCard[];
 }
 
 export interface NiiaChatContextValue {

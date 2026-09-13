@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { useNiiaChat } from "../context/useNiiaChat";
-import { CONTACT_EMAIL, PROJECT_LINKS } from "../lib/niiaLLM";
+import { CONTACT_EMAIL, PROJECT_LINKS, type AnswerCard } from "../lib/niiaLLM";
 
 const LINKEDIN_URL = "https://www.linkedin.com/in/niia-bieliavtseva/";
 const RESUME_URL = "/resume.pdf";
@@ -103,7 +103,40 @@ function renderAnswer(text: string): ReactNode {
   });
   flushBullets("ul-end");
 
-  return <div className="flex flex-col gap-2 text-sm">{blocks}</div>;
+  return <div className="flex flex-col gap-2 text-sm leading-relaxed">{blocks}</div>;
+}
+
+// Thumbnail cards for case studies / AI experiments mentioned in an answer —
+// one horizontally-scrollable row, sized generously so the image actually
+// reads as a preview rather than a cramped icon.
+function AnswerCards({ cards }: { cards: AnswerCard[] }) {
+  if (cards.length === 0) return null;
+
+  return (
+    <div className="-mx-1 mt-2 flex gap-4 overflow-x-auto px-1 pb-1">
+      {cards.map((c) => (
+        <Link
+          key={c.href}
+          to={c.href}
+          className="group/card block w-72 shrink-0 overflow-hidden rounded-md bg-neutral-100"
+        >
+          <div className="h-36 w-full overflow-hidden bg-black">
+            <img
+              src={c.image}
+              alt=""
+              className="h-full w-full object-cover transition-transform duration-200 group-hover/card:scale-105"
+            />
+          </div>
+          <div className="p-3.5">
+            <p className="text-base leading-snug text-black">{c.title}</p>
+            <p className="mt-1.5 font-mono text-xs tracking-wide text-gray-400 uppercase">
+              {c.caption}
+            </p>
+          </div>
+        </Link>
+      ))}
+    </div>
+  );
 }
 
 export default function NiiaChatSidebar() {
@@ -144,16 +177,21 @@ export default function NiiaChatSidebar() {
       }`}
     >
       <div className="flex items-center justify-between border-b border-black/5 p-4">
-        <p className="flex items-center gap-1.5 font-mono text-xs tracking-widest uppercase">
+        <p className="flex items-center gap-1.5 font-mono text-xs tracking-widest">
           <span aria-hidden>✦</span> Niia AI
-          <span
-            title="These are pre-written answers, not a live model — email Niia directly for anything else."
-            className="cursor-help text-neutral-400"
-          >
+          <span className="group relative inline-flex cursor-help items-center text-gray-400">
             ⓘ
+            <span
+              role="tooltip"
+              className="pointer-events-none absolute top-full left-0 z-50 mt-2 w-56 rounded-md bg-black px-2.5 py-1.5 text-[11px] leading-snug font-sans font-normal tracking-normal text-white normal-case opacity-0 shadow-lg transition-opacity duration-150 group-hover:opacity-100"
+            >
+              <span aria-hidden className="absolute -top-1 left-2 h-2 w-2 rotate-45 bg-black" />A
+              little chatbot I vibe-coded for fun — not a live model, just pre-written answers.
+              Try asking about a case study, my AI experiments, hiring, or my hobbies.
+            </span>
           </span>
         </p>
-        <div className="flex items-center gap-3 text-neutral-400">
+        <div className="flex items-center gap-3 text-gray-400">
           <button
             type="button"
             onClick={reset}
@@ -178,7 +216,7 @@ export default function NiiaChatSidebar() {
       <div ref={scrollRef} className="flex flex-1 flex-col overflow-y-auto p-4">
         <div className="mt-auto flex flex-col gap-5">
           {messages.length === 0 && (
-            <p className="niia-fade-in-up text-lg">
+            <p className="niia-fade-in-up text-lg leading-relaxed">
               Hey, I'm Niia AI — the pre-written version of her, anyway.
             </p>
           )}
@@ -193,7 +231,14 @@ export default function NiiaChatSidebar() {
                   “{m.quote}”
                 </p>
               )}
-              {m.role === "bot" ? renderAnswer(m.text) : <p className="text-sm">{m.text}</p>}
+              {m.role === "bot" ? (
+                <>
+                  {renderAnswer(m.text)}
+                  {m.cards && <AnswerCards cards={m.cards} />}
+                </>
+              ) : (
+                <p className="text-sm leading-relaxed">{m.text}</p>
+              )}
             </div>
           ))}
 
@@ -220,14 +265,14 @@ export default function NiiaChatSidebar() {
           )}
 
           {!isTyping && suggestions.length > 0 && (
-            <div className="flex flex-col gap-3">
+            <div className="flex flex-col gap-0.5">
               {suggestions.map((q, i) => (
                 <button
                   key={q}
                   type="button"
                   onClick={() => submit(q)}
                   style={{ animationDelay: `${0.1 + i * 0.08}s` }}
-                  className="niia-fade-in-up flex items-start gap-2 text-left text-sm text-neutral-600 transition-colors hover:text-[#e65f2e]"
+                  className="niia-fade-in-up -mx-2 flex items-start gap-2 rounded-md px-2 py-1 text-left text-sm leading-relaxed text-neutral-600 transition-colors hover:bg-[#e65f2e]/10 hover:text-[#e65f2e]"
                 >
                   <span aria-hidden>↳</span> {q}
                 </button>

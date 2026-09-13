@@ -59,8 +59,8 @@ export function NiiaChatProvider({ children }: { children: ReactNode }) {
       setIsTyping(true);
       typingTimeout.current = window.setTimeout(
         () => {
-          const answer = getCannedAnswer(trimmed);
-          setMessages((prev) => [...prev, { role: "bot", text: answer }]);
+          const { text: answer, cards } = getCannedAnswer(trimmed);
+          setMessages((prev) => [...prev, { role: "bot", text: answer, cards }]);
           setIsTyping(false);
           typingTimeout.current = null;
 

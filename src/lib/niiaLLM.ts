@@ -5,15 +5,30 @@
  * Voice follows case-study.md's tone guide: first person, contractions,
  * short sentences, honest about being scrappy rather than polished. */
 
+import { projects } from "../data/projects";
+import { experiments } from "../data/experiments";
+
+export interface AnswerCard {
+  title: string;
+  caption: string;
+  image: string;
+  href: string;
+}
+
 export interface CannedAnswer {
   keywords: string[];
   answer: string;
+  /** Optional visual cards (case studies, AI experiments) shown under the text. */
+  cards?: AnswerCard[];
 }
 
+// First-open order, fixed per the client's ask: one about AI tools, one
+// about case studies, one about hiring — everything after this comes from
+// the follow-up pool instead.
 export const SUGGESTED_QUESTIONS = [
-  "What's your design process?",
-  "What size of projects do you take on?",
   "What's your experience with AI tools?",
+  "Which case study should I start with?",
+  "I'd love to hire you",
 ];
 
 export const CONTACT_EMAIL = "nia.bieliavtseva@gmail.com";
@@ -23,15 +38,38 @@ export interface ProjectLink {
   slug: string;
 }
 
-// Case-study names, exactly as they appear in projects.ts — reused both to
-// write answers that name real projects and to turn those same mentions
-// into real links to /work/:slug (see linkifyKnownTerms in the sidebar).
-export const PROJECT_LINKS: ProjectLink[] = [
-  { name: "Wellness AI Companion", slug: "ios-app" },
-  { name: "Enterprise Dashboard", slug: "enterprise-dashboard" },
-  { name: "Digital Screen Co.", slug: "digitalscreen" },
-  { name: "Hirement", slug: "hirement" },
-];
+// Case-study names, derived from projects.ts (not hand-duplicated) — reused
+// both to write answers that name real projects and to turn those same
+// mentions into real links to /work/:slug (see linkifyKnownTerms in the sidebar).
+export const PROJECT_LINKS: ProjectLink[] = projects.map((p) => ({
+  name: p.name,
+  slug: p.slug,
+}));
+
+// Same cover image + caption convention as the homepage's WorkGridCard, so a
+// case study mentioned in chat can render as a real thumbnail card.
+export const PROJECT_CARDS: AnswerCard[] = projects.map((p) => ({
+  title: p.name,
+  caption: `${p.client} · ${p.lastUpdated}`,
+  image: p.screenshots[0].src,
+  href: `/work/${p.slug}`,
+}));
+
+function projectCard(slug: string): AnswerCard[] {
+  const card = PROJECT_CARDS.find((c) => c.href === `/work/${slug}`);
+  return card ? [card] : [];
+}
+
+// AI Experiments cards — only entries with a cover image and an internal
+// link render as a card (Taski's first version has neither yet).
+export const EXPERIMENT_CARDS: AnswerCard[] = experiments
+  .filter((e): e is typeof e & { image: string; link: string } => Boolean(e.image && e.link))
+  .map((e) => ({
+    title: e.name,
+    caption: e.stack,
+    image: e.image,
+    href: e.link,
+  }));
 
 const ANSWERS: CannedAnswer[] = [
   // Checked first: specific personal phrasing like "what do you do outside
@@ -92,6 +130,7 @@ const ANSWERS: CannedAnswer[] = [
     ],
     answer:
       "Yes — the Wellness AI Companion is a neuroscience-backed iOS app I redesigned, folding six validated neurotransmitter systems (dopamine, serotonin, testosterone, oxytocin, opioids, cannabinoids) into one guided AI coach. It was picked as Apple's App of the Day across multiple countries and is now expanding into clinical research.",
+    cards: projectCard("ios-app"),
   },
   {
     keywords: [
@@ -104,16 +143,19 @@ const ANSWERS: CannedAnswer[] = [
     ],
     answer:
       "Yes — I designed an enterprise operations dashboard that replaced an Airtable-based workflow, for a company managing digital signage installs across chains like KFC and Apple stores. Quotations through deployment, maintenance, inventory — the whole lifecycle. Sole designer, concept through engineering handoff, about 2.5 months.",
+    cards: projectCard("enterprise-dashboard"),
   },
   {
     keywords: ["digital screen co", "signage website", "corporate website", "signage company"],
     answer:
       "Digital Screen Co. was a corporate website I built from zero for a digital signage company — information architecture, layout system, and visual identity, all built to explain a technical product simply. About a month, start to finish.",
+    cards: projectCard("digitalscreen"),
   },
   {
     keywords: ["hirement", "hiring tool", "hiring platform", "recruiting", "interview flow", "recruitment"],
     answer:
       "Hirement is an AI-first hiring platform I designed — structured interview flows with checklists, ratings, and open-ended rounds, so different interviewers can score candidates consistently. Sole designer, working directly with the founder from early idea to a working product.",
+    cards: projectCard("hirement"),
   },
 
   {
@@ -139,6 +181,7 @@ const ANSWERS: CannedAnswer[] = [
     ],
     answer:
       "Start with the Wellness AI Companion — it's the most complete start-to-finish (research, design system, App Store creative), and it's the one I'm proudest of. Enterprise Dashboard and Hirement are good next if you want more dashboard or AI-tooling work, and Digital Screen Co. is the quick one if you're short on time.",
+    cards: PROJECT_CARDS,
   },
   {
     keywords: [
@@ -161,12 +204,14 @@ const ANSWERS: CannedAnswer[] = [
   {
     keywords: ["ai", "artificial intelligence", "claude", "llm", "machine learning", "gpt"],
     answer:
-      "AI shows up two ways in my work: I design AI-first products (a neuroscience-backed wellness coach, AI-native hiring tools), and I build with AI — using Claude for prototyping, documentation, and increasingly for shipping the code itself, not just the spec. The AI Experiments page has the rawer, in-progress stuff, if you're curious.",
+      "AI shows up two ways in my work: I design AI-first products (a neuroscience-backed wellness coach, AI-native hiring tools), and I build with AI — using Claude for prototyping, documentation, and increasingly for shipping the code itself, not just the spec. Here's some of the rawer, in-progress stuff:",
+    cards: EXPERIMENT_CARDS,
   },
   {
     keywords: ["favorite project", "proudest", "best project", "most proud", "which project"],
     answer:
       "The Wellness AI Companion — folding six neuroscience-validated systems into one guided AI coach. It got picked as Apple's App of the Day across multiple countries, which felt like proof that hiding complexity (not the effort behind it) actually works.",
+    cards: projectCard("ios-app"),
   },
   {
     keywords: ["hire", "available", "availability", "rate", "cost", "price", "budget", "contract", "freelance"],
@@ -244,13 +289,18 @@ function matchesKeyword(question: string, keyword: string): boolean {
   return question.toLowerCase().includes(keyword.toLowerCase());
 }
 
-export function getCannedAnswer(question: string): string {
+export interface CannedResponse {
+  text: string;
+  cards?: AnswerCard[];
+}
+
+export function getCannedAnswer(question: string): CannedResponse {
   for (const entry of ANSWERS) {
     if (entry.keywords.some((k) => matchesKeyword(question, k))) {
-      return entry.answer;
+      return { text: entry.answer, cards: entry.cards };
     }
   }
-  return pickFallback();
+  return { text: pickFallback() };
 }
 
 /** True if `question` matches a real entry above (not the fallback pool) — used to sanity-check every suggested/follow-up question actually has an answer. */
@@ -272,10 +322,9 @@ export interface FollowUpQuestion {
 }
 
 export const FOLLOW_UP_QUESTIONS: FollowUpQuestion[] = [
-  // professional
-  { text: "I'd love to hire you", category: "professional" },
+  // professional — "I'd love to hire you" and "Which case study should I
+  // start with?" live in SUGGESTED_QUESTIONS instead, not duplicated here.
   { text: "How did you build this portfolio?", category: "professional" },
-  { text: "Which case study should I start with?", category: "professional" },
   { text: "Do you design and build, or just design?", category: "professional" },
   { text: "Do you have generalist experience beyond design?", category: "professional" },
   { text: "Tell me about Overspace", category: "professional" },
