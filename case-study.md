@@ -50,6 +50,10 @@ This is the summary card, skimmable in under 10 seconds.
 - **My role**: specific disciplines, not a job title. "Design strategy, UI, UX, User Research" — not "Product Designer."
 - **Team**: who else was involved, by function (PM, EM, Data, Engineers, Researcher) — not names. If it was just you, say so; it's a credibility point, not a weakness (see tone notes).
 - **Timeline**: quarter-level precision ("2024 Q1–Q2"), not vague ("a few months").
+- **Metadata must agree with the body.** If the case study later describes a
+  workshop with a PM, engineers and a founder, the Team field cannot say
+  "research advisors." Recruiters read the overview card and stop; a
+  collaboration story contradicted by its own metadata reads as solo work.
 - **Impact Overview**: 3 stat cards, no more. Each card has:
   1. A metric name (Sign up rate, Activation rate, Trial-to-customer conversion)
   2. One clause explaining the causal mechanism ("Through redesign of homepage and sign-up page...")
@@ -93,11 +97,41 @@ This section is explicitly the subset of the Solution that actually shipped — 
 
 ### Results
 
+- **"What didn't work"**: a required sub-section, not an optional one. Name what
+  the change cost and who it cost it for — the users who lost a feature, the
+  explanations new users still miss. Pair it with a real complaint, then say
+  what it fed into next. A results section with no counter-evidence reads as
+  marketing; this is the cheapest credibility on the page.
 - **Headline rollup**: restate the 2-3 biggest wins as a short bulleted list. It's fine (expected) that these numbers overlap with the Impact Overview at the top — repetition here is intentional, not redundant, since different readers enter at different points.
 - **Real quote**: an actual attributed quote from a user/prospect/customer, not a paraphrase. Attribution can be role-based ("Prospect of Lokalise") if anonymized.
 - **Further reading** (optional but valuable): a link to external validation — an article, talk, or publication about the same work. Signals the work held up to outside scrutiny, not just internal review.
 - **Downloadable artifact** (optional but valuable): a template or tool built during the project that a reader could actually reuse (a Miro board, a framework doc). This converts a reader into someone who got value from the case study, not just someone who read it.
 - **Navigation to more case studies**: don't dead-end the page.
+
+---
+
+## 2b. Evidence hygiene
+
+The rules that stop a case study being quietly wrong.
+
+- **Place evidence by its date, not its usefulness.** An interview recorded after
+  launch is Results evidence, not Problem evidence, however well it describes
+  the old pain. Check the date on every quote before placing it.
+- **Never write a test result you don't have.** Showing four design variants and
+  explaining which shipped is design reasoning, and should read as design
+  reasoning. "It tested badly" without a test is fabrication. Say "reviewing
+  them side by side, the problem was obvious" and the argument still lands.
+- **Quote verbatim or don't use quotation marks.** Two fragments from the same
+  interview joined with "and" inside one set of quotes is a paraphrase wearing
+  a quote's clothes. Quote one cleanly, put the rest in the caption.
+- **Don't report metrics that are artifacts.** A cohort that hasn't aged into
+  week 6 shows 0% at week 6. Omit it and say why, or explain it — never let it
+  stand as either a win or a loss.
+- **Anonymisation is a craft task, not a find-and-replace.** If the client is
+  anonymised, the product name also appears inside the screenshots: in-product
+  nouns ("Matter Score"), body copy, and logo marks that no text search will
+  find. Audit every asset at full length, not just the crop you're shipping,
+  and caption the blurs once so they read as deliberate rather than as damage.
 
 ---
 
@@ -115,6 +149,17 @@ The reference case study reads like a person talking, not a report being filed. 
 - **Honesty about scrappiness reads as credibility, not weakness.** "I had no one to rely on... I was the only team member in the team." Own the constraint instead of hiding it.
 - **Every visual has a one-line plain-English caption** that states the takeaway, not just a description of what's pictured. "The largest drop-offs happened between sign-up and project creation" — not "Funnel chart."
 - **Metrics are always paired with a causal clause**, never left to stand alone. Not "37% increase in sign-up conversion" by itself — always "...because [specific design change]."
+- **Watch for the AI-voice tells.** These accumulate without any single sentence
+  looking wrong. The fix is almost always to split the sentence in two and use
+  a plain verb:
+  - Em-dash appositives stacking clauses into one long sentence. If a paragraph
+    has more than one, rewrite it.
+  - The "didn't just X — it Y" construction.
+  - Arch sentence fragments as transitions ("A fair amount, and mostly on
+    purpose." / "Two pieces of work either side of the app itself.")
+  - Passive constructions hiding who decided ("first-message placement was
+    deferred") where "we didn't ship it as the first message" is the truth.
+  - Self-congratulatory meta ("it's the part I'd defend hardest").
 - **Section headers as narrative beats or questions**, not clinical labels: "Why we started redesigning onboarding?" instead of "Background." "Now, you may ask: Ben, how did you solve the problem then?" instead of "Solution."
 
 ---
@@ -124,6 +169,7 @@ The reference case study reads like a person talking, not a report being filed. 
 Use this to check a case study against the framework. Mark each row **Present / Weak / Missing**.
 
 ### Overview
+- [ ] Team/role metadata matches the collaboration described in the body
 - [ ] Title is outcome-phrased, not just a feature/project name
 - [ ] One-line summary exists and names the result, not just the scope
 - [ ] My role is specific disciplines, not a job title
@@ -153,11 +199,27 @@ Use this to check a case study against the framework. Mark each row **Present / 
 - [ ] Every metric has a one-sentence causal explanation tied to the specific design decision
 
 ### Results
+- [ ] A "What didn't work" sub-section exists, with a real complaint in it
 - [ ] Headline rollup of the 2-3 biggest wins
 - [ ] Real, attributed user quote
 - [ ] Further reading / external validation link (nice-to-have)
 - [ ] Downloadable/reusable artifact (nice-to-have)
 - [ ] Link onward to more case studies
+
+### Evidence
+- [ ] Every quote is dated and placed in the right section for that date
+- [ ] No test result is claimed that wasn't run
+- [ ] Quotes are verbatim, not two fragments spliced together
+- [ ] Cohort artifacts are omitted or explained, never reported as results
+- [ ] Screenshots audited at full length for the client's name, including
+      in-product nouns and logo marks; blurs captioned once as deliberate
+- [ ] No placeholder assets left in the published page
+
+### Process evidence
+- [ ] Collaboration is *shown* (workshop photo, board, annotated artifact), not
+      only asserted in a sentence
+- [ ] Research volume is quantified (how many interviews, over what period)
+- [ ] At least one synthesis artifact appears, not just its conclusions
 
 ### Tone
 - [ ] Written in first person, casual register, contractions used
@@ -168,3 +230,8 @@ Use this to check a case study against the framework. Mark each row **Present / 
 - [ ] Every metric is paired with a "because..." clause
 - [ ] Section headers read as narrative beats/questions, not clinical labels
 - [ ] No overselling — numbers are left to speak for themselves
+- [ ] Checked for AI-voice tells: em-dash appositives, "didn't just X — it Y",
+      arch fragments, passive decisions, self-congratulatory meta
+- [ ] Sub-headings outrank body text in size and weight (a sub-head rendering
+      smaller than the paragraph under it reads as broken)
+- [ ] Body measure capped (~45-75 characters); lists use hanging indent

@@ -545,7 +545,7 @@ export default function CaseStudy() {
   return (
     <main>
       <Nav />
-      <div className="mx-auto max-w-4xl pt-10">
+      <div className="mx-auto max-w-4xl pt-6 md:pt-24">
         <div className="relative">
           {/* Sits further out in the page margin, outside the reading column, so
               the column itself never has to shrink to make room for it. Spans
@@ -624,16 +624,20 @@ export default function CaseStudy() {
             </div>
 
             {project.impact && project.impact.length > 0 && (
-              <div className="mt-10">
-                <p className="mb-4 text-sm tracking-wide text-gray-400 uppercase">
-                  Impact overview
-                </p>
-                <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+              // The block recruiters and summarisers read first, so it gets
+              // its own panel and near-body-size text. 14px here was the main
+              // reason it scanned worse than the prose around it.
+              <div className="mt-12 bg-neutral-50 p-5 sm:p-6">
+                <p className="mb-5 font-semibold">Impact</p>
+                <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
                   {project.impact.map((stat) => (
-                    <div key={stat.metric} className="bg-neutral-100 p-6">
-                      <p className="mb-2 font-medium">{stat.metric}</p>
-                      <p className="text-sm">
-                        {stat.description} <strong>{stat.result}</strong>
+                    <div
+                      key={stat.metric}
+                      className="bg-white p-5 ring-1 ring-neutral-200"
+                    >
+                      <p className="mb-3 text-[1.0625rem] font-semibold">{stat.metric}</p>
+                      <p className="text-[1.0625rem] leading-relaxed">
+                        {stat.description} <strong className="font-semibold">{stat.result}</strong>
                       </p>
                     </div>
                   ))}

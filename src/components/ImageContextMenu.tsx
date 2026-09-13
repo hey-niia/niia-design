@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const EMAIL = "nia.bieliavtseva@gmail.com";
 const MENU_WIDTH = 256;
@@ -29,6 +29,35 @@ function getBackgroundLuma(el: Element | null): number | null {
   return null;
 }
 
+// navigator.clipboard.writeText() can reject silently (permission denied,
+// insecure context, browser policy) without throwing synchronously, so a
+// bare fire-and-forget call can look like it did nothing. Fall back to the
+// legacy execCommand path when the async API isn't available or is refused.
+async function copyToClipboard(text: string): Promise<boolean> {
+  try {
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(text);
+      return true;
+    }
+  } catch {
+    // fall through to the legacy fallback below
+  }
+  const textarea = document.createElement("textarea");
+  textarea.value = text;
+  textarea.style.position = "fixed";
+  textarea.style.opacity = "0";
+  document.body.appendChild(textarea);
+  textarea.select();
+  let ok = false;
+  try {
+    ok = document.execCommand("copy");
+  } catch {
+    ok = false;
+  }
+  document.body.removeChild(textarea);
+  return ok;
+}
+
 // A single delegated listener for the whole site: right-clicking any <img>
 // anywhere (case study screenshots, work grid thumbnails, art pieces, tool
 // icons) shows this instead of the native menu, so nothing has to wire it up
@@ -37,6 +66,15 @@ export default function ImageContextMenu() {
   const [menu, setMenu] = useState<{ x: number; y: number; src: string; onLight: boolean } | null>(
     null,
   );
+  // Independent of `menu`: the menu closes on the very click that triggers
+  // the copy (see the window "click" listener below), which would unmount
+  // any success/failure label placed inside it before the async clipboard
+  // call resolves. This toast lives outside that lifecycle so the result is
+  // still visible after the menu is gone.
+  const [toast, setToast] = useState<{ text: string; x: number; y: number; onLight: boolean } | null>(
+    null,
+  );
+  const toastTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     const onContextMenu = (e: MouseEvent) => {
@@ -50,9 +88,17 @@ export default function ImageContextMenu() {
         src: img.currentSrc,
         onLight: luma !== null && luma > CONTRAST_LUMA_THRESHOLD,
       });
+      if (toastTimeout.current) clearTimeout(toastTimeout.current);
+      setToast(null);
     };
     window.addEventListener("contextmenu", onContextMenu);
     return () => window.removeEventListener("contextmenu", onContextMenu);
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (toastTimeout.current) clearTimeout(toastTimeout.current);
+    };
   }, []);
 
   useEffect(() => {
@@ -72,58 +118,79 @@ export default function ImageContextMenu() {
     };
   }, [menu]);
 
-  if (!menu) return null;
+  const toastNode = toast && (
+    <div
+      className={`pointer-events-none fixed z-[9999] rounded-lg border px-3 py-1.5 text-xs shadow-[0_8px_30px_rgba(0,0,0,0.35)] backdrop-blur-xl ${
+        toast.onLight ? "border-black/10 bg-black/70 text-white" : "border-white/15 bg-white/90 text-black"
+      }`}
+      style={{ left: Math.min(toast.x, window.innerWidth - 8), top: Math.min(toast.y, window.innerHeight - 8) }}
+    >
+      {toast.text}
+    </div>
+  );
+
+  if (!menu) return toastNode;
 
   const left = Math.min(menu.x, window.innerWidth - MENU_WIDTH - 8);
   const top = Math.min(menu.y, window.innerHeight - MENU_HEIGHT_ESTIMATE - 8);
 
+  const showToast = (text: string) => {
+    if (toastTimeout.current) clearTimeout(toastTimeout.current);
+    setToast({ text, x: menu.x, y: menu.y, onLight: menu.onLight });
+    toastTimeout.current = setTimeout(() => setToast(null), 1800);
+  };
+
   return (
-    <div
-      className={`fixed z-[9999] w-64 rounded-xl border p-1 text-sm text-white shadow-[0_8px_30px_rgba(0,0,0,0.35)] backdrop-blur-xl ${
-        menu.onLight ? "border-black/10 bg-black/70" : "border-white/15 bg-white/10"
-      }`}
-      style={{ left, top }}
-      onClick={(e) => e.stopPropagation()}
-    >
-      <p className="px-3 py-2 text-xs leading-snug text-white/70">
-        Glad you like my work! Email me if you want to talk.
-      </p>
-      <div className="my-1 h-px bg-white/15" />
-      <a
-        href={menu.src}
-        download
-        className="block rounded-lg px-3 py-1.5 hover:bg-white/10"
-        onClick={() => setMenu(null)}
+    <>
+      <div
+        className={`fixed z-[9999] w-64 rounded-xl border p-1 text-sm text-white shadow-[0_8px_30px_rgba(0,0,0,0.35)] backdrop-blur-xl ${
+          menu.onLight ? "border-black/10 bg-black/70" : "border-white/15 bg-white/10"
+        }`}
+        style={{ left, top }}
+        onClick={(e) => e.stopPropagation()}
       >
-        Download image
-      </a>
-      <a
-        href={menu.src}
-        target="_blank"
-        rel="noreferrer"
-        className="block rounded-lg px-3 py-1.5 hover:bg-white/10"
-        onClick={() => setMenu(null)}
-      >
-        Open image in new tab
-      </a>
-      <button
-        type="button"
-        className="block w-full rounded-lg px-3 py-1.5 text-left hover:bg-white/10"
-        onClick={() => {
-          navigator.clipboard?.writeText(menu.src);
-          setMenu(null);
-        }}
-      >
-        Copy image address
-      </button>
-      <div className="my-1 h-px bg-white/15" />
-      <a
-        href={`mailto:${EMAIL}`}
-        className="block rounded-lg px-3 py-1.5 hover:bg-white/10"
-        onClick={() => setMenu(null)}
-      >
-        Email Niia
-      </a>
-    </div>
+        <p className="px-3 py-2 text-xs leading-snug text-white/70">
+          Glad you like my work! Email me if you want to talk.
+        </p>
+        <div className="my-1 h-px bg-white/15" />
+        <a
+          href={menu.src}
+          download
+          className="block rounded-lg px-3 py-1.5 hover:bg-white/10"
+          onClick={() => setMenu(null)}
+        >
+          Download image
+        </a>
+        <a
+          href={menu.src}
+          target="_blank"
+          rel="noreferrer"
+          className="block rounded-lg px-3 py-1.5 hover:bg-white/10"
+          onClick={() => setMenu(null)}
+        >
+          Open image in new tab
+        </a>
+        <button
+          type="button"
+          className="block w-full rounded-lg px-3 py-1.5 text-left hover:bg-white/10"
+          onClick={() => {
+            void copyToClipboard(menu.src).then((ok) => {
+              showToast(ok ? "Copied image address" : "Couldn't copy — try again");
+            });
+          }}
+        >
+          Copy image address
+        </button>
+        <div className="my-1 h-px bg-white/15" />
+        <a
+          href={`mailto:${EMAIL}`}
+          className="block rounded-lg px-3 py-1.5 hover:bg-white/10"
+          onClick={() => setMenu(null)}
+        >
+          Email Niia
+        </a>
+      </div>
+      {toastNode}
+    </>
   );
 }

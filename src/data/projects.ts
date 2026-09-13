@@ -123,15 +123,20 @@ export const projects: Project[] = [
       "Redesigned a neuroscience-backed wellness app from a complex, multi-feature product into a single guided AI coach — selected as Apple's App of the Day across multiple countries.",
     client: "Client (NDA)",
     role: "Product design, design systems, UX research, App Store creative",
-    team: "Neuroscience research advisors (university partnerships)",
+    team: "Product manager, three engineers, a co-founder, and neuroscience research advisors from university partnerships",
     credits: [
-      { initials: "Me", label: "Niia Bieliavtseva", highlight: true },
-      { initials: "RA", label: "Research Advisors" },
+      { initials: "Me", label: "Niia Bieliavtseva — product design", highlight: true },
+      { initials: "PM", label: "Product manager (who also shipped code)" },
+      { initials: "iOS", label: "iOS engineer" },
+      { initials: "iOS", label: "iOS engineer" },
+      { initials: "EN", label: "Platform engineer" },
+      { initials: "CF", label: "Co-founder" },
+      { initials: "RA", label: "Neuroscience research advisors" },
     ],
     duration: "Dec 2025 – Sep 2026 · 10 months",
-    tools: ["Figma", "Claude", "Figjam", "Notion"],
+    tools: ["Figma", "Claude", "Figjam", "Notion", "Amplitude"],
     screenshots: [
-      { src: "/projects/ios-app/1.webp", alt: "Wellness AI app screens" },
+      { src: "/projects/ios-app/hero-coaching.webp", alt: "Three coaching screens" },
       { src: "/projects/ios-app/3.webp", alt: "Emotional fitness app progression screen" },
     ],
     lastUpdated: "Sep, 2026",
@@ -140,13 +145,13 @@ export const projects: Project[] = [
     impact: [
       {
         metric: "Activation",
-        description: "Replacing a home screen that made four separate asks with a coach that makes one,",
-        result: "first-memory creation rose from 39% to 60% of trial starters.",
+        description: "After swapping a four-way home screen for one coach,",
+        result: "first-memory creation rose from 39% to 60%.",
       },
       {
         metric: "Retention",
-        description: "Because opening the app now produces a reply rather than a dashboard,",
-        result: "week-one retention for paid subscribers went from 28% to 49%.",
+        description: "Opening the app gets you a reply, not a dashboard, and",
+        result: "week-one retention went from 28% to 49%.",
       },
       {
         metric: "Recognition",
@@ -157,10 +162,10 @@ export const projects: Project[] = [
     content: [
       {
         type: "image",
-        src: "/projects/ios-app/1.webp",
-        alt: "Wellness app home screen showing an AI coach prompt and a single progress bar across six neurotransmitter systems",
+        src: "/projects/ios-app/hero-coaching.webp",
+        alt: "Three coaching screens: the coach asking a question, the coach naming which neurotransmitters a logged memory affected, and the progress sheet",
         caption:
-          "One question from the coach, one progress bar for all six systems — instead of a home screen split six ways.",
+          "Ask, answer, progress. The six systems sit as dots along the top and never take over the screen.",
       },
 
       { type: "section", id: "problem-framing", title: "Problem" },
@@ -298,6 +303,13 @@ export const projects: Project[] = [
         text: "We ran a workshop: me, the PM, the iOS engineers, the founder who owns the neuroscience, and the community lead who reads every support ticket. We decided to make the app answer instead of display. You open it and land in a conversation. The coach asks how your day went, and your answer decides what comes next. The science arrives when it is relevant, instead of all at once on a dashboard.",
       },
       {
+        type: "image",
+        src: "/projects/ios-app/solution-exploration.webp",
+        alt: "A working canvas of chat-screen explorations in dark UI, with reference screens from other wellbeing apps along the bottom",
+        caption:
+          "The canvas partway through. Chat directions across the top, apps we looked at along the bottom. Most of this didn't survive.",
+      },
+      {
         type: "paragraph",
         text: "Each concept traces back to one of the three frictions:",
       },
@@ -337,6 +349,24 @@ export const projects: Project[] = [
       {
         type: "paragraph",
         text: "The card that shipped names what you are working toward, your weekly Happiness Report, and counts the memories left in whole numbers. Tap it and a sheet opens with the level bar and the report progress together. Same fix as the home screen, one size down: swap an unexplained number for a named next step.",
+      },
+
+      { type: "heading", text: "Designing so a model can build it" },
+      {
+        type: "paragraph",
+        text: "The team was small and shipping fast, and a lot of the implementation was going to be AI-assisted. That changed who I was designing the handoff for. Not only an engineer reading a spec, but a model reading the design file.",
+      },
+      {
+        type: "paragraph",
+        text: "So I built the new design system around one rule: every name in Figma has to survive the trip into code unchanged. A colour called levels/level-2 becomes Color.level2. A spacing value called spacing/32 becomes CGFloat.spacing32. Drop the folder, camel-case the rest, and that is the whole mapping.",
+      },
+      {
+        type: "paragraph",
+        text: "The payoff is that there's no translation step. An agent reads the design context straight out of Figma, sees a token name, and already knows the constant to write. No handoff document, no naming table to keep in sync, nothing for either of us to misremember. A script pulls Figma's own export and rewrites the code files in place, so the two never drift.",
+      },
+      {
+        type: "paragraph",
+        text: "I worked the same way myself — prototyping screens as working code rather than static frames, so I could feel an interaction before asking anyone to build it. The hard part isn't getting a model to produce a screen. It's making the system underneath legible enough that what it produces is right.",
       },
 
       { type: "heading", text: "What we cut" },
@@ -395,9 +425,13 @@ export const projects: Project[] = [
         text: "First-memory creation went from 39% to 60% of trial starters. The screen makes one request now, and answering it means writing a sentence instead of choosing between four modules.",
       },
       {
+        type: "paragraph",
+        text: "The session also ends. It has a purpose and a natural stopping point, which is unusual for a chat interface and was a deliberate call: the product is trying to send you back into your own life, not keep you in the app.",
+      },
+      {
         type: "image",
-        src: "/projects/ios-app/2.webp",
-        alt: "The coach tagging a shared memory to the opioid and cannabinoid systems with a plain-language explanation",
+        src: "/projects/ios-app/final-coach-tagging.webp",
+        alt: "The coach confirming a saved memory and naming which neurotransmitters it affected, with Add memory and Recall memories cards",
         caption:
           "The six systems didn't disappear, they moved behind the conversation. Log a memory and the coach names which systems it affected and why — in a sentence, not a lab report.",
       },
@@ -446,11 +480,7 @@ export const projects: Project[] = [
       },
       {
         type: "paragraph",
-        text: "The naming was the real design decision. Every token name maps to its Swift constant by one predictable transform: drop the Figma folder, camelCase the rest. levels/level-2 becomes Color.level2. spacing/32 becomes CGFloat.spacing32. A script reads Figma's own JSON export and rewrites the Swift files in place.",
-      },
-      {
-        type: "paragraph",
-        text: "That was deliberate. The team was moving toward AI-assisted implementation, so part of the design system's audience is now a model reading design context. A token that needs a translation table gets ignored. Optic and the old system ran side by side, with new screens on Optic and old ones moving over when someone touched them, so nothing needed a big rewrite.",
+        text: "Optic and the old system ran side by side. New screens used Optic, old ones moved over when somebody touched them, so nothing needed a big rewrite.",
       },
       {
         type: "image",
