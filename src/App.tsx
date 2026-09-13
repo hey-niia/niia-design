@@ -20,7 +20,9 @@ function AppContent() {
 
   return (
     <>
-      <div className={isOpen ? "sm:mr-[380px]" : undefined}>
+      <div
+        className={`transition-[margin-right] duration-300 ease-out ${isOpen ? "sm:mr-[380px]" : ""}`}
+      >
         <ScrollToTop />
         <Routes>
           <Route path="/" element={<Home />} />

@@ -1,74 +1,42 @@
 import { Link, useLocation } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
 
-type Phase = "burst" | "glow";
+const BASE_TEXT = "AI Experiments";
+const SCRAMBLE_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+const FRAME_MS = 35;
+const REVEAL_STEPS = 14;
+const SETTLE_MS = 450;
 
-type Spot = { left: string; top: string; dx: number; dy: number; rot: number };
-
-type BurstItem = Spot & { emoji: string; delay: number };
-
-const EMOJIS = ["🧪", "🤖", "✨", "💻", "🧠", "⚡️", "🛠️", "🌀"];
-
-// Eight points around the word's perimeter — top/bottom/left/right and the corners.
-const SPOTS: Spot[] = [
-  { left: "6%", top: "0%", dx: -6, dy: -2, rot: -10 },
-  { left: "50%", top: "-1%", dx: 0, dy: -2, rot: 0 },
-  { left: "94%", top: "0%", dx: 6, dy: -2, rot: 10 },
-  { left: "104%", top: "50%", dx: 8, dy: 0, rot: 8 },
-  { left: "90%", top: "108%", dx: 6, dy: 6, rot: -8 },
-  { left: "50%", top: "112%", dx: 0, dy: 8, rot: 6 },
-  { left: "10%", top: "108%", dx: -6, dy: 6, rot: 8 },
-  { left: "-4%", top: "50%", dx: -8, dy: 0, rot: -8 },
-];
-
-const EMOJI_ANIM_MS = 900;
-const GLOW_MS = 1200;
-
-// True Fisher-Yates shuffle — guarantees every order is equally likely, so
-// which emoji lands in which slot (and at which spot) is genuinely random.
-function shuffle<T>(arr: T[]): T[] {
-  const result = [...arr];
-  for (let i = result.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [result[i], result[j]] = [result[j], result[i]];
-  }
-  return result;
+function randomIdleGap() {
+  return 4000 + Math.random() * 5000;
 }
 
-const EMOJI_GAP_MS = 500;
-
-// Pause length between phases is randomized so the rhythm doesn't feel mechanical.
-function randomGap() {
-  return 500 + Math.random() * 300;
-}
-
-// Emojis launch one at a time, each from a different spot around the word, in
-// a freshly randomized order, with an even 0.5s gap between them.
-function pickBurst(): BurstItem[] {
-  const count = Math.random() < 0.5 ? 3 : 4;
-  const emojis = shuffle(EMOJIS).slice(0, count);
-  const spots = shuffle(SPOTS).slice(0, count);
-  const items: BurstItem[] = [];
-  let delay = Math.random() * 150;
-  for (let i = 0; i < count; i++) {
-    items.push({ ...spots[i], emoji: emojis[i], delay });
-    delay += EMOJI_GAP_MS;
+function scrambledFrame(frame: number): string {
+  let out = "";
+  for (let i = 0; i < BASE_TEXT.length; i++) {
+    const ch = BASE_TEXT[i];
+    if (ch === " ") {
+      out += " ";
+      continue;
+    }
+    const revealAt = (i / BASE_TEXT.length) * REVEAL_STEPS + 4;
+    out += frame >= revealAt ? ch : SCRAMBLE_CHARS[Math.floor(Math.random() * SCRAMBLE_CHARS.length)];
   }
-  return items;
+  return out;
 }
 
 /**
- * Continuously looping Easter egg on the "AI Experiments" nav link: emojis
- * pop out one by one from different spots around the word at irregular
- * intervals, a beat of nothing, the text flashes a gradient, another beat of
- * nothing, then it starts again.
+ * Intermittent Easter egg on the "AI Experiments" nav link: the text
+ * decodes itself, resolving left-to-right out of random characters in the
+ * accent color like a terminal locking in a value, then fades back to rest.
  */
 export default function AIExperimentsNavLink() {
   const { pathname } = useLocation();
   const isActive = pathname === "/ai-experiments";
-  const [phase, setPhase] = useState<Phase>("burst");
-  const [burst, setBurst] = useState<BurstItem[]>([]);
+  const [isAnimating, setIsAnimating] = useState(false);
+  const [overlayText, setOverlayText] = useState(BASE_TEXT);
   const timeouts = useRef<number[]>([]);
+  const interval = useRef<number | null>(null);
 
   useEffect(() => {
     const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -79,21 +47,28 @@ export default function AIExperimentsNavLink() {
     };
 
     const runCycle = () => {
-      const items = pickBurst();
-      const burstDuration = items[items.length - 1].delay + EMOJI_ANIM_MS;
-      const gapBeforeGlow = randomGap();
-      const gapAfterGlow = randomGap();
-      setBurst(items);
-      setPhase("burst");
-      schedule(() => setPhase("glow"), burstDuration + gapBeforeGlow);
-      schedule(runCycle, burstDuration + gapBeforeGlow + GLOW_MS + gapAfterGlow);
+      setIsAnimating(true);
+      let frame = 0;
+      const totalFrames = REVEAL_STEPS + 4;
+      interval.current = window.setInterval(() => {
+        frame++;
+        if (frame >= totalFrames) {
+          if (interval.current !== null) window.clearInterval(interval.current);
+          setOverlayText(BASE_TEXT);
+          schedule(() => setIsAnimating(false), SETTLE_MS);
+          schedule(runCycle, SETTLE_MS + randomIdleGap());
+          return;
+        }
+        setOverlayText(scrambledFrame(frame));
+      }, FRAME_MS);
     };
 
-    runCycle();
+    schedule(runCycle, randomIdleGap());
 
     return () => {
       timeouts.current.forEach((id) => window.clearTimeout(id));
       timeouts.current = [];
+      if (interval.current !== null) window.clearInterval(interval.current);
     };
   }, []);
 
@@ -102,32 +77,10 @@ export default function AIExperimentsNavLink() {
       to="/ai-experiments"
       className={`ai-nav-link ${isActive ? "nav-active" : ""}`}
     >
-      <span className="ai-nav-text-base">AI Experiments</span>
-      <span className={`ai-nav-text-glow ${phase === "glow" ? "is-active" : ""}`} aria-hidden="true">
-        AI Experiments
+      <span className={`ai-nav-text-base ${isAnimating ? "is-hidden" : ""}`}>{BASE_TEXT}</span>
+      <span className={`ai-nav-text-overlay ${isAnimating ? "is-active" : ""}`} aria-hidden="true">
+        {overlayText}
       </span>
-      {phase === "burst" && burst.length > 0 && (
-        <span className="ai-nav-burst" aria-hidden="true">
-          {burst.map((b, i) => (
-            <span
-              key={i}
-              className="ai-nav-burst-emoji"
-              style={
-                {
-                  left: b.left,
-                  top: b.top,
-                  "--dx": `${b.dx}px`,
-                  "--dy": `${b.dy}px`,
-                  "--rot": `${b.rot}deg`,
-                  animationDelay: `${b.delay}ms`,
-                } as React.CSSProperties
-              }
-            >
-              {b.emoji}
-            </span>
-          ))}
-        </span>
-      )}
     </Link>
   );
 }

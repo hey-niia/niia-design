@@ -60,8 +60,8 @@ export default function SelectionAskTooltip() {
   return (
     <button
       type="button"
-      style={{ top: pill.top, left: pill.left, transform: "translateX(-50%)" }}
-      className="fixed z-40 flex items-center gap-1.5 rounded-full bg-[#e65f2e] px-3 py-1.5 text-xs whitespace-nowrap text-white shadow-lg"
+      style={{ top: pill.top, left: pill.left }}
+      className="niia-pill-in fixed z-40 flex items-center gap-1.5 rounded-full bg-[#e65f2e]/90 px-3 py-1.5 text-xs whitespace-nowrap text-white shadow-lg backdrop-blur-sm"
       onMouseDown={(e) => {
         // Prevent the browser from collapsing the selection before onClick fires.
         e.preventDefault();
