@@ -56,7 +56,7 @@ export default function Home() {
               </a>
             </p>
             <p className="mt-2 font-mono text-xs tracking-widest text-neutral-400 uppercase">
-              Co-founder · 2021–Present
+              Co-founder · 2022–Present
             </p>
             <p className="mt-2 text-sm">
               Co-founded a product design studio for startups and teams building what's next —
@@ -71,13 +71,13 @@ export default function Home() {
               </a>
             </p>
             <p className="mt-2 font-mono text-xs tracking-widest text-neutral-400 uppercase">
-              Founder · 2016–2021
+              Founder · 2016–2022
             </p>
             <p className="mt-2 text-sm">
-              Before Overspace, founded Leap, growing it into [growth stat — TK]. As the sole
-              founder I did everything: working with designers, product and packaging design,
-              distribution, and social media — the generalist range startups still hire me for
-              today.
+              Before Overspace, I founded Leap, a health snack brand that reached 1000+ shops and
+              cafés across Ukraine. Sole founder: product and packaging design, manufacturing,
+              distribution, social, and the team I hired to run it. That generalist range is
+              still what startups hire me for.
             </p>
           </div>
         </div>
