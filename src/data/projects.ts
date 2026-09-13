@@ -154,7 +154,7 @@ export const projects: Project[] = [
     name: "Popular Wellness App's AI Pivot",
     title: "Turning six neuroscience systems into one AI coaching experience",
     summary:
-      "Rebuilt an Apple App of the Day: a neuroscience-backed wellness app, taken from a complex multi-feature product to a single guided AI coach. First-memory activation went from 39% to 60%.",
+      "Redesigned an Apple App of the Day: a neuroscience-backed wellness app, taken from a complex multi-feature product to a single guided AI coach. First-memory activation went from 39% to 60%.",
     client: "Client (NDA)",
     role: "Product design, design systems, UX research, App Store creative",
     team: "Product manager, three engineers, a co-founder, and neuroscience research advisors from university partnerships",
@@ -462,14 +462,14 @@ export const projects: Project[] = [
           "The six systems didn't disappear, they moved behind the conversation. Log a memory and the coach names which systems it affected and why — in a sentence, not a lab report.",
       },
 
-      { type: "heading", text: "2. The progress page, rebuilt as one place" },
+      { type: "heading", text: "2. The progress page, redesigned as one place" },
       {
         type: "paragraph",
         text: "The old Stats tab opened on a chart of a composite score across the week, with a paragraph underneath explaining what you were looking at. Below that came score-versus-neurotransmitter breakdowns. The rest of your progress lived on three other tabs.",
       },
       {
         type: "paragraph",
-        text: "The rebuilt You page follows what someone actually wants to know: who you are, how far you have come, how your balance looks, and what to read next. The charts are still there, just not first. Anything that isn't obvious has an info icon that explains it in place.",
+        text: "The redesigned You page follows what someone actually wants to know: who you are, how far you have come, how your balance looks, and what to read next. The charts are still there, just not first. Anything that isn't obvious has an info icon that explains it in place.",
       },
       {
         type: "before-after",
@@ -478,7 +478,7 @@ export const projects: Project[] = [
         beforeAlt:
           "The old Stats tab: a composite score chart across a week, with a paragraph explaining the chart underneath it",
         afterAlt:
-          "The rebuilt You page: profile, level and streaks, molecular balance across six systems, then joyalties",
+          "The redesigned You page: profile, level and streaks, molecular balance across six systems, then joyalties",
         maxWidth: 360,
         viewportHeight: 782,
         caption:
