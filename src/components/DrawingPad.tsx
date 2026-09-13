@@ -187,7 +187,7 @@ export default function DrawingPad() {
           onPointerDown={handlePointerDown}
           onPointerMove={handlePointerMove}
           onPointerUp={handlePointerUp}
-          onPointerLeave={handlePointerUp}
+          onPointerCancel={handlePointerUp}
           className="h-full w-full touch-none"
         />
 
@@ -198,7 +198,7 @@ export default function DrawingPad() {
             className="absolute inset-0 flex flex-col items-center justify-center gap-2 font-mono text-xs tracking-widest text-black/70 uppercase"
           >
             <span>I love to draw and have been doing it all my life.</span>
-            <span>I love to inspire other people.</span>
+            <span>My mission is to inspire other people.</span>
             <span>Click to start drawing.</span>
           </button>
         )}
