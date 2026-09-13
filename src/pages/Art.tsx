@@ -9,11 +9,10 @@ export default function Art() {
 
       <header className="border-b py-8">
         <h1 className="font-black tracking-tight text-4xl lg:text-6xl">Art</h1>
+        <p className="mt-4 max-w-3xl text-neutral-500">A collection of drawings, on the side.</p>
       </header>
 
       <section className="py-8">
-        <p className="mb-8 italic">A collection of drawings, on the side.</p>
-
         <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
           {Array.from({ length: PLACEHOLDER_COUNT }).map((_, i) => (
             <div
