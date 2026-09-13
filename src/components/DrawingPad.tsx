@@ -2,14 +2,36 @@ import { useRef, useState, useEffect } from "react";
 
 type Point = { x: number; y: number };
 
+type Brush = {
+  id: string;
+  label: string;
+  maxWidth: number;
+  taperLength: number;
+  opacity: number;
+  dotSize: number;
+};
+
+type Stroke = {
+  points: Point[];
+  maxWidth: number;
+  taperLength: number;
+  opacity: number;
+};
+
 const STROKE_COLOR = "#000000";
 const BACKGROUND_COLOR = "#f07c57";
-// Matches the ink used on floraghnassia.com's "Now your turn" drawing pad —
-// a constant-width trail that tapers to a point over its last 100px, so the
-// tip you're actively drawing stays thin while everything behind it settles
-// to full weight. Both are in CSS px; scaled by devicePixelRatio at draw time.
-const MAX_STROKE_WIDTH = 10;
-const TAPER_LENGTH = 100;
+// Widths/taper lengths are in CSS px; scaled by devicePixelRatio at draw time.
+// The "Pen" preset matches the ink used on floraghnassia.com's "Now your
+// turn" drawing pad — a constant-width trail that tapers to a point over its
+// last 100px, so the tip you're actively drawing stays thin while everything
+// behind it settles to full weight.
+const BRUSHES: Brush[] = [
+  { id: "fine", label: "Fine", maxWidth: 3, taperLength: 20, opacity: 1, dotSize: 8 },
+  { id: "pen", label: "Pen", maxWidth: 10, taperLength: 100, opacity: 1, dotSize: 12 },
+  { id: "marker", label: "Marker", maxWidth: 18, taperLength: 40, opacity: 1, dotSize: 16 },
+  { id: "brush", label: "Brush", maxWidth: 26, taperLength: 180, opacity: 1, dotSize: 20 },
+  { id: "highlighter", label: "Highlighter", maxWidth: 34, taperLength: 0, opacity: 0.35, dotSize: 24 },
+];
 
 function distance(a: Point, b: Point) {
   return Math.hypot(b.x - a.x, b.y - a.y);
@@ -30,6 +52,7 @@ function renderTaperedStroke(
   points: Point[],
   maxWidth: number,
   taperLength: number,
+  opacity: number,
 ) {
   if (points.length < 2) return;
 
@@ -45,6 +68,7 @@ function renderTaperedStroke(
   ctx.strokeStyle = STROKE_COLOR;
   ctx.lineCap = "round";
   ctx.lineJoin = "round";
+  ctx.globalAlpha = opacity;
 
   let travelled = 0;
   for (let i = 0; i < points.length - 1; i++) {
@@ -62,18 +86,23 @@ function renderTaperedStroke(
 
     travelled += segLen;
   }
+
+  ctx.globalAlpha = 1;
 }
 
 export default function DrawingPad() {
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const strokesRef = useRef<Point[][]>([]);
-  const currentStrokeRef = useRef<Point[] | null>(null);
+  const strokesRef = useRef<Stroke[]>([]);
+  const currentStrokeRef = useRef<Stroke | null>(null);
   const dprRef = useRef(1);
   const [hasStarted, setHasStarted] = useState(false);
+  const [brush, setBrush] = useState<Brush>(BRUSHES[1]);
+  const brushRef = useRef(brush);
+  brushRef.current = brush;
 
-  const toPixels = (stroke: Point[], canvas: HTMLCanvasElement) =>
-    stroke.map((p) => ({ x: p.x * canvas.width, y: p.y * canvas.height }));
+  const toPixels = (points: Point[], canvas: HTMLCanvasElement) =>
+    points.map((p) => ({ x: p.x * canvas.width, y: p.y * canvas.height }));
 
   const redrawAll = () => {
     const canvas = canvasRef.current;
@@ -83,14 +112,25 @@ export default function DrawingPad() {
     ctx.fillStyle = BACKGROUND_COLOR;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    const maxWidth = MAX_STROKE_WIDTH * dprRef.current;
-    const taperLength = TAPER_LENGTH * dprRef.current;
-
+    const dpr = dprRef.current;
     for (const stroke of strokesRef.current) {
-      renderTaperedStroke(ctx, toPixels(stroke, canvas), maxWidth, taperLength);
+      renderTaperedStroke(
+        ctx,
+        toPixels(stroke.points, canvas),
+        stroke.maxWidth * dpr,
+        stroke.taperLength * dpr,
+        stroke.opacity,
+      );
     }
     if (currentStrokeRef.current) {
-      renderTaperedStroke(ctx, toPixels(currentStrokeRef.current, canvas), maxWidth, taperLength);
+      const stroke = currentStrokeRef.current;
+      renderTaperedStroke(
+        ctx,
+        toPixels(stroke.points, canvas),
+        stroke.maxWidth * dpr,
+        stroke.taperLength * dpr,
+        stroke.opacity,
+      );
     }
   };
 
@@ -124,17 +164,23 @@ export default function DrawingPad() {
 
   const handlePointerDown = (e: React.PointerEvent<HTMLCanvasElement>) => {
     canvasRef.current?.setPointerCapture(e.pointerId);
-    currentStrokeRef.current = [pointFromEvent(e)];
+    const activeBrush = brushRef.current;
+    currentStrokeRef.current = {
+      points: [pointFromEvent(e)],
+      maxWidth: activeBrush.maxWidth,
+      taperLength: activeBrush.taperLength,
+      opacity: activeBrush.opacity,
+    };
   };
 
   const handlePointerMove = (e: React.PointerEvent<HTMLCanvasElement>) => {
     if (!currentStrokeRef.current) return;
-    currentStrokeRef.current.push(pointFromEvent(e));
+    currentStrokeRef.current.points.push(pointFromEvent(e));
     redrawAll();
   };
 
   const handlePointerUp = () => {
-    if (currentStrokeRef.current && currentStrokeRef.current.length > 1) {
+    if (currentStrokeRef.current && currentStrokeRef.current.points.length > 1) {
       strokesRef.current.push(currentStrokeRef.current);
     }
     currentStrokeRef.current = null;
@@ -161,35 +207,60 @@ export default function DrawingPad() {
   };
 
   return (
-    <section id="draw" className="-mx-4 -mb-24 mt-20 bg-[#f07c57] px-4 py-16 md:mt-32 md:py-24">
-      {hasStarted && (
-        <div className="mb-2 flex justify-end gap-x-6">
-          <button
-            type="button"
-            onClick={handleClear}
-            className="font-mono text-xs tracking-widest text-black/60 uppercase transition-colors duration-150 hover:text-black"
-          >
-            Clear
-          </button>
-          <button
-            type="button"
-            onClick={handleDownload}
-            className="font-mono text-xs tracking-widest text-black/60 uppercase transition-colors duration-150 hover:text-black"
-          >
-            Download
-          </button>
-        </div>
-      )}
-
-      <div ref={containerRef} className="relative h-[420px] w-full md:h-[560px]">
+    <section id="draw" className="-mx-4 -mb-24 mt-20 bg-[#f07c57] md:mt-32">
+      <div ref={containerRef} className="relative h-[550px] w-full select-none md:h-[750px]">
         <canvas
           ref={canvasRef}
-          onPointerDown={handlePointerDown}
+          onPointerDown={(e) => {
+            e.preventDefault();
+            handlePointerDown(e);
+          }}
           onPointerMove={handlePointerMove}
           onPointerUp={handlePointerUp}
           onPointerCancel={handlePointerUp}
-          className="h-full w-full touch-none"
+          className="h-full w-full touch-none select-none"
         />
+
+        {hasStarted && (
+          <div className="pointer-events-none absolute top-4 right-4 flex gap-x-6 md:top-6 md:right-6">
+            <button
+              type="button"
+              onClick={handleClear}
+              className="pointer-events-auto font-mono text-xs tracking-widest text-black/60 uppercase transition-colors duration-150 hover:text-black"
+            >
+              Clear
+            </button>
+            <button
+              type="button"
+              onClick={handleDownload}
+              className="pointer-events-auto font-mono text-xs tracking-widest text-black/60 uppercase transition-colors duration-150 hover:text-black"
+            >
+              Download
+            </button>
+          </div>
+        )}
+
+        {hasStarted && (
+          <div className="pointer-events-none absolute bottom-20 left-1/2 flex -translate-x-1/2 items-center gap-x-3 md:bottom-24 md:gap-x-4">
+            {BRUSHES.map((b) => (
+              <button
+                key={b.id}
+                type="button"
+                aria-label={b.label}
+                aria-pressed={brush.id === b.id}
+                onClick={() => setBrush(b)}
+                className={`pointer-events-auto flex h-9 w-9 items-center justify-center rounded-full transition-colors md:h-10 md:w-10 ${
+                  brush.id === b.id ? "bg-black/15" : "hover:bg-black/10"
+                }`}
+              >
+                <span
+                  className="rounded-full bg-black"
+                  style={{ width: b.dotSize, height: b.dotSize, opacity: b.opacity }}
+                />
+              </button>
+            ))}
+          </div>
+        )}
 
         {!hasStarted && (
           <button
