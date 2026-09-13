@@ -187,6 +187,62 @@ Layout failures read as carelessness about the work itself.
   "Designing so a model can build it" tells the reader nothing; "Optic, the
   design system" tells them whether to keep reading.
 
+### Screenshots
+
+The house style, so a page of twenty screenshots reads as one set.
+
+- **One corner radius on every screenshot, and none on the panel behind it.**
+  The rounded thing is the screenshot; the grey field it sits on runs square to
+  the column edges. Mixing radii — or rounding some screenshots and not others —
+  is the single most obvious tell that a page was assembled in pieces.
+- **The grey panel is for screenshots that have no background of their own.** An
+  asset that already carries one (a composite you built, an exported canvas with
+  its own fill) sits directly on the page. Panelling it puts a box inside a box.
+- **Check the alpha channel before you place anything.** A frame exported without
+  a fill is transparent, and light-coloured content on transparent is invisible
+  on a white page — it will look like a broken image, not a design choice. Fix it
+  by compositing a background *into* the asset, with its own padding, so it reads
+  as a contained block. Don't reach for a dark panel: that spans the full column
+  and reads as a band across the page.
+- **Anything taller than about 700px scrolls inside a fixed window.** A phone
+  screen at column width becomes 1,500–2,000px of page, and three of them make a
+  case study feel endless. Fix the window height to the shorter of the two states
+  you are comparing, and let the longer one run — how far a screen scrolls is
+  often part of what you are showing.
+- **A scrolling frame needs a visible affordance.** A pill at the bottom edge over
+  a short gradient, inside the frame rather than below it, so it doesn't compete
+  with a caption or a toggle. Fade it out once the reader reaches the end. Nothing
+  else on the page signals that a screenshot moves.
+- **Rename an asset whenever its contents change.** Same filename plus new bytes
+  means browsers keep serving the old version, and you will waste a cycle
+  debugging a design problem that is really a cache. Give it a name that says
+  what it is while you're there.
+
+### Annotated screenshots
+
+- **One per case study.** It works because it does forensic work — proving a claim
+  about a screen the reader has never seen. Everywhere else the screenshot is the
+  reward after the argument, and markers slow it down. A second one halves the
+  effect of the first.
+- **Position markers as a fraction of the image, not the frame.** In a scrolling
+  window a percentage resolves against the window's fixed height, and every marker
+  silently bunches into the top third. Take the fractions from the real layer
+  offsets in the design file rather than eyeballing them, so a re-export at a
+  different scale doesn't move them.
+- **The note opens next to its marker.** A legend under a full-length screenshot
+  ends up a thousand pixels from the thing it describes and reads as a row of
+  unexplained circles.
+- **Repeat the notes as a numbered list below.** That's what carries the content
+  for screen readers, narrow screens and print.
+
+### When a set is too small to read
+
+Six cards side by side at column width render about 140px tall — technically
+present, actually useless. Either cut to the two or three that make the point at
+a legible size, or animate the set: a slow marquee that pauses on hover, showing
+two or three at full size. Honour `prefers-reduced-motion`, and expose the strip
+as one labelled figure rather than N unlabelled images.
+
 ---
 
 ## 3. Tone of voice
@@ -297,8 +353,15 @@ aren't failures, they're out of scope.
 - [ ] Sub-headings outrank body text in size and weight (a sub-head rendering
       smaller than the paragraph under it reads as broken)
 - [ ] Body measure capped (~45-75 characters); lists use hanging indent
-- [ ] Tall screenshots contained in a scrolling window, not rendered at full
-      height inline
+- [ ] Every screenshot uses the same corner radius; the panel behind it has none
+- [ ] Panels only on screenshots with no background of their own
+- [ ] Alpha channel checked — no transparent asset left to vanish on white
+- [ ] Tall screenshots scroll inside a fixed window, with a visible hint that
+      fades out at the end
 - [ ] Every image at least 2x its rendered width at the size it actually shows
+- [ ] Assets renamed whenever their contents changed (cache serves stale bytes)
+- [ ] At most one annotated screenshot, with markers positioned against the
+      image and repeated as a numbered list
+- [ ] No set rendered too small to read — cut it down or animate it
 - [ ] Identifiers and token names set as inline code
 - [ ] No argument made in two different sections
