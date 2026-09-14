@@ -28,10 +28,9 @@ export default function Home() {
             I help startups and scale-ups design complex AI-driven products people actually
             use.
           </p>
-          <p className="text-3xl">
-            My work sits at the intersection of visual arts and business — a generalist range
-            shaped by founding an FMCG brand and co-founding a product design studio, now
-            sharpened by building with AI.
+          <p>
+            My work sits at the intersection of visual arts and business, shaped by founding
+            two companies — now sharpened by building with AI.
           </p>
         </div>
       </section>
