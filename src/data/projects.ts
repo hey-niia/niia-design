@@ -1008,7 +1008,7 @@ export const projects: Project[] = [
     // launch metrics, or client quote — only the two original descriptive paragraphs.
     // The section structure below is applied honestly on top of that; nothing beyond
     // what was already written is invented. See TODO near Results.
-    slug: "digitalscreen",
+    slug: "other-project",
     category: "Website",
     name: "Other Designs",
     title: "Corporate website for a digital signage company",
@@ -1027,7 +1027,7 @@ export const projects: Project[] = [
         tall: true,
       },
     ],
-    lastUpdated: "2023",
+    lastUpdated: "2023–2026",
     content: [
       { type: "section", id: "problem", title: "Problem" },
       {

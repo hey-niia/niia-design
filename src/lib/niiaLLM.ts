@@ -149,7 +149,7 @@ const ANSWERS: CannedAnswer[] = [
     keywords: ["digital screen co", "signage website", "corporate website", "signage company"],
     answer:
       "Digital Screen Co. was a corporate website I built from zero for a digital signage company — information architecture, layout system, and visual identity, all built to explain a technical product simply. About a month, start to finish.",
-    cards: projectCard("digitalscreen"),
+    cards: projectCard("other-project"),
   },
   {
     keywords: ["hirement", "hiring tool", "hiring platform", "recruiting", "interview flow", "recruitment"],
