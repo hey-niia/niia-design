@@ -3,6 +3,21 @@ import type { Project } from "../data/projects";
 import { FRAME_RADIUS } from "./ScreenshotFrame";
 import { useAutoplayInView } from "../lib/useAutoplayInView";
 
+// The meta line is all-caps (via the parent's `uppercase` class) except "iOS",
+// which keeps its brand casing — wrap it in `normal-case` so it survives the
+// transform instead of becoming "IOS".
+function renderMetaPart(part: string) {
+  const iosIndex = part.toLowerCase().indexOf("ios");
+  if (iosIndex === -1) return part;
+  return (
+    <>
+      {part.slice(0, iosIndex)}
+      <span className="normal-case">iOS</span>
+      {part.slice(iosIndex + 3)}
+    </>
+  );
+}
+
 export default function WorkGridCard({
   project,
   titleClassName,
@@ -14,9 +29,7 @@ export default function WorkGridCard({
   const { slug, name, category, client, lastUpdated, screenshots, coverVideo } = project;
   const cover = screenshots[0];
   const videoRef = useAutoplayInView<HTMLVideoElement>();
-  // First tag only (e.g. "iOS app, AI" → "iOS app"). Rendered verbatim, never
-  // through a CSS `uppercase` transform — categories are pre-cased in the data
-  // (lowercase generic terms, "iOS" kept as-is) so that casing survives on screen.
+  // First tag only (e.g. "iOS App, AI" → "iOS App").
   const categoryLabel = category.split(",")[0].trim();
   // Some projects reuse the category as a stand-in `client` (e.g. Hirement, which
   // has no nameable client) — drop it from the meta line when it just repeats.
@@ -50,8 +63,13 @@ export default function WorkGridCard({
       </div>
       <div className="mt-3 flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between sm:gap-4">
         <p className={titleClassName}>{name}</p>
-        <p className="shrink-0 font-mono text-xs tracking-widest text-neutral-400">
-          {metaParts.join(" · ")}
+        <p className="shrink-0 font-mono text-xs tracking-widest text-neutral-400 uppercase">
+          {metaParts.map((part, i) => (
+            <span key={i}>
+              {i > 0 && " · "}
+              {renderMetaPart(part)}
+            </span>
+          ))}
         </p>
       </div>
     </Link>
