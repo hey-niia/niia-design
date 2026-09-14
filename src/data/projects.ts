@@ -856,6 +856,32 @@ export const projects: Project[] = [
         caption: "After each round, candidates rate the interview back — anonymously, per question.",
       },
 
+      { type: "heading", text: "Getting there" },
+      {
+        type: "paragraph",
+        text: "None of the screens above started that way. Early passes were grayscale wireframes and competing color directions before purple stuck, and the loops list went through a real structural change — from one flat table to grouped by role — once it was clear a recruiter would realistically have more than one open loop at a time.",
+      },
+      {
+        type: "before-after",
+        before: "/projects/hirement/7.png",
+        after: "/projects/hirement/8.png",
+        beforeAlt: "Black-and-white wireframe of an interview question screen",
+        afterAlt: "Blue color exploration of the same interview question screen",
+        beforeLabel: "Wireframe",
+        afterLabel: "Color exploration",
+        caption: "Structure got worked out in grayscale before color entered the conversation.",
+      },
+      {
+        type: "before-after",
+        before: "/projects/hirement/9.png",
+        after: "/projects/hirement/2.png",
+        beforeAlt: "Early loops list as a single flat table",
+        afterAlt: "Final loops list grouped by role",
+        beforeLabel: "Early version",
+        afterLabel: "Final",
+        caption: "The loops list itself changed shape once roles, not just candidates, needed to be scannable.",
+      },
+
       { type: "section", id: "results", title: "Results" },
       {
         type: "paragraph",
