@@ -24,9 +24,9 @@ export default function Home() {
 
       <section id="about" className="flex justify-center pt-6 md:pt-24">
         <div className="max-w-xl">
-          <p className="text-[32px] leading-tight">
+          <p className="text-2xl">
             I help companies design ambitious products people actually use. I've built companies
-            before I built interfaces. Systems thinking is the lens; AI is the tool.
+            before I built interfaces. Systems thinking is the lens, AI is the tool.
           </p>
         </div>
       </section>
