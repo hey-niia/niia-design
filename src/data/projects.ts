@@ -869,10 +869,10 @@ export const projects: Project[] = [
         afterAlt: "Blue color exploration of the same interview question screen",
         beforeLabel: "Wireframe",
         afterLabel: "Color exploration",
-        // Desktop screens (1360×960) — wide enough to read, tall enough that
-        // one viewport fits with no scroll.
+        // Cropped to actual content bounds (both frames had dead space below
+        // the UI baked in). Sized to the taller of the two at this width.
         maxWidth: 896,
-        viewportHeight: 634,
+        viewportHeight: 610,
         caption: "Structure got worked out in grayscale before color entered the conversation.",
       },
       {
