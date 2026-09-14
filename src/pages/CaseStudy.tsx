@@ -6,11 +6,13 @@ import BeforeAfter from "../components/BeforeAfter";
 import CardCarousel from "../components/CardCarousel";
 import Nav from "../components/Nav";
 import ResearchQuotes from "../components/ResearchQuotes";
+import { FRAME_RADIUS } from "../components/ScreenshotFrame";
 import ScrollableImage from "../components/ScrollableImage";
 import WiggleText from "../components/WiggleText";
 import WorkGridCard from "../components/WorkGridCard";
 import { useNiiaChat } from "../context/useNiiaChat";
 import { splitIntoColumns } from "../lib/columns";
+import { useAutoplayInView } from "../lib/useAutoplayInView";
 
 // Keyed by the exact strings used in `tools` across projects.ts.
 const TOOL_ICONS: Record<string, string> = {
@@ -39,18 +41,38 @@ function ToolList({ tools }: { tools: string[] }) {
 
 // Placeholder initials, not real photos — see the `Credit` type for why.
 function CreditAvatars({ credits }: { credits: Credit[] }) {
+  // `group-hover` alone never fires on touch, so the label was unreachable on
+  // mobile — tapping an avatar now toggles it too, closing on an outside tap.
+  const [activeIndex, setActiveIndex] = useState<number | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (activeIndex === null) return;
+    const onPointerDown = (e: PointerEvent) => {
+      if (!containerRef.current?.contains(e.target as Node)) setActiveIndex(null);
+    };
+    window.addEventListener("pointerdown", onPointerDown);
+    return () => window.removeEventListener("pointerdown", onPointerDown);
+  }, [activeIndex]);
+
   return (
-    <div className="mt-2 flex -space-x-2">
+    <div ref={containerRef} className="mt-2 flex -space-x-2">
       {credits.map((credit, i) => (
         <div key={i} className="group relative">
-          <div
+          <button
+            type="button"
+            onClick={() => setActiveIndex(activeIndex === i ? null : i)}
             className={`flex h-9 w-9 items-center justify-center rounded-full border-2 border-white text-xs font-medium text-white ${
               credit.highlight ? "bg-[#e65f2e]" : "bg-black"
             }`}
           >
             {credit.initials}
-          </div>
-          <span className="pointer-events-none absolute -top-9 left-1/2 -translate-x-1/2 rounded bg-black px-2 py-1 text-xs whitespace-nowrap text-white opacity-0 transition-opacity group-hover:opacity-100">
+          </button>
+          <span
+            className={`pointer-events-none absolute -top-9 left-1/2 -translate-x-1/2 rounded bg-black px-2 py-1 text-xs whitespace-nowrap text-white transition-opacity group-hover:opacity-100 ${
+              activeIndex === i ? "opacity-100" : "opacity-0"
+            }`}
+          >
             {credit.label}
           </span>
         </div>
@@ -324,9 +346,13 @@ function Block({
   onImageClick: (src: string) => void;
   zoomCursor: ZoomCursorHandlers;
 }) {
+  const videoRef = useAutoplayInView<HTMLVideoElement>();
+
   switch (block.type) {
     case "paragraph":
-      return <p className="my-4 max-w-[46rem]">{withCode(block.text)}</p>;
+      return (
+        <p className="my-4 max-w-[46rem] text-[1.125rem] leading-[1.8]">{withCode(block.text)}</p>
+      );
     case "heading":
       return (
         <h3 className="mt-12 mb-3 max-w-[46rem] text-[1.375rem] font-semibold">{block.text}</h3>
@@ -341,7 +367,7 @@ function Block({
       return (
         // list-outside so wrapped lines align with the first line's text
         // instead of sliding back under the bullet.
-        <ul className="my-4 max-w-[46rem] list-outside list-disc space-y-2 pl-5">
+        <ul className="my-4 max-w-[46rem] list-outside list-disc space-y-2 pl-5 text-[1.125rem] leading-[1.8]">
           {block.items.map((item, i) => (
             <li key={i} className="pl-1">
               {withCode(item)}
@@ -357,7 +383,7 @@ function Block({
               <p className="w-12 shrink-0 font-mono text-4xl leading-none text-neutral-200">
                 {String(i + 1).padStart(2, "0")}
               </p>
-              <p className="pt-1">{item}</p>
+              <p className="pt-1 text-[1.125rem] leading-[1.8]">{item}</p>
             </div>
           ))}
         </div>
@@ -365,7 +391,7 @@ function Block({
     case "quote":
       return (
         <blockquote className="my-6 max-w-[46rem] border-l-2 pl-4 italic">
-          <p>“{block.text}”</p>
+          <p className="text-[1.125rem] leading-[1.8]">“{block.text}”</p>
           <footer className="mt-2 text-sm not-italic">— {block.attribution}</footer>
         </blockquote>
       );
@@ -427,6 +453,24 @@ function Block({
               {block.caption}
             </p>
           )}
+        </div>
+      );
+    case "video":
+      return (
+        <div className="my-4">
+          <video
+            ref={videoRef}
+            src={block.src}
+            poster={block.poster}
+            aria-label={block.alt}
+            autoPlay
+            loop
+            muted
+            playsInline
+            className={`block w-full ${FRAME_RADIUS} ring-1 ring-black/10`}
+            style={{ maxWidth: block.maxWidth ?? 380, margin: "0 auto" }}
+          />
+          {block.caption && <p className="mt-2 text-sm italic text-gray-400">{block.caption}</p>}
         </div>
       );
     case "annotated-image":

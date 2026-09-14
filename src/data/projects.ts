@@ -24,6 +24,16 @@ export type ContentBlock =
       /** Scroll the image inside a fixed-height window instead of running full height. */
       viewportHeight?: number;
     }
+  /** Silent, autoplaying, looping screen capture — no controls, no lightbox. */
+  | {
+      type: "video";
+      src: string;
+      /** Shown while the video loads, and to browsers/crawlers that don't play it. */
+      poster?: string;
+      alt: string;
+      caption?: string;
+      maxWidth?: number;
+    }
   /** Screenshot with interactive numbered markers — see AnnotatedImage. */
   | {
       type: "annotated-image";
@@ -117,6 +127,9 @@ export interface Project {
   duration: string;
   tools: string[];
   screenshots: ProjectScreenshot[];
+  /** Looping muted clip shown on the work grid card instead of the static cover
+   *  screenshot — `screenshots[0]` stays as its poster frame and alt text. */
+  coverVideo?: string;
   lastUpdated: string;
   /** Impact Overview: 2-3 stat cards surfaced at the top of the case study. */
   impact?: ImpactStat[];
@@ -169,6 +182,7 @@ export const projects: Project[] = [
     ],
     duration: "Dec 2025 – Sep 2026 · 10 months",
     tools: ["Figma", "Claude", "Notion", "Amplitude"],
+    coverVideo: "/projects/ios-app/hero-coaching.mp4",
     screenshots: [
       { src: "/projects/ios-app/hero-coaching.webp", alt: "Three coaching screens" },
       { src: "/projects/ios-app/3.webp", alt: "Emotional fitness app progression screen" },
@@ -195,9 +209,10 @@ export const projects: Project[] = [
     ],
     content: [
       {
-        type: "image",
-        src: "/projects/ios-app/hero-coaching.webp",
-        alt: "Three coaching screens: the coach asking a question, the coach naming which neurotransmitters a logged memory affected, and the progress sheet",
+        type: "video",
+        src: "/projects/ios-app/hero-coaching.mp4",
+        poster: "/projects/ios-app/hero-coaching.webp",
+        alt: "Screen recording of the coaching flow: asking a question, logging a memory, naming which neurotransmitters it affected, and the progress sheet",
         caption:
           "Ask, answer, progress. The six systems sit as dots along the top and never take over the screen.",
       },
