@@ -752,17 +752,17 @@ export const projects: Project[] = [
     ],
   },
   {
-    // Rewritten against case-study.md. Same caveat as digitalscreen: no documented
-    // research process, named frictions, usage metrics, or quote exist for this
-    // project — only the two original descriptive paragraphs. Structure is applied
-    // honestly on top of that. See TODO near Results.
+    // Rewritten against case-study.md. No formal research phase, launch, or metrics
+    // exist for this project — the founder's domain expertise stood in for research,
+    // and the engagement ended at design completion, not launch. Framed honestly as
+    // that rather than inventing interviews, a comparative study, or usage numbers.
     slug: "hirement",
-    category: "AI Tooling, Web App",
+    category: "Web App",
     name: "Hirement",
     title: "Collaborative hiring flow platform",
     summary:
-      "AI-first hiring tool — interaction design and prototyping across the end-to-end recruiting flow.",
-    client: "Hirement",
+      "Hiring tool — interaction design and prototyping across the end-to-end recruiting flow.",
+    client: "Web App",
     role: "Product design, brand identity, design systems",
     team: "Founder",
     duration: "2.5 months",
@@ -780,6 +780,16 @@ export const projects: Project[] = [
         text: "Each hiring flow needed multiple rounds, each with its own question types — checklists, ratings, open-ended — so different interviewers could evaluate the same candidate consistently, with notes and a 1–5 star score.",
       },
 
+      { type: "section", id: "approach", title: "Approach" },
+      {
+        type: "paragraph",
+        text: "There was no research budget and no team beyond the two of us. The input instead was the founder's own years working inside recruiting — he already knew where interview loops break down: inconsistent rubrics, notes that live in someone's head instead of the record, no shared signal across rounds. My job was to turn that domain knowledge into a product model, not validate it from scratch.",
+      },
+      {
+        type: "paragraph",
+        text: "That meant working in short, direct cycles with the founder as both stakeholder and subject-matter expert — sketch a flow, walk it against a real hiring scenario he'd run before, adjust, repeat — rather than a separate discovery phase ahead of design.",
+      },
+
       { type: "section", id: "solution", title: "Solution" },
       {
         type: "paragraph",
@@ -795,46 +805,66 @@ export const projects: Project[] = [
       },
 
       { type: "section", id: "final-design", title: "Final design" },
-      { type: "heading", text: "A flow builder for structured hiring" },
       {
         type: "paragraph",
-        text: "The flow builder, scoring screens, and design system shipped as one coherent product — built for hiring teams who need consistency across rounds and interviewers, not just a nicer form.",
+        text: "The flow builder, scoring screens, and design system came together as one coherent product design — built for hiring teams who need consistency across rounds and interviewers, not just a nicer form. It had two sides: the recruiter running the loop, and the candidate going through it.",
       },
+      { type: "heading", text: "The recruiter side" },
       {
         type: "gallery",
         images: [
           {
-            src: "/projects/hirement/1.png",
-            alt: "Hirement interview flow builder",
-            caption: "Each hiring flow is built as a sequence of rounds, not one long form.",
-          },
-          {
             src: "/projects/hirement/2.png",
-            alt: "Hirement candidate evaluation screen",
-            caption: "Interviewers evaluate candidates with notes alongside a 1–5 star score.",
+            alt: "Hirement loop dashboard showing candidates for a role",
+            caption:
+              "Each role's loop tracks every candidate's status, interviewers, and running average rating in one table.",
           },
           {
             src: "/projects/hirement/3.png",
-            alt: "Hirement scoring interface",
-            caption: "Scoring stays consistent across interviewers, even across question types.",
+            alt: "Hirement edit interview loop modal",
+            caption:
+              "Editing a loop after interviews are already scheduled — role, candidates, and invite details stay in one place.",
           },
         ],
       },
       {
         type: "image",
         src: "/projects/hirement/4.png",
-        alt: "Hirement design system",
-        caption: "A lightweight design system carries the same clarity across every screen.",
+        alt: "Hirement interview screen with candidate profile lookup open",
+        caption:
+          "Mid-interview, an interviewer can pull up the candidate's full profile without losing their place in the question.",
+      },
+
+      { type: "heading", text: "The candidate side" },
+      {
+        type: "paragraph",
+        text: "Hirement wasn't one-directional. Candidates got their own guide before their first round — who they'd meet, how scoring worked, what to expect on interview day — and after each round, they rated the interview itself, anonymously, question by question. That reciprocal loop was the founder's idea: a way to catch a bad interview experience before it became a bad review, not just a way to score candidates.",
+      },
+      {
+        type: "image",
+        src: "/projects/hirement/5.png",
+        alt: "Hirement candidate interview overview guide",
+        viewportHeight: 620,
+        caption:
+          "Before their first round, candidates see who's interviewing them, how scoring works, and what to expect.",
+      },
+      {
+        type: "image",
+        src: "/projects/hirement/6.png",
+        alt: "Hirement candidate feedback form",
+        viewportHeight: 620,
+        caption: "After each round, candidates rate the interview back — anonymously, per question.",
       },
 
       { type: "section", id: "results", title: "Results" },
       {
         type: "paragraph",
-        text: "In 2.5 months, working solo alongside the founder, this took Hirement from an early idea to a shipped product with its own logo, interface, and design system.",
+        text: "In 2.5 months, working solo alongside the founder, this took Hirement from an early idea to a complete product design: a flow builder, scoring system, and design system built to hold together as the product scaled past the first few hiring teams.",
       },
-      // TODO: no usage metrics, launch numbers, or a client/user quote are documented
-      // for this project yet — add them here if/when available, per case-study.md's
-      // Results section. Don't invent numbers to fill the gap.
+      {
+        type: "paragraph",
+        text: "The project stopped there — Hirement didn't move into engineering or launch. What's left is the design itself: a hiring flow built end to end, from the recruiter's loop builder to the candidate's own guide and feedback loop.",
+      },
     ],
   },
   {
