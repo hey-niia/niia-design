@@ -643,127 +643,215 @@ export const projects: Project[] = [
     ],
   },
   {
-    slug: "enterprise-dashboard",
-    category: "Dashboard, Web App, AI",
-    name: "Enterprise Dashboard",
-    title: "Enterprise operations dashboard for digital screen deployment",
+    // Rewritten against case-study.md, replacing the anonymized "Enterprise Dashboard"
+    // stub with the real, named engagement — the client agreed to be named and shown.
+    // Sourced from real discovery-call transcripts, the Aug 11, 2025 kickoff notes, and
+    // a real Airtable job-record export (public/projects/connectiq/airtable-job-record.webp
+    // started life as a PDF print of an actual job record) — not reconstructed from memory.
+    // No analytics platform existed for this engagement, so Results stays qualitative on
+    // purpose — don't add a stat-row without a source.
+    slug: "connectiq",
+    category: "Dashboard, Web App",
+    name: "Platform serving screens at Apple, Starbucks, KFC, and more across the world",
+    title: "Platform serving screens at Apple, Starbucks, KFC, and more across the world",
     summary:
-      "Data-rich dashboard for an enterprise workflow — dense information made legible at a glance.",
-    client: "Client (NDA)",
-    role: "Product design, information architecture, design systems",
-    team: "Founder, Head of Operations",
-    duration: "2.5 months",
-    tools: ["Figma", "Claude", "Figjam"],
+      "Replaced a fully manual, four-silo Airtable operation with one platform for deployment, partner dispatch, and job tracking, for a company installing digital signage and audio hardware across Southeast Asia and Latin America.",
+    client: "Giant Pumpkin",
+    role: "Product design, 0→1, information architecture, design systems",
+    team: "Founder, project manager, and the internal planning & operations team",
+    credits: [
+      { initials: "Me", label: "Niia Bieliavtseva — product design", highlight: true },
+      { initials: "SS", label: "Sebastian — founder" },
+      { initials: "YP", label: "Yves — project manager" },
+      { initials: "PN", label: "Priyanuch — dispatch management" },
+      { initials: "KR", label: "Krittiyanee — planning & operations" },
+    ],
+    duration: "Aug – Nov 2025 · 3 months",
+    tools: ["Figma", "Claude", "Airtable"],
     screenshots: [
-      { src: "/projects/enterprise-dashboard.png", alt: "Enterprise dashboard overview" },
+      {
+        src: "/projects/connectiq.webp",
+        alt: "Partner-facing jobs board, jobs grouped by status, with a job card mid-drag between columns",
+      },
     ],
     lastUpdated: "Nov, 2025",
-    // Real qualitative story (Airtable replacement, KFC/Apple-store scale, founder+ops
-    // collaboration) is documented below. What's still missing before this fully matches
-    // case-study.md: hard metrics for a Results stat-row (e.g. time-to-quote, adoption,
-    // error/rework rate) and a real attributed quote. Don't invent numbers to fill that gap.
     content: [
       { type: "section", id: "problem", title: "Problem" },
       {
         type: "paragraph",
-        text: "The client runs digital signage installations for major retail chains — KFC, Apple stores — across quoting, deployment, maintenance, and inventory. All of it lived in Airtable: one flat, general-purpose tool asked to hold a multi-stage lifecycle it was never built for.",
+        text: "Giant Pumpkin installs and maintains digital signage and audio-for-business hardware for retail chains — KFC, Apple resellers, Starbucks, Uniqlo, Zus Coffee — across Southeast Asia and Latin America. Every install, every broken screen, every renewed contract ran through Airtable.",
       },
       {
         type: "paragraph",
-        text: "That created real friction for the internal deployment managers who lived in it every day. I spent time with them early on to see exactly where it broke down, before drawing a single screen.",
+        text: "Airtable keeps data in separate bases, on purpose. That's fine for a spreadsheet. It's not fine when one job touches a customer record, a location, a contract, and an inventory item — bases that can't talk to each other on one screen. The team had already patched around it once, with a separate form tool bolted onto Airtable just so field agents could reach into the inventory table from their phones.",
       },
       {
-        type: "callouts",
+        type: "list",
         items: [
-          {
-            title: "Scattered state",
-            description:
-              "A job's status lived across disconnected views instead of one lifecycle, so nothing showed where a deployment actually stood.",
-          },
-          {
-            title: "One view, three audiences",
-            description:
-              "Internal teams, partner companies, and customers all needed a different slice of the same data — a flat spreadsheet couldn't shape itself for any of them.",
-          },
-          {
-            title: "No structure for multi-step work",
-            description:
-              "Quoting-to-deployment is a sequence, but Airtable gave every stage the same flat rows, with nothing to signal what came next.",
-          },
+          "No tool built for the field — agents worked from a form bolted onto Airtable, typing serial numbers by hand.",
+          "One job, four interfaces — a customer, its location, a contract, and a bill of materials each lived in a different base.",
+          "No client-facing view — a job's status only ever traveled by phone call or a manually exported PDF.",
         ],
       },
-      { type: "image", src: "/projects/enterprise-dashboard/1.png", alt: "Dashboard overview" },
+      {
+        type: "paragraph",
+        text: "This is the full job record, printed straight out of Airtable, uncropped — browser tab title down to the last empty state. Scroll it and hover the markers for what's actually going on underneath it.",
+      },
+      {
+        type: "annotated-image",
+        src: "/projects/connectiq/airtable-job-record.webp",
+        alt: "The complete Airtable job record, printed uncropped from the browser: assignment avatars, a quote reference next to an empty BOM reference, service/job-type/status pills, a linked partner panel, a job-checks checklist, then a long run of mostly-empty sections — tasks, location details, BOM, contract, documents, related jobs, images, tickets, inventory — down to the record's last-modified footer",
+        maxWidth: 720,
+        viewportHeight: 620,
+        pins: [
+          {
+            x: 92,
+            y: 3,
+            title: "A name tag, not a queue",
+            body: "Two names sit on this job, but neither is a dispatch list either can open on a phone — that had to be built as a separate tool outside Airtable entirely.",
+          },
+          {
+            x: 92,
+            y: 5,
+            title: "Even the team wasn't sure what this pointed to",
+            body: "\"We are not quite sure about that as well\" — the internal ops team's own answer when I asked whether this reference is client-specific or tied to inventory. Even they had to guess at what it actually points to.",
+          },
+          {
+            x: 92,
+            y: 6,
+            title: "Every field carries equal weight",
+            body: "Service, job type, and status sit side by side with the same visual weight. Nothing on the page signals which one actually gates the others.",
+          },
+          {
+            x: 92,
+            y: 8,
+            title: "The partner lives in a fourth base",
+            body: "This panel is a linked-record embed, read-only from here. Changing anything about the partner means leaving this record and opening yet another base.",
+          },
+        ],
+        caption:
+          "Nothing here is broken — this is Airtable working exactly as designed. Scroll past the checklist and it's mostly empty states: tasks, documents, images, tickets, all waiting for data that lives somewhere else. One job record, sixteen thousand pixels tall.",
+      },
+      { type: "heading", text: "How I tackled it" },
+      {
+        type: "numbered-list",
+        items: [
+          "Sat in on the founder and PM's own walkthrough of their Airtable base, screen by screen, before opening Figma.",
+          "Ran a separate session with the internal planning and operations team, asking them to set up a client, a contract, and a job in their own words — and to show me exactly where they got stuck.",
+          "Mapped a full user flow for all three groups — internal ops, partners, clients — as a plain flowchart with no visual design, so the founder could sign off on the logic before a single screen got designed.",
+        ],
+      },
+      {
+        type: "image",
+        src: "/projects/connectiq/user-flow.webp",
+        alt: "A boxes-and-arrows user flow diagram for the internal deployment team, internal support, and partner dispatch manager and field service agent roles — onboarding, adding a customer and locations, adding a contract, creating jobs, generating tasks and BOM, and the incident-report thread back to support",
+        caption:
+          "No visual design yet — just boxes, arrows, and the logic between three user groups. This is what got signed off before I opened Figma.",
+      },
 
       { type: "section", id: "solution", title: "Solution" },
       {
         type: "paragraph",
-        text: "I worked directly with the founder and head of operations — the two people who understood the business end of this best — to turn what I'd learned from deployment managers into an information architecture that actually matched how the work moves.",
+        text: "So how do you turn four separate Airtable bases into one product, when the founder and the PM don't even agree yet on how much the internal side matters?",
+      },
+      {
+        type: "paragraph",
+        text: "That tension was real from the first kickoff call. Yves wanted to focus entirely on partners and clients; Sebastian pushed back, since he'd watched his own ops team fight the tool every day. We did both, starting with partners — their screens overlapped so heavily with internal ops that designing one meant most of the other was already done.",
       },
       {
         type: "list",
         items: [
-          "Interactive HTML wireframes first, so the IA could get cheap, fast feedback before a single pixel was styled in Figma.",
-          "A modular component library, inspired by Linear's restraint, so every screen in a very information-dense product speaks the same visual language.",
-          "Progressive disclosure throughout — surfacing only what a step needs, instead of every field a record could ever hold.",
+          "One guided flow to create a job — a single stepped form (basic info, then location & bill of materials) instead of the four-interface hop.",
+          "Serial numbers that autocomplete from the last three digits, matched live against inventory, replacing the separate bolted-on form tool.",
+          "One component set for both portals, so the internal and partner sides read as one product instead of two.",
         ],
+      },
+      {
+        type: "paragraph",
+        text: "One thing got cut almost immediately: statuses. Airtable's list had grown to unscheduled, tentative, scheduled, rescheduled, dispatched, and more, but the ops team only ever used to-do and done. I dropped it to three — to-do, in progress, done — which also turned marking a task complete from two clicks into one.",
       },
 
       { type: "section", id: "final-design", title: "Final design" },
-      { type: "heading", text: "One dashboard for the whole lifecycle" },
       {
         type: "paragraph",
-        text: "Quotes, deployment, maintenance, and inventory now live in one workflow-aware system instead of one flat base — each stage has its own view, shaped for what that step needs.",
+        text: "ConnectIQ shipped as two portals built from the same components: an internal one for planning and dispatch, and a partner one for the field teams who execute jobs.",
       },
+
+      { type: "heading", text: "Internal: a dashboard built around how the team actually thinks" },
       {
-        type: "gallery",
-        images: [
-          {
-            src: "/projects/enterprise-dashboard/2.png",
-            alt: "Dashboard workflow screen",
-            caption: "A deployment's stages are structured as a sequence, not a spreadsheet row.",
-          },
-          {
-            src: "/projects/enterprise-dashboard/3.png",
-            alt: "Dashboard detail screen",
-            caption: "Progressive disclosure keeps a dense record legible at a glance.",
-          },
-        ],
+        type: "paragraph",
+        text: "Sebastian sketched this himself on an early call, before I'd designed a single screen: ops thinks in brands first, then the jobs and subscriptions underneath each one — not four separate tables. The shipped dashboard follows that shape, with unassigned, dispatched, overdue, and incident counts up top and a brand-by-brand breakdown underneath.",
       },
       {
         type: "image",
-        src: "/projects/enterprise-dashboard/4.png",
-        alt: "Dashboard inventory screen",
-        caption: "Inventory gets its own view, shaped around stock instead of jobs.",
+        src: "/projects/connectiq/internal-dashboard.webp",
+        alt: "Internal dashboard: KPI tiles for unassigned, dispatched, due soon, overdue, and incident-report counts, a brand-by-brand breakdown of jobs with completion rings, a task checklist, and an incident-report list",
+        caption:
+          "Brand first, jobs underneath — the shape the ops team already thought in, not the shape four separate Airtable bases happened to be in.",
       },
-      { type: "heading", text: "A component library built for a dense product" },
+
+      { type: "heading", text: "Internal: one guided flow instead of four Airtable tabs" },
       {
         type: "paragraph",
-        text: "I built a modular component library — inspired by Linear's minimalist aesthetic — so a genuinely data-heavy product would still read as one coherent system, not a pile of one-off screens.",
+        text: "That's the same job record from the Problem section above. Setting one up meant visiting three other bases first; the ConnectIQ version folds the same information into a single three-step modal.",
+      },
+      {
+        type: "before-after",
+        before: "/projects/connectiq/airtable-job-record.webp",
+        after: "/projects/connectiq/job-creation-modal.webp",
+        beforeAlt:
+          "A real Airtable job record: assignment, quote reference, service and status fields, a separate linked partner panel, and a job-checks checklist, all on one long scrolling page",
+        afterAlt:
+          "ConnectIQ's Add job modal, step one: customer, job type, scheduled date, and time slot fields, with a progress indicator for the two steps ahead",
+        beforeLabel: "Airtable",
+        afterLabel: "ConnectIQ",
+        maxWidth: 800,
+        viewportHeight: 560,
+        caption:
+          "Same information, one scrolling record versus one short step. Location and the bill of materials are steps two and three of the same modal.",
+      },
+
+      { type: "heading", text: "Partners: dispatch, from a board or a map" },
+      {
+        type: "paragraph",
+        text: "A dispatch manager with a dozen jobs wants a board. One with fifty spread across a city wants a map. Both read from the same job data — I didn't make anyone pick one view and live with it.",
       },
       {
         type: "image",
-        src: "/projects/enterprise-dashboard/5.png",
-        alt: "Dashboard component library",
-        caption: "One shared component library carries the whole product's visual language.",
+        src: "/projects/connectiq/partner-jobs-kanban.webp",
+        alt: "Partner-facing jobs board, columns for Unassigned, To do, In progress, and Done, with a job card mid-drag showing avatars and job details",
+        caption:
+          "Unassigned, to-do, in progress, done — the same three-status model the ops team actually used, not Airtable's longer list.",
+      },
+      {
+        type: "image",
+        src: "/projects/connectiq/dispatch-map.webp",
+        alt: "Jobs board next to a live map, with pins colored and counted by field-agent name across a city",
+        caption:
+          "The same jobs, plotted by location and colored by which field agent owns them — for deciding who's closest, not just who's next.",
+      },
+
+      { type: "heading", text: "The same components, either portal" },
+      {
+        type: "paragraph",
+        text: "Settings is the least dramatic screen in the product, and that's the point — same fields, spacing, and structure as the job flow above it, so even a screen nobody lingers on still reads as part of one system.",
+      },
+      {
+        type: "image",
+        src: "/projects/connectiq/settings-profile.webp",
+        alt: "Settings screen showing profile information — name, email, password, phone number, and role — for a dispatch manager",
+        caption: "Even the screen nobody lingers on carries the same inputs and layout as everything else.",
       },
 
       { type: "section", id: "results", title: "Results" },
       {
-        type: "list",
-        items: [
-          "Replaced a fully manual, Airtable-based process with one system spanning quoting through inventory.",
-          "Shipped a workflow-aware component library used consistently across the whole product.",
-          "Stayed on through engineering implementation, so the shipped product matched the design intent.",
-        ],
+        type: "paragraph",
+        text: "ConnectIQ shipped both portals, and the team moved its day-to-day dispatch and job tracking onto it. There was no analytics platform behind this engagement, so I'm not going to invent a percentage here — the only account I have is Sebastian's, and he described it as cutting down real time his team used to lose stitching one job together across four separate interfaces.",
       },
       {
         type: "paragraph",
-        text: "The redesign didn't just move the same spreadsheet into Figma — it gave a multi-stage operations process a structure that actually matches how the work happens.",
+        text: "We hadn't started the client-facing portal when the engagement ended in November 2025 — that was sequenced last on purpose, on the bet that once partners and internal ops held together, giving a client their own slice of the same data would be the easiest part.",
       },
-      // TODO: swap the list above for a `stat-row` block once real numbers exist
-      // (e.g. time-to-quote, adoption, error/rework rate) — see the comment above
-      // this project's `content` array. A real attributed quote would also land
-      // well here, per case-study.md's Results section.
     ],
   },
   {
@@ -885,7 +973,7 @@ export const projects: Project[] = [
       { type: "heading", text: "The candidate side" },
       {
         type: "paragraph",
-        text: "Hirement wasn't one-directional. Candidates got their own guide before their first round — who they'd meet, how scoring worked, what to expect on interview day — and after each round, they rated the interview itself, anonymously, question by question. That reciprocal loop was the founder's idea: a way to catch a bad interview experience before it became a bad review, not just a way to score candidates.",
+        text: "Hirement wasn't one-directional. Candidates got their own guide before their first round — who they'd meet, how scoring worked, what to expect on interview day — and after each round, they rated the interview itself, anonymously, question by question. That reciprocal loop was the founder's idea: a way to catch a bad interview experience before it became a bad review.",
       },
       {
         type: "image",
@@ -906,7 +994,7 @@ export const projects: Project[] = [
       { type: "section", id: "results", title: "Results" },
       {
         type: "paragraph",
-        text: "In 2.5 months, working solo alongside the founder, this took Hirement from an early idea to a complete product design: a flow builder, scoring system, and design system built to hold together as the product scaled past the first few hiring teams.",
+        text: "Working solo with the founder for 2.5 months, I took Hirement from an early idea to a complete product design: a flow builder, scoring system, and design system built to hold together as the product scaled past the first few hiring teams.",
       },
       {
         type: "paragraph",
@@ -944,11 +1032,11 @@ export const projects: Project[] = [
       { type: "section", id: "problem", title: "Problem" },
       {
         type: "paragraph",
-        text: "The client needed a website that could explain a technical product — digital signage technology — to potential customers, alongside its services and team. There was nothing to build on: no site, no visual identity yet.",
+        text: "The client needed a site that could explain digital signage technology to potential customers, alongside its services and team. There was nothing to build on: no site, no visual identity yet.",
       },
       {
         type: "paragraph",
-        text: "The brief was mostly about credibility: give a technical product a modern, trustworthy web presence that communicates innovation and reliability, not just a spec sheet.",
+        text: "The brief was mostly about credibility: make it read as a real company, not a spec sheet.",
       },
 
       { type: "section", id: "solution", title: "Solution" },
@@ -981,7 +1069,7 @@ export const projects: Project[] = [
       { type: "section", id: "results", title: "Results" },
       {
         type: "paragraph",
-        text: "In about a month, working solo, this took the client from no web presence to a full, responsive site that explains a technical product in plain language.",
+        text: "A month of solo work took the client from no web presence to a full, responsive site that explains digital signage in plain language.",
       },
       // TODO: no launch metrics (traffic, lead volume) or client quote are documented
       // for this project — add them here if/when available, per case-study.md's
