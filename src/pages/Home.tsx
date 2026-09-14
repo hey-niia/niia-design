@@ -24,12 +24,9 @@ export default function Home() {
 
       <section id="about" className="flex justify-center pt-6 md:pt-24">
         <div className="max-w-xl">
-          <p className="mb-4 text-3xl">
-            I help companies design ambitious products people actually use.
-          </p>
-          <p>
-            My work sits at the intersection of visual arts and business, shaped by founding
-            two companies — now sharpened by building with AI.
+          <p className="text-[32px] leading-tight">
+            I help companies design ambitious products people actually use. I've built companies
+            before I built interfaces. Systems thinking is the lens; AI is the tool.
           </p>
         </div>
       </section>
