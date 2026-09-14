@@ -826,8 +826,8 @@ export const projects: Project[] = [
       },
       {
         type: "before-after",
-        before: "/projects/hirement/7.png",
-        after: "/projects/hirement/8.png",
+        before: "/projects/hirement/7.webp",
+        after: "/projects/hirement/8.webp",
         beforeAlt: "Black-and-white wireframe of an interview question screen",
         afterAlt: "Blue color exploration of the same interview question screen",
         beforeLabel: "Wireframe",
@@ -840,8 +840,8 @@ export const projects: Project[] = [
       },
       {
         type: "before-after",
-        before: "/projects/hirement/9.png",
-        after: "/projects/hirement/10.png",
+        before: "/projects/hirement/9.webp",
+        after: "/projects/hirement/10.webp",
         beforeAlt: "Early loops list as a single flat table",
         afterAlt: "Final loops list grouped by role",
         beforeLabel: "Early version",
@@ -861,13 +861,13 @@ export const projects: Project[] = [
         type: "gallery",
         images: [
           {
-            src: "/projects/hirement/2.png",
+            src: "/projects/hirement/2.webp",
             alt: "Hirement loop dashboard showing candidates for a role",
             caption:
               "Each role's loop tracks every candidate's status, interviewers, and running average rating in one table.",
           },
           {
-            src: "/projects/hirement/3.png",
+            src: "/projects/hirement/3.webp",
             alt: "Hirement edit interview loop modal",
             caption:
               "Editing a loop after interviews are already scheduled — role, candidates, and invite details stay in one place.",
@@ -876,7 +876,7 @@ export const projects: Project[] = [
       },
       {
         type: "image",
-        src: "/projects/hirement/4.png",
+        src: "/projects/hirement/4.webp",
         alt: "Hirement interview screen with candidate profile lookup open",
         caption:
           "Mid-interview, an interviewer can pull up the candidate's full profile without losing their place in the question.",
@@ -889,7 +889,7 @@ export const projects: Project[] = [
       },
       {
         type: "image",
-        src: "/projects/hirement/5.png",
+        src: "/projects/hirement/5.webp",
         alt: "Hirement candidate interview overview guide",
         viewportHeight: 620,
         caption:
@@ -897,7 +897,7 @@ export const projects: Project[] = [
       },
       {
         type: "image",
-        src: "/projects/hirement/6.png",
+        src: "/projects/hirement/6.webp",
         alt: "Hirement candidate feedback form",
         viewportHeight: 620,
         caption: "After each round, candidates rate the interview back — anonymously, per question.",
