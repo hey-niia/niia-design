@@ -8,6 +8,7 @@ import Taski from "./pages/Taski";
 import TaskiV1 from "./pages/TaskiV1";
 import Skim from "./pages/Skim";
 import CatEight from "./pages/CatEight";
+import NotFound from "./pages/NotFound";
 import ScrollToTop from "./components/ScrollToTop";
 import Footer from "./components/Footer";
 import NiiaChatSidebar from "./components/NiiaChatSidebar";
@@ -35,6 +36,7 @@ function AppContent() {
           <Route path="/skim" element={<Skim />} />
           <Route path="/08" element={<CatEight />} />
           <Route path="/work/:slug" element={<CaseStudy />} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
         <Footer />
       </div>
