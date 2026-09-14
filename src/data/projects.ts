@@ -163,7 +163,7 @@ export const projects: Project[] = [
     // confounded by an App Store feature that the product review itself credits
     // for the install surge.
     slug: "ios-app",
-    category: "iOS App, AI",
+    category: "iOS App",
     name: "Popular Wellness App's AI Pivot",
     title: "Turning six neuroscience systems into one AI coaching experience",
     summary:
@@ -651,7 +651,7 @@ export const projects: Project[] = [
     // No analytics platform existed for this engagement, so Results stays qualitative on
     // purpose — don't add a stat-row without a source.
     slug: "connectiq",
-    category: "Dashboard, Web App",
+    category: "Dashboard",
     name: "Platform serving screens at Apple, Starbucks, KFC, and more across the world",
     title: "Platform serving screens at Apple, Starbucks, KFC, and more across the world",
     summary:
@@ -1009,12 +1009,12 @@ export const projects: Project[] = [
     // The section structure below is applied honestly on top of that; nothing beyond
     // what was already written is invented. See TODO near Results.
     slug: "other-projects",
-    category: "Website",
-    name: "Other Designs",
+    category: "Landing pages, Web apps",
+    name: "Other Projects",
     title: "Corporate website for a digital signage company",
     summary:
       "A collection of smaller landing pages and web apps — shorter engagements that didn't need a full case study of their own.",
-    client: "Client (NDA)",
+    client: "Landing pages, Web apps",
     role: "UI/UX design, information architecture, visual identity",
     team: "Founder, Operations team",
     duration: "1 month",

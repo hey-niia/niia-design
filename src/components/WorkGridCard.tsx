@@ -29,11 +29,9 @@ export default function WorkGridCard({
   const { slug, name, category, client, lastUpdated, screenshots, coverVideo } = project;
   const cover = screenshots[0];
   const videoRef = useAutoplayInView<HTMLVideoElement>();
-  // First tag only (e.g. "iOS App, AI" → "iOS App").
-  const categoryLabel = category.split(",")[0].trim();
   // Some projects reuse the category as a stand-in `client` (e.g. Hirement, which
   // has no nameable client) — drop it from the meta line when it just repeats.
-  const metaParts = [categoryLabel, client, lastUpdated].filter(
+  const metaParts = [category, client, lastUpdated].filter(
     (part, i, parts) => i === 0 || part.toLowerCase() !== parts[i - 1].toLowerCase(),
   );
 
