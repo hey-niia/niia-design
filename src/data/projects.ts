@@ -187,7 +187,7 @@ export const projects: Project[] = [
       { src: "/projects/ios-app/hero-coaching.webp", alt: "Three coaching screens" },
       { src: "/projects/ios-app/3.webp", alt: "Emotional fitness app progression screen" },
     ],
-    lastUpdated: "Sep, 2026",
+    lastUpdated: "2026",
     // Figures are from the May 2026 internal product review, cleared for
     // publication. The client itself stays anonymous — see `client` above.
     impact: [
@@ -674,7 +674,7 @@ export const projects: Project[] = [
         alt: "Partner-facing jobs board, jobs grouped by status, with a job card mid-drag between columns",
       },
     ],
-    lastUpdated: "Nov, 2025",
+    lastUpdated: "2025–2026",
     content: [
       { type: "section", id: "problem", title: "Problem" },
       {
@@ -871,7 +871,7 @@ export const projects: Project[] = [
     duration: "2.5 months",
     tools: ["Figma"],
     screenshots: [{ src: "/projects/hirement.png", alt: "Hirement interview flow builder" }],
-    lastUpdated: "Nov, 2025",
+    lastUpdated: "2026",
     content: [
       { type: "section", id: "problem", title: "Problem" },
       {
@@ -1027,7 +1027,7 @@ export const projects: Project[] = [
         tall: true,
       },
     ],
-    lastUpdated: "Nov, 2025",
+    lastUpdated: "2023",
     content: [
       { type: "section", id: "problem", title: "Problem" },
       {
