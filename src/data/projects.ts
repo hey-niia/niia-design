@@ -1008,7 +1008,7 @@ export const projects: Project[] = [
     // launch metrics, or client quote — only the two original descriptive paragraphs.
     // The section structure below is applied honestly on top of that; nothing beyond
     // what was already written is invented. See TODO near Results.
-    slug: "other-project",
+    slug: "other-projects",
     category: "Website",
     name: "Other Designs",
     title: "Corporate website for a digital signage company",
