@@ -869,6 +869,10 @@ export const projects: Project[] = [
         afterAlt: "Blue color exploration of the same interview question screen",
         beforeLabel: "Wireframe",
         afterLabel: "Color exploration",
+        // Desktop screens (1360×960) — wide enough to read, tall enough that
+        // one viewport fits with no scroll.
+        maxWidth: 896,
+        viewportHeight: 634,
         caption: "Structure got worked out in grayscale before color entered the conversation.",
       },
       {
@@ -879,6 +883,8 @@ export const projects: Project[] = [
         afterAlt: "Final loops list grouped by role",
         beforeLabel: "Early version",
         afterLabel: "Final",
+        maxWidth: 896,
+        viewportHeight: 634,
         caption: "The loops list itself changed shape once roles, not just candidates, needed to be scannable.",
       },
 
