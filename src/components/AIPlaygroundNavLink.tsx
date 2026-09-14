@@ -1,7 +1,7 @@
 import { Link, useLocation } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
 
-const BASE_TEXT = "AI Experiments";
+const BASE_TEXT = "AI Playground";
 const SCRAMBLE_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 const FRAME_MS = 35;
 const REVEAL_STEPS = 14;
@@ -26,13 +26,13 @@ function scrambledFrame(frame: number): string {
 }
 
 /**
- * Intermittent Easter egg on the "AI Experiments" nav link: the text
+ * Intermittent Easter egg on the "AI Playground" nav link: the text
  * decodes itself, resolving left-to-right out of random characters in the
  * accent color like a terminal locking in a value, then fades back to rest.
  */
-export default function AIExperimentsNavLink() {
+export default function AIPlaygroundNavLink() {
   const { pathname } = useLocation();
-  const isActive = pathname === "/ai-experiments";
+  const isActive = pathname === "/ai-playground";
   const [isAnimating, setIsAnimating] = useState(false);
   const [overlayText, setOverlayText] = useState(BASE_TEXT);
   const timeouts = useRef<number[]>([]);
@@ -74,7 +74,7 @@ export default function AIExperimentsNavLink() {
 
   return (
     <Link
-      to="/ai-experiments"
+      to="/ai-playground"
       className={`ai-nav-link ${isActive ? "nav-active" : ""}`}
     >
       <span className={`ai-nav-text-base ${isAnimating ? "is-hidden" : ""}`}>{BASE_TEXT}</span>

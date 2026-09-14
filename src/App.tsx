@@ -2,7 +2,7 @@ import { Route, Routes } from "react-router-dom";
 import Home from "./pages/Home";
 import About from "./pages/About";
 import CaseStudy from "./pages/CaseStudy";
-import AIExperiments from "./pages/AIExperiments";
+import AIPlayground from "./pages/AIPlayground";
 import Art from "./pages/Art";
 import Taski from "./pages/Taski";
 import TaskiV1 from "./pages/TaskiV1";
@@ -28,7 +28,7 @@ function AppContent() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/about" element={<About />} />
-          <Route path="/ai-experiments" element={<AIExperiments />} />
+          <Route path="/ai-playground" element={<AIPlayground />} />
           <Route path="/art" element={<Art />} />
           <Route path="/taski" element={<Taski />} />
           <Route path="/taski-v1" element={<TaskiV1 />} />

@@ -1,7 +1,9 @@
 import { Link, useLocation } from "react-router-dom";
 import { useLayoutEffect, useRef, useState } from "react";
-import AIExperimentsNavLink from "./AIExperimentsNavLink";
+import AIPlaygroundNavLink from "./AIPlaygroundNavLink";
 import { useNiiaChat } from "../context/useNiiaChat";
+
+const LINKEDIN_URL = "https://www.linkedin.com/in/niia-bieliavtseva/";
 
 export default function Nav() {
   const { pathname } = useLocation();
@@ -47,14 +49,17 @@ export default function Nav() {
       >
         <span className="flex items-baseline gap-x-2">
           <span className="font-medium">Niia Bieliavtseva</span>
-          <span>Senior Product Designer, AI Design Engineer</span>
+          <span>Product Designer + Engineer</span>
         </span>
         <span className="flex items-center gap-x-6">
+          <span>Work</span>
+          <span>AI Playground</span>
           <span>About</span>
-          <span>AI Experiments</span>
-          <span>Art</span>
           <span>✦ Niia AI</span>
-          <span>Contact</span>
+        </span>
+        <span className="flex items-center gap-x-6">
+          <span>Email</span>
+          <span>LinkedIn</span>
         </span>
       </div>
 
@@ -63,31 +68,37 @@ export default function Nav() {
           <Link to="/" className="font-medium text-black">
             Niia Bieliavtseva
           </Link>
-          <span className="text-gray-400">
-            {fitsInline ? "Senior Product Designer, AI Design Engineer" : "Product Designer + Engineer"}
-          </span>
+          <span className="text-gray-400">Product Designer + Engineer</span>
         </p>
 
         {fitsInline ? (
-          <nav className="flex items-center gap-x-6 text-gray-400">
-            <Link to="/about" className={pathname === "/about" ? "nav-active" : undefined}>
-              About
-            </Link>
-            <AIExperimentsNavLink />
-            <Link to="/art" className={pathname === "/art" ? "nav-active" : undefined}>
-              Art
-            </Link>
-            <button
-              type="button"
-              onClick={openWelcome}
-              className="flex cursor-pointer items-center gap-1 hover:text-[#e65f2e]"
-            >
-              <span aria-hidden>✦</span> Niia AI
-            </button>
-            <a href="mailto:nia.bieliavtseva@gmail.com" target="_blank" rel="noopener noreferrer">
-              Contact
-            </a>
-          </nav>
+          <>
+            <nav className="flex items-center gap-x-6 text-gray-400">
+              <Link to="/" state={{ scrollTo: "work" }} className={pathname === "/" ? "nav-active" : undefined}>
+                Work
+              </Link>
+              <AIPlaygroundNavLink />
+              <Link to="/about" className={pathname === "/about" ? "nav-active" : undefined}>
+                About
+              </Link>
+              <button
+                type="button"
+                onClick={openWelcome}
+                className="flex cursor-pointer items-center gap-1 hover:text-[#e65f2e]"
+              >
+                <span aria-hidden className="text-[20px]">✦</span> Niia AI
+              </button>
+            </nav>
+
+            <div className="flex items-center gap-x-6 text-gray-400">
+              <a href="mailto:nia.bieliavtseva@gmail.com" target="_blank" rel="noopener noreferrer">
+                Email
+              </a>
+              <a href={LINKEDIN_URL} target="_blank" rel="noopener noreferrer">
+                LinkedIn
+              </a>
+            </div>
+          </>
         ) : (
           <button
             type="button"
@@ -109,19 +120,20 @@ export default function Nav() {
       {!fitsInline && isMenuOpen && (
         <nav className="flex flex-col gap-4 pt-2 text-gray-400">
           <Link
+            to="/"
+            state={{ scrollTo: "work" }}
+            onClick={() => setIsMenuOpen(false)}
+            className={pathname === "/" ? "nav-active" : undefined}
+          >
+            Work
+          </Link>
+          <AIPlaygroundNavLink />
+          <Link
             to="/about"
             onClick={() => setIsMenuOpen(false)}
             className={pathname === "/about" ? "nav-active" : undefined}
           >
             About
-          </Link>
-          <AIExperimentsNavLink />
-          <Link
-            to="/art"
-            onClick={() => setIsMenuOpen(false)}
-            className={pathname === "/art" ? "nav-active" : undefined}
-          >
-            Art
           </Link>
           <button
             type="button"
@@ -131,10 +143,14 @@ export default function Nav() {
             }}
             className="flex cursor-pointer items-center gap-1 text-left hover:text-[#e65f2e]"
           >
-            <span aria-hidden>✦</span> Niia AI
+            <span aria-hidden className="text-[20px]">✦</span> Niia AI
           </button>
+          <div className="border-t border-gray-200" />
           <a href="mailto:nia.bieliavtseva@gmail.com" target="_blank" rel="noopener noreferrer">
-            Contact
+            Email
+          </a>
+          <a href={LINKEDIN_URL} target="_blank" rel="noopener noreferrer">
+            LinkedIn
           </a>
         </nav>
       )}

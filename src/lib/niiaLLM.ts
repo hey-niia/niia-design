@@ -18,7 +18,7 @@ export interface AnswerCard {
 export interface CannedAnswer {
   keywords: string[];
   answer: string;
-  /** Optional visual cards (case studies, AI experiments) shown under the text. */
+  /** Optional visual cards (case studies, AI playground projects) shown under the text. */
   cards?: AnswerCard[];
 }
 
@@ -60,9 +60,9 @@ function projectCard(slug: string): AnswerCard[] {
   return card ? [card] : [];
 }
 
-// AI Experiments cards — only entries with a cover image and an internal
+// AI Playground cards — only entries with a cover image and an internal
 // link render as a card (Taski's first version has neither yet).
-export const EXPERIMENT_CARDS: AnswerCard[] = experiments
+export const PLAYGROUND_CARDS: AnswerCard[] = experiments
   .filter((e): e is typeof e & { image: string; link: string } => Boolean(e.image && e.link))
   .map((e) => ({
     title: e.name,
@@ -204,8 +204,8 @@ const ANSWERS: CannedAnswer[] = [
   {
     keywords: ["ai", "artificial intelligence", "claude", "llm", "machine learning", "gpt"],
     answer:
-      "AI shows up two ways in my work: I design AI-first products, and I build with AI myself — using Claude for prototyping, documentation, and increasingly for shipping the code itself, not just the spec. Here's the flagship case study, plus some of the rawer, in-progress experiments:",
-    cards: [...projectCard("ios-app"), ...EXPERIMENT_CARDS],
+      "AI shows up two ways in my work: I design AI-first products, and I build with AI myself — using Claude for prototyping, documentation, and increasingly for shipping the code itself, not just the spec. Here's the flagship case study, plus some of the rawer, in-progress projects from my AI playground:",
+    cards: [...projectCard("ios-app"), ...PLAYGROUND_CARDS],
   },
   {
     keywords: ["favorite project", "proudest", "best project", "most proud", "which project"],

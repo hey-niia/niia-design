@@ -58,7 +58,7 @@
   color: #e65f2e;
 }
 
-/* AI Experiments nav Easter egg — intermittent decode animation: the text
+/* AI Playground nav Easter egg — intermittent decode animation: the text
    scrambles through random characters and resolves back, in the accent
    color, like a terminal locking in a value. */
 .ai-nav-link {

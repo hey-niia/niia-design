@@ -9,6 +9,6 @@
 - [Enterprise Dashboard](https://niia.design/work/enterprise-dashboard)
 - [Digital Screen Co.](https://niia.design/work/digitalscreen)
 - [Hirement](https://niia.design/work/hirement)
-- [AI Experiments](https://niia.design/#ai-experiments)
+- [AI Playground](https://niia.design/ai-playground)
 - [Overspace](https://overspace.co)
 - [Leap](https://superleap.com.ua/)

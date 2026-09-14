@@ -1,7 +1,9 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { Link } from "react-router-dom";
+import ExperimentCard from "../components/ExperimentCard";
 import Nav from "../components/Nav";
 import WiggleText from "../components/WiggleText";
+import { experiments } from "../data/experiments";
 
 type RoutineTask = { id: string; text: string; lastDoneDate: string | null };
 type TodayTask = { id: string; text: string; done: boolean };
@@ -82,6 +84,7 @@ function TaskRow({
 }
 
 export default function TaskiV1() {
+  const moreExperiments = experiments.filter((exp) => exp.link !== "/taski-v1");
   const [data, setData] = useState<Stored>(loadInitial);
   const [routineDraft, setRoutineDraft] = useState("");
   const [todayDraft, setTodayDraft] = useState("");
@@ -90,14 +93,19 @@ export default function TaskiV1() {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
   }, [data]);
 
-  const doneCount = data.routine.filter((t) => t.lastDoneDate === data.todayDate).length;
+  const doneCount = data.routine.filter(
+    (t) => t.lastDoneDate === data.todayDate,
+  ).length;
   const hasDoneToday = data.today.some((t) => t.done);
 
   function addRoutine(e: FormEvent) {
     e.preventDefault();
     const text = routineDraft.trim();
     if (!text) return;
-    setData((d) => ({ ...d, routine: [...d.routine, { id: uid(), text, lastDoneDate: null }] }));
+    setData((d) => ({
+      ...d,
+      routine: [...d.routine, { id: uid(), text, lastDoneDate: null }],
+    }));
     setRoutineDraft("");
   }
 
@@ -106,7 +114,10 @@ export default function TaskiV1() {
       ...d,
       routine: d.routine.map((t) =>
         t.id === id
-          ? { ...t, lastDoneDate: t.lastDoneDate === d.todayDate ? null : d.todayDate }
+          ? {
+              ...t,
+              lastDoneDate: t.lastDoneDate === d.todayDate ? null : d.todayDate,
+            }
           : t,
       ),
     }));
@@ -120,7 +131,10 @@ export default function TaskiV1() {
     e.preventDefault();
     const text = todayDraft.trim();
     if (!text) return;
-    setData((d) => ({ ...d, today: [...d.today, { id: uid(), text, done: false }] }));
+    setData((d) => ({
+      ...d,
+      today: [...d.today, { id: uid(), text, done: false }],
+    }));
     setTodayDraft("");
   }
 
@@ -140,151 +154,177 @@ export default function TaskiV1() {
   }
 
   return (
-    <main className="pb-24">
+    <main>
       <Nav />
 
-      <section className="py-8">
-        <Link to="/ai-experiments" className="underline">
-          <WiggleText>← AI Experiments</WiggleText>
-        </Link>
+      <div className="mx-auto max-w-4xl pt-6 md:pt-24">
+        <header className="border-b border-gray-200 pb-8">
+          <Link
+            to="/ai-playground"
+            className="mb-6 block text-sm text-gray-400 hover:text-[#e65f2e]"
+          >
+            <WiggleText>← AI Playground</WiggleText>
+          </Link>
 
-        <h1 className="mt-6 mb-2 text-3xl font-medium lg:text-5xl">Taski — first version</h1>
-        <p className="mb-10 max-w-xl italic">
-          This was the first version of Taski, before it became a native Mac app. A to-do list
-          that doesn't pressure you: add the things you want to do most days once, then just
-          check them off — nothing scores you, nothing has to happen at an exact time. It's kept
-          running here, working exactly as it did originally.
-        </p>
+          <h1 className="mb-4 text-3xl font-medium lg:text-5xl">
+            Taski — first version
+          </h1>
+          <p className="max-w-2xl text-gray-500 italic">
+            This was the first version of Taski, before it became a native Mac
+            app. A to-do list that doesn't pressure you: add the things you want
+            to do most days once, then just check them off — nothing scores you,
+            nothing has to happen at an exact time. It's kept running here,
+            working exactly as it did originally.
+          </p>
+        </header>
 
-        <div className="mb-12">
-          <div className="mb-4 flex items-baseline justify-between border-b pb-2">
-            <h3>Routine</h3>
+        <section className="py-8">
+          <div className="mb-12 max-w-[46rem]">
+            <div className="mb-4 flex items-baseline justify-between border-b pb-2">
+              <h3 className="font-medium">Routine</h3>
+              {data.routine.length > 0 && (
+                <span className="text-base opacity-60">
+                  {doneCount}/{data.routine.length} today
+                </span>
+              )}
+            </div>
+
+            {data.routine.length === 0 && (
+              <p className="mb-2 italic opacity-60">
+                Nothing here yet. Add the first thing you want to do most days —
+                waking up, a walk, anything.
+              </p>
+            )}
+
             {data.routine.length > 0 && (
-              <span className="text-base opacity-60">
-                {doneCount}/{data.routine.length} today
-              </span>
+              <ul className="mb-2">
+                {data.routine.map((t) => (
+                  <TaskRow
+                    key={t.id}
+                    text={t.text}
+                    done={t.lastDoneDate === data.todayDate}
+                    onToggle={() => toggleRoutine(t.id)}
+                    onDelete={() => deleteRoutine(t.id)}
+                  />
+                ))}
+              </ul>
             )}
-          </div>
 
-          {data.routine.length === 0 && (
-            <p className="mb-2 italic opacity-60">
-              Nothing here yet. Add the first thing you want to do most days — waking up, a walk,
-              anything.
-            </p>
-          )}
-
-          {data.routine.length > 0 && (
-            <ul className="mb-2">
-              {data.routine.map((t) => (
-                <TaskRow
-                  key={t.id}
-                  text={t.text}
-                  done={t.lastDoneDate === data.todayDate}
-                  onToggle={() => toggleRoutine(t.id)}
-                  onDelete={() => deleteRoutine(t.id)}
-                />
-              ))}
-            </ul>
-          )}
-
-          <form onSubmit={addRoutine} className="flex items-center gap-3 border-b py-3">
-            <input
-              value={routineDraft}
-              onChange={(e) => setRoutineDraft(e.target.value)}
-              placeholder="Add a routine step…"
-              className="flex-1 bg-transparent outline-none placeholder:opacity-40"
-            />
-            <button
-              type="submit"
-              disabled={!routineDraft.trim()}
-              className="shrink-0 underline disabled:opacity-30"
+            <form
+              onSubmit={addRoutine}
+              className="flex items-center gap-3 border-b py-3"
             >
-              Add
-            </button>
-          </form>
-        </div>
-
-        <div>
-          <div className="mb-4 flex items-baseline justify-between border-b pb-2">
-            <h3>Today</h3>
-            {hasDoneToday && (
+              <input
+                value={routineDraft}
+                onChange={(e) => setRoutineDraft(e.target.value)}
+                placeholder="Add a routine step…"
+                className="flex-1 bg-transparent outline-none placeholder:opacity-40"
+              />
               <button
-                type="button"
-                onClick={clearDoneToday}
-                className="text-base underline opacity-60 hover:opacity-100"
+                type="submit"
+                disabled={!routineDraft.trim()}
+                className="shrink-0 underline disabled:opacity-30"
               >
-                Clear done
+                Add
               </button>
-            )}
+            </form>
           </div>
 
-          {data.today.length === 0 && (
-            <p className="mb-2 italic opacity-60">
-              Nothing here yet. Add whatever's on your mind for today.
-            </p>
-          )}
+          <div className="max-w-[46rem]">
+            <div className="mb-4 flex items-baseline justify-between border-b pb-2">
+              <h3 className="font-medium">Today</h3>
+              {hasDoneToday && (
+                <button
+                  type="button"
+                  onClick={clearDoneToday}
+                  className="text-base underline opacity-60 hover:opacity-100"
+                >
+                  Clear done
+                </button>
+              )}
+            </div>
 
-          {data.today.length > 0 && (
-            <ul className="mb-2">
-              {data.today.map((t) => (
-                <TaskRow
-                  key={t.id}
-                  text={t.text}
-                  done={t.done}
-                  onToggle={() => toggleToday(t.id)}
-                  onDelete={() => deleteToday(t.id)}
-                />
-              ))}
-            </ul>
-          )}
+            {data.today.length === 0 && (
+              <p className="mb-2 italic opacity-60">
+                Nothing here yet. Add whatever's on your mind for today.
+              </p>
+            )}
 
-          <form onSubmit={addToday} className="flex items-center gap-3 border-b py-3">
-            <input
-              value={todayDraft}
-              onChange={(e) => setTodayDraft(e.target.value)}
-              placeholder="Add something for today…"
-              className="flex-1 bg-transparent outline-none placeholder:opacity-40"
-            />
-            <button
-              type="submit"
-              disabled={!todayDraft.trim()}
-              className="shrink-0 underline disabled:opacity-30"
+            {data.today.length > 0 && (
+              <ul className="mb-2">
+                {data.today.map((t) => (
+                  <TaskRow
+                    key={t.id}
+                    text={t.text}
+                    done={t.done}
+                    onToggle={() => toggleToday(t.id)}
+                    onDelete={() => deleteToday(t.id)}
+                  />
+                ))}
+              </ul>
+            )}
+
+            <form
+              onSubmit={addToday}
+              className="flex items-center gap-3 border-b py-3"
             >
-              Add
-            </button>
-          </form>
-        </div>
+              <input
+                value={todayDraft}
+                onChange={(e) => setTodayDraft(e.target.value)}
+                placeholder="Add something for today…"
+                className="flex-1 bg-transparent outline-none placeholder:opacity-40"
+              />
+              <button
+                type="submit"
+                disabled={!todayDraft.trim()}
+                className="shrink-0 underline disabled:opacity-30"
+              >
+                Add
+              </button>
+            </form>
+          </div>
 
-        <p className="mt-12 max-w-xl text-base italic opacity-50">
-          Routine checkmarks clear every morning. Today's list clears itself too, so it never
-          piles up. Everything is saved only on this device.
-        </p>
+          <p className="mt-12 max-w-[46rem] text-base text-gray-400 italic">
+            Routine checkmarks clear every morning. Today's list clears itself
+            too, so it never piles up. Everything is saved only on this device.
+          </p>
 
-        <h3 className="mt-12 mb-2">Why it became something else</h3>
-        <p className="my-4">
-          This version proved the idea — routines instead of due dates — but it lived in a
-          browser tab, which meant it was only ever as close as the tab I happened to have open.
-          The{" "}
-          <Link to="/taski" className="underline">
-            <WiggleText>native Mac app</WiggleText>
-          </Link>{" "}
-          picks up from here: same core idea, now with recurrence, drag-and-drop, a calendar, and
-          real theming.
-        </p>
-      </section>
+          <h3 className="mt-12 mb-3 max-w-[46rem] text-[1.375rem] font-semibold">
+            Why it became something else
+          </h3>
+          <p className="my-4 max-w-[46rem] text-[1.125rem] leading-[1.8]">
+            This version proved the idea — routines instead of due dates — but
+            it lived in a browser tab, which meant it was only ever as close as
+            the tab I happened to have open. The{" "}
+            <Link to="/taski" className="underline">
+              <WiggleText>native Mac app</WiggleText>
+            </Link>{" "}
+            picks up from here: same core idea, now with recurrence,
+            drag-and-drop, a calendar, and real theming.
+          </p>
+        </section>
 
-      <footer className="border-t py-8">
-        <p>
-          <Link to="/taski" className="underline">
-            <WiggleText>See the current version →</WiggleText>
-          </Link>
-        </p>
-        <p className="my-2">
-          <Link to="/ai-experiments" className="underline">
-            <WiggleText>← AI Experiments</WiggleText>
-          </Link>
-        </p>
-      </footer>
+        <footer className="border-t border-gray-200 py-16">
+          <div className="flex items-center justify-center">
+            <Link to="/taski">
+              <WiggleText>See the current version →</WiggleText>
+            </Link>
+          </div>
+        </footer>
+
+        {moreExperiments.length > 0 && (
+          <section className="py-16">
+            <p className="mb-6 text-sm tracking-wide text-gray-400 uppercase">
+              More AI experiments
+            </p>
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {moreExperiments.map((exp) => (
+                <ExperimentCard key={exp.name} exp={exp} />
+              ))}
+            </div>
+          </section>
+        )}
+      </div>
     </main>
   );
 }

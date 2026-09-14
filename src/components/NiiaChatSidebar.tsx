@@ -106,7 +106,7 @@ function renderAnswer(text: string): ReactNode {
   return <div className="flex flex-col gap-2 text-sm leading-relaxed">{blocks}</div>;
 }
 
-// Thumbnail cards for case studies / AI experiments mentioned in an answer —
+// Thumbnail cards for case studies / AI playground projects mentioned in an answer —
 // one horizontally-scrollable row, sized generously so the image actually
 // reads as a preview rather than a cramped icon.
 function AnswerCards({ cards }: { cards: AnswerCard[] }) {
@@ -187,7 +187,7 @@ export default function NiiaChatSidebar() {
             >
               <span aria-hidden className="absolute -top-1 left-2 h-2 w-2 rotate-45 bg-black" />A
               little chatbot I vibe-coded for fun — not a live model, just pre-written answers.
-              Try asking about a case study, my AI experiments, hiring, or my hobbies.
+              Try asking about a case study, my AI playground, hiring, or my hobbies.
             </span>
           </span>
         </p>

@@ -1010,10 +1010,10 @@ export const projects: Project[] = [
     // what was already written is invented. See TODO near Results.
     slug: "digitalscreen",
     category: "Website",
-    name: "Digital Screen Co.",
+    name: "Other Designs",
     title: "Corporate website for a digital signage company",
     summary:
-      "Narrative corporate website for a digital signage company, built to explain a technical product simply.",
+      "A collection of smaller landing pages and web apps — shorter engagements that didn't need a full case study of their own.",
     client: "Client (NDA)",
     role: "UI/UX design, information architecture, visual identity",
     team: "Founder, Operations team",
