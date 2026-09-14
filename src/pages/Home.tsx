@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import DrawingPad from "../components/DrawingPad";
 import Nav from "../components/Nav";
 import WorkGridCard from "../components/WorkGridCard";
@@ -24,14 +24,14 @@ export default function Home() {
 
       <section id="about" className="flex justify-center pt-6 md:pt-24">
         <div className="max-w-xl">
-          <p className="mb-4">
-            I help startups and scale-ups turn complex, AI-driven products into interfaces people
-            actually use.
+          <p className="mb-4 text-3xl">
+            I help startups and scale-ups design complex AI-driven products people actually
+            use.
           </p>
-          <p>
-            I design interfaces and build them into working products{" "}
-            <Link to="/ai-experiments">with AI</Link> — from narrative websites to data-rich
-            dashboards, closing the gap between idea and shipped.
+          <p className="text-3xl">
+            My work sits at the intersection of visual arts and business — a generalist range
+            shaped by founding an FMCG brand and co-founding a product design studio, now
+            sharpened by building with AI.
           </p>
         </div>
       </section>
