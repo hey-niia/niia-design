@@ -878,7 +878,7 @@ export const projects: Project[] = [
       {
         type: "before-after",
         before: "/projects/hirement/9.png",
-        after: "/projects/hirement/2.png",
+        after: "/projects/hirement/10.png",
         beforeAlt: "Early loops list as a single flat table",
         afterAlt: "Final loops list grouped by role",
         beforeLabel: "Early version",
