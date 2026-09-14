@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type MouseEvent } from "react";
 
 export default function Zoomable({
   src,
@@ -11,6 +11,7 @@ export default function Zoomable({
 }) {
   const [open, setOpen] = useState(false);
   const [naturalWidth, setNaturalWidth] = useState<number | null>(null);
+  const [cursorLabel, setCursorLabel] = useState({ x: 0, y: 0, visible: false });
 
   useEffect(() => {
     if (!open) return;
@@ -26,15 +27,32 @@ export default function Zoomable({
       <img
         src={src}
         alt={alt}
-        onClick={() => setOpen(true)}
+        onClick={() => {
+          setOpen(true);
+          setCursorLabel((c) => ({ ...c, visible: false }));
+        }}
         onLoad={(e) => setNaturalWidth(e.currentTarget.naturalWidth)}
-        className={`cursor-zoom-in ${className ?? ""}`}
+        onMouseMove={(e: MouseEvent) => setCursorLabel({ x: e.clientX, y: e.clientY, visible: true })}
+        onMouseLeave={() => setCursorLabel((c) => ({ ...c, visible: false }))}
+        className={`cursor-none ${className ?? ""}`}
         // `className` typically passes a fill-width utility (e.g. `w-full`),
         // which on a page with no max-width wrapper stretches to the full
         // viewport — past the image's own resolution on a wide screen,
         // which upscales and visibly softens it. This caps it at 1:1.
         style={naturalWidth ? { maxWidth: naturalWidth } : undefined}
       />
+
+      <span
+        aria-hidden
+        className={`pointer-events-none fixed z-50 flex -translate-x-1/2 -translate-y-1/2 items-center gap-1.5 rounded-full bg-[#e65f2e] px-4 py-2 text-sm font-normal text-white transition-[transform,opacity] duration-150 ease-out ${
+          cursorLabel.visible ? "scale-100 opacity-100" : "scale-75 opacity-0"
+        }`}
+        style={{ left: cursorLabel.x, top: cursorLabel.y }}
+      >
+        <span className="text-base leading-none">+</span>
+        Click to zoom
+      </span>
+
       {open && (
         <div
           role="dialog"
