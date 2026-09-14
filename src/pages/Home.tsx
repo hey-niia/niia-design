@@ -25,8 +25,7 @@ export default function Home() {
       <section id="about" className="flex justify-center pt-6 md:pt-24">
         <div className="max-w-xl">
           <p className="mb-4 text-3xl">
-            I help startups and scale-ups design complex AI-driven products people actually
-            use.
+            I help companies design ambitious products people actually use.
           </p>
           <p>
             My work sits at the intersection of visual arts and business, shaped by founding
