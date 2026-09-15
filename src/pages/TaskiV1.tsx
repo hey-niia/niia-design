@@ -189,13 +189,6 @@ export default function TaskiV1() {
               )}
             </div>
 
-            {data.routine.length === 0 && (
-              <p className="mb-2 italic opacity-60">
-                Nothing here yet. Add the first thing you want to do most days —
-                waking up, a walk, anything.
-              </p>
-            )}
-
             {data.routine.length > 0 && (
               <ul className="mb-2">
                 {data.routine.map((t) => (
@@ -243,12 +236,6 @@ export default function TaskiV1() {
                 </button>
               )}
             </div>
-
-            {data.today.length === 0 && (
-              <p className="mb-2 italic opacity-60">
-                Nothing here yet. Add whatever's on your mind for today.
-              </p>
-            )}
 
             {data.today.length > 0 && (
               <ul className="mb-2">
