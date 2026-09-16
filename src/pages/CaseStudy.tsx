@@ -1,13 +1,26 @@
-import { useCallback, useEffect, useMemo, useRef, useState, type MouseEvent } from "react";
+import { Fragment, useCallback, useEffect, useMemo, useRef, useState, type MouseEvent } from "react";
 import { Link, useParams } from "react-router-dom";
 import { getProject, projects, type ContentBlock, type Credit } from "../data/projects";
 import AnnotatedImage from "../components/AnnotatedImage";
 import BeforeAfter from "../components/BeforeAfter";
 import CardCarousel from "../components/CardCarousel";
+import ClickThrough from "../components/ClickThrough";
+import ConnectIQUserFlow from "../components/ConnectIQUserFlow";
+import { Band } from "../components/DarkVisuals";
+import Decisions from "../components/Decisions";
+import Findings from "../components/Findings";
+import FramedImage from "../components/FramedImage";
+import Outcomes from "../components/Outcomes";
 import Nav from "../components/Nav";
 import ResearchQuotes from "../components/ResearchQuotes";
 import { FRAME_RADIUS } from "../components/ScreenshotFrame";
 import ScrollableImage from "../components/ScrollableImage";
+import Silos from "../components/Silos";
+import Slides from "../components/Slides";
+import { slideImages } from "../lib/slides";
+import { NADIIA_LABEL, NADIIA_SHAPE, NADIIA_SURFACE } from "../components/nadiia";
+import ToolMap from "../components/ToolMap";
+import UserGroups from "../components/UserGroups";
 import WiggleText from "../components/WiggleText";
 import WorkGridCard from "../components/WorkGridCard";
 import { useNiiaChat } from "../context/useNiiaChat";
@@ -316,7 +329,8 @@ function Lightbox({
 }
 
 interface ZoomCursorHandlers {
-  onMouseMove: (e: MouseEvent) => void;
+  /** `label` replaces "Click to zoom", e.g. on a screenshot with markers. */
+  onMouseMove: (e: MouseEvent, label?: string) => void;
   onMouseLeave: () => void;
 }
 
@@ -337,14 +351,52 @@ function withCode(text: string) {
   );
 }
 
+// Blocks that sit on the full-bleed band when a project has `darkVisuals`.
+const VISUAL_TYPES = new Set<ContentBlock["type"]>([
+  "image",
+  "video",
+  "annotated-image",
+  "card-carousel",
+  "before-after",
+  "gallery",
+]);
+
+// A plain image opts out of the band and sits on the white page instead.
+function isVisual(block: ContentBlock) {
+  return VISUAL_TYPES.has(block.type) && !(block.type === "image" && block.plain);
+}
+
+// Consecutive visuals share one band, so two screenshots in a row aren't
+// split by a strip of white. Sections are numbered along the way.
+function groupVisuals(content: ContentBlock[]) {
+  const groups: { block: ContentBlock; index: number; sectionNumber?: number }[][] = [];
+  let section = 0;
+  content.forEach((block, index) => {
+    const entry = { block, index, sectionNumber: block.type === "section" ? ++section : undefined };
+    const last = groups[groups.length - 1];
+    if (last && isVisual(last[0].block) === isVisual(block)) {
+      last.push(entry);
+    } else {
+      groups.push([entry]);
+    }
+  });
+  return groups;
+}
+
 function Block({
   block,
   onImageClick,
   zoomCursor,
+  dark = false,
+  sectionNumber,
 }: {
   block: ContentBlock;
   onImageClick: (src: string) => void;
   zoomCursor: ZoomCursorHandlers;
+  /** Rendering inside a dark full-bleed band, which supplies the spacing and background. */
+  dark?: boolean;
+  /** Shown as an orange "01/" label above the section title. */
+  sectionNumber?: number;
 }) {
   const videoRef = useAutoplayInView<HTMLVideoElement>();
 
@@ -360,6 +412,11 @@ function Block({
     case "section":
       return (
         <h2 id={block.id} className="mt-16 mb-4 scroll-mt-8 text-3xl font-medium">
+          {sectionNumber !== undefined && (
+            <span className="mb-3 block font-mono text-xs tracking-widest text-[#e65f2e]">
+              {String(sectionNumber).padStart(2, "0")}/
+            </span>
+          )}
           {block.title}
         </h2>
       );
@@ -371,6 +428,19 @@ function Block({
           {block.items.map((item, i) => (
             <li key={i} className="pl-1">
               {withCode(item)}
+            </li>
+          ))}
+        </ul>
+      );
+    case "chips":
+      return (
+        <ul className="my-8 grid max-w-[46rem] grid-cols-1 gap-4 sm:grid-cols-3">
+          {block.items.map((item) => (
+            <li
+              key={item}
+              className={`${NADIIA_SHAPE} ${NADIIA_SURFACE.white} ${NADIIA_LABEL} flex min-h-20 items-center justify-center px-5 py-4 text-center`}
+            >
+              {item}
             </li>
           ))}
         </ul>
@@ -423,13 +493,28 @@ function Block({
         </div>
       );
     case "image":
+      if (block.plain) {
+        return (
+          <div className="my-10">
+            <FramedImage
+              src={block.src}
+              alt={block.alt}
+              onImageClick={onImageClick}
+              zoomCursor={zoomCursor}
+            />
+            {block.caption && <p className="mt-3 text-sm italic text-gray-400">{block.caption}</p>}
+          </div>
+        );
+      }
       return (
         // `panel` puts the image on the same neutral field the before/after
         // toggles use. Screenshots with no background of their own float on
         // white and read as a different kind of asset from the ones that do.
         <div
           className={
-            block.panel
+            dark
+              ? ""
+              : block.panel
               ? `my-8 px-4 py-8 sm:px-10 sm:py-10 ${
                   block.panel === "dark" ? "bg-neutral-900" : "bg-neutral-100"
                 }`
@@ -475,7 +560,7 @@ function Block({
       );
     case "annotated-image":
       return (
-        <div className="my-8 bg-neutral-100 px-4 py-8 sm:px-10 sm:py-10">
+        <div className={dark ? "" : "my-8 bg-neutral-100 px-4 py-8 sm:px-10 sm:py-10"}>
           <AnnotatedImage
             src={block.src}
             alt={block.alt}
@@ -503,7 +588,7 @@ function Block({
       return <ResearchQuotes items={block.items} />;
     case "before-after":
       return (
-        <div className="my-8">
+        <div className={dark ? "" : "my-8"}>
           <BeforeAfter
             before={block.before}
             after={block.after}
@@ -514,11 +599,42 @@ function Block({
             maxWidth={block.maxWidth}
             viewportHeight={block.viewportHeight}
             caption={block.caption}
+            dark={block.dark ?? dark}
             onImageClick={onImageClick}
             zoomCursor={zoomCursor}
           />
         </div>
       );
+    case "cards":
+      return <Outcomes items={block.items} />;
+    case "tool-map":
+      return <ToolMap items={block.items} />;
+    case "user-groups":
+      return <UserGroups groups={block.groups} />;
+    case "silos":
+      return <Silos from={block.from} to={block.to} />;
+    case "click-through":
+      return (
+        <div className="my-10">
+          <ClickThrough steps={block.steps} label={block.label} />
+        </div>
+      );
+    case "slides":
+      return (
+        <Slides
+          slides={block.slides}
+          label={block.label}
+          appearance={block.appearance}
+          onImageClick={onImageClick}
+          zoomCursor={zoomCursor}
+        />
+      );
+    case "diagram":
+      return <ConnectIQUserFlow />;
+    case "decisions":
+      return <Decisions items={block.items} />;
+    case "findings":
+      return <Findings tested={block.tested} findings={block.findings} />;
     case "gallery":
       return (
         <div className="my-4 flex flex-col gap-6 sm:flex-row">
@@ -553,6 +669,11 @@ export default function CaseStudy() {
   // can step through them regardless of which block a screenshot came from.
   const images = useMemo(() => {
     const list: { src: string; alt: string }[] = [];
+    if (project?.hero) list.push(project.hero);
+    if (project?.featured) {
+      list.push({ src: project.featured.before, alt: project.featured.beforeAlt });
+      list.push({ src: project.featured.after, alt: project.featured.afterAlt });
+    }
     for (const block of project?.content ?? []) {
       if (block.type === "image") list.push({ src: block.src, alt: block.alt });
       else if (block.type === "annotated-image") {
@@ -563,14 +684,21 @@ export default function CaseStudy() {
         list.push({ src: block.after, alt: block.afterAlt });
       } else if (block.type === "gallery") {
         for (const img of block.images) list.push({ src: img.src, alt: img.alt });
+      } else if (block.type === "slides") {
+        for (const slide of block.slides) list.push(...slideImages(slide));
       }
     }
     return list;
   }, [project]);
-  const [cursorLabel, setCursorLabel] = useState({ x: 0, y: 0, visible: false });
+  const [cursorLabel, setCursorLabel] = useState({
+    x: 0,
+    y: 0,
+    visible: false,
+    text: undefined as string | undefined,
+  });
 
   const zoomCursor: ZoomCursorHandlers = {
-    onMouseMove: (e) => setCursorLabel({ x: e.clientX, y: e.clientY, visible: true }),
+    onMouseMove: (e, text) => setCursorLabel({ x: e.clientX, y: e.clientY, visible: true, text }),
     onMouseLeave: () => setCursorLabel((c) => ({ ...c, visible: false })),
   };
 
@@ -642,9 +770,16 @@ export default function CaseStudy() {
   }
 
   const hasToc = toc.length > 1;
+  const openImage = (src: string) =>
+    setLightboxIndex(images.findIndex((img) => img.src === src));
+  const featuredToggle = project.featured && (
+    <BeforeAfter {...project.featured} onImageClick={openImage} zoomCursor={zoomCursor} />
+  );
 
   return (
-    <main>
+    // `clip`, not `hidden`: full-bleed bands are 100vw, which includes the
+    // scrollbar, and `hidden` would break the TOC's sticky positioning.
+    <main className={project.darkVisuals ? "overflow-x-clip" : undefined}>
       <Nav />
       <div className="mx-auto max-w-4xl pt-6 md:pt-24">
         <div className="relative">
@@ -685,7 +820,9 @@ export default function CaseStudy() {
 
           <header className="border-b border-gray-200 pb-8">
             <p className="mb-4 font-mono text-xs tracking-widest text-gray-400 uppercase">
-              {project.name} · {project.client}
+              {project.hideClientInHeader
+                ? project.name
+                : `${project.name} · ${project.client}`}
             </p>
             <h1 className="mb-4 text-3xl font-medium lg:text-5xl">{project.title}</h1>
             {project.summary && <p className="mt-4 max-w-2xl">{project.summary}</p>}
@@ -746,15 +883,44 @@ export default function CaseStudy() {
             )}
           </section>
 
-          <section className="py-8">
-            {project.content.map((block, i) => (
-              <Block
-                key={i}
-                block={block}
-                onImageClick={(src) => setLightboxIndex(images.findIndex((img) => img.src === src))}
-                zoomCursor={zoomCursor}
+          {/* After the overview, so its rule stays right under Role / Team / Timeline. */}
+          {project.hero && (
+            <div className="pt-8">
+              <img
+                src={project.hero.src}
+                alt={project.hero.alt}
+                className={`block w-full cursor-none ${FRAME_RADIUS} shadow-[0_2px_4px_rgba(0,0,0,0.04),0_12px_32px_rgba(0,0,0,0.08)] ring-1 ring-black/10`}
+                onClick={() => openImage(project.hero!.src)}
+                onMouseMove={zoomCursor.onMouseMove}
+                onMouseLeave={zoomCursor.onMouseLeave}
               />
-            ))}
+            </div>
+          )}
+
+          {featuredToggle && <div className="pt-8">{featuredToggle}</div>}
+
+          <section className="py-8">
+            {project.darkVisuals
+              ? groupVisuals(project.content).map((group) => {
+                  const blocks = group.map(({ block, index, sectionNumber }) => (
+                    <Block
+                      key={index}
+                      block={block}
+                      dark
+                      sectionNumber={sectionNumber}
+                      onImageClick={openImage}
+                      zoomCursor={zoomCursor}
+                    />
+                  ));
+                  return isVisual(group[0].block) ? (
+                    <Band key={group[0].index}>{blocks}</Band>
+                  ) : (
+                    <Fragment key={group[0].index}>{blocks}</Fragment>
+                  );
+                })
+              : project.content.map((block, i) => (
+                  <Block key={i} block={block} onImageClick={openImage} zoomCursor={zoomCursor} />
+                ))}
           </section>
         </div>
 
@@ -800,8 +966,12 @@ export default function CaseStudy() {
         }`}
         style={{ left: cursorLabel.x, top: cursorLabel.y }}
       >
-        <span className="text-base leading-none">+</span>
-        Click to zoom
+        {cursorLabel.text ?? (
+          <>
+            <span className="text-base leading-none">+</span>
+            Click to zoom
+          </>
+        )}
       </span>
 
       {lightboxIndex !== null && (

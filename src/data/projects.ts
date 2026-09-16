@@ -15,6 +15,8 @@ export type ContentBlock =
   | {
       type: "image";
       src: string;
+      /** On the white page with a soft shadow, never grouped onto a dark band. */
+      plain?: boolean;
       alt: string;
       caption?: string;
       maxWidth?: number;
@@ -82,7 +84,64 @@ export type ContentBlock =
       /** Height of the scroll window, in px. Taller screens scroll inside it. */
       viewportHeight?: number;
       caption?: string;
+      /** Numbered markers on the before screen, with notes on hover. */
+      beforePins?: { x: number; y: number; title: string; body: string }[];
+      /** Dark grey (#292929) panel, matching the PDF case study. */
+      dark?: boolean;
+      /** No panel: the frame sits on the white page with a soft shadow. */
+      plain?: boolean;
     }
+  /** Outcome cards (Nadiia style); `green` marks a headline result. */
+  | {
+      type: "cards";
+      title?: string;
+      columns?: 3 | 4;
+      items: { text: string; tone?: "outline" | "light" | "green" }[];
+    }
+  /** Tools grouped by takeaway: white boxes forking out to one strength (+) and one weakness (−). */
+  | { type: "tool-map"; items: { names: string[]; plus: string; minus: string }[] }
+  /** One column per user group (Nadiia style): pain points, then what they create or need. */
+  | {
+      type: "user-groups";
+      groups: { name: string; pains: string[]; needsLabel: string; needs: string[] }[];
+    }
+  /** Separate systems merging into the one system they became (Nadiia style). */
+  /** Auto-advancing slideshow of screens with a name tag above each (Nadiia style). */
+  | {
+      type: "slides";
+      label: string;
+      /** `figma`: each slide as a Figma section in the app's placeholder colour. Default: Nadiia frames on orange. */
+      appearance?: "nadiia" | "figma";
+      slides: {
+        title: string;
+        src?: string;
+        alt?: string;
+        /** Several related components on one screen (figma look). */
+        images?: { src: string; alt: string; width?: number; bare?: boolean }[];
+        columns?: number;
+        scroll?: boolean;
+        /** Too big to read in the slider: shown only on the explore canvas. */
+        gridOnly?: boolean;
+      }[];
+    }
+  /** Screens played back like a recording, with a hand clicking through to each next screen. */
+  | {
+      type: "click-through";
+      label: string;
+      steps: { src: string; alt: string; click?: { x: number; y: number }; holdMs?: number }[];
+    }
+  /** A hand-built diagram component, looked up by name in CaseStudy. */
+  | { type: "diagram"; name: "connectiq-user-flow" }
+  | { type: "silos"; from: string[]; to: string }
+  /** Key product decisions as before → after cards (Nadiia style). */
+  | {
+      type: "decisions";
+      items: { title: string; before: string; after: string; note?: string }[];
+    }
+  /** Usability test scope next to what came out of it (Nadiia style). */
+  | { type: "findings"; tested: string[]; findings: string[] }
+  /** Short labels in white mono boxes with a soft shadow, on the white page. */
+  | { type: "chips"; items: string[] }
   /** Big standalone numbers (page views, MAU, usability score…), no card/border. */
   | { type: "stat-row"; stats: { value: string; label: string }[] }
   /** Numbered short-form callouts (frictions, concepts) — 2-4 items, gray fill. */
@@ -119,6 +178,8 @@ export interface Project {
   title: string;
   summary: string;
   client: string;
+  /** Show only `name` in the small line above the case study title, without "· client". */
+  hideClientInHeader?: boolean;
   role: string;
   /** Who else was involved, by function — omit if solo or not documented. */
   team?: string;
@@ -133,6 +194,12 @@ export interface Project {
   lastUpdated: string;
   /** Impact Overview: 2-3 stat cards surfaced at the top of the case study. */
   impact?: ImpactStat[];
+  /** Screenshot shown right under Role / Team / Timeline, before `featured`. */
+  hero?: { src: string; alt: string };
+  /** Before/after toggle shown right under Role / Team / Timeline. */
+  featured?: Extract<ContentBlock, { type: "before-after" }>;
+  /** Every visual sits on a full-bleed dark grey band, and sections are numbered — the PDF case study look. */
+  darkVisuals?: boolean;
   content: ContentBlock[];
 }
 
@@ -650,12 +717,17 @@ export const projects: Project[] = [
     // started life as a PDF print of an actual job record) — not reconstructed from memory.
     // No analytics platform existed for this engagement, so Results stays qualitative on
     // purpose — don't add a stat-row without a source.
+    // Later merged with Niia's PDF case study (2025): the outcome cards, including
+    // "3× fewer screens" and reduced onboarding time, are her own claims from that PDF.
+    // The client portal is shown as a concept only. Design system slides are exported
+    // straight from the Figma file (dashboard C) at 3×, at their real component size.
     slug: "connectiq",
     category: "Dashboard",
     name: "Platform serving screens at Apple, Starbucks, KFC, and more across the world",
-    title: "Platform serving screens at Apple, Starbucks, KFC, and more across the world",
+    title: "ConnectIQ",
+    hideClientInHeader: true,
     summary:
-      "Replaced a fully manual, four-silo Airtable operation with one platform for deployment, partner dispatch, and job tracking, for a company installing digital signage and audio hardware across Southeast Asia and Latin America.",
+      "One platform for planning, dispatch, installation, and reporting for a company that installs digital signage and audio hardware across Southeast Asia and Latin America. It replaced four disconnected Airtable bases, Fillout forms, Slack messages, and the phone calls and exported PDFs in between.",
     client: "Giant Pumpkin",
     role: "Product design, 0→1, information architecture, design systems",
     team: "Founder, project manager, and the internal planning & operations team",
@@ -667,7 +739,7 @@ export const projects: Project[] = [
       { initials: "KR", label: "Krittiyanee — planning & operations" },
     ],
     duration: "Aug – Nov 2025 · 3 months",
-    tools: ["Figma", "Claude", "Airtable"],
+    tools: ["Figma", "Figjam", "Claude", "Airtable"],
     screenshots: [
       {
         src: "/projects/connectiq.webp",
@@ -675,182 +747,641 @@ export const projects: Project[] = [
       },
     ],
     lastUpdated: "2025–2026",
+    hero: {
+      src: "/projects/connectiq/partner-jobs-board.webp",
+      alt: "Partner-facing jobs board, columns for Unassigned, To do, In progress, and Done, with a job card mid-drag showing avatars and job details",
+    },
+    featured: {
+      type: "before-after",
+      before: "/projects/connectiq/airtable-job-record.webp",
+      after: "/projects/connectiq/job-creation-modal.webp",
+      beforeAlt:
+        "A real Airtable job record: assignment, quote reference, service and status fields, a separate linked partner panel, and a job-checks checklist, all on one long scrolling page",
+      afterAlt:
+        "ConnectIQ's Add job modal, step one: customer, job type, scheduled date, and time slot fields, with a progress indicator for the two steps ahead",
+      beforeLabel: "Airtable",
+      afterLabel: "ConnectIQ",
+      maxWidth: 896,
+      viewportHeight: 640,
+      beforePins: [
+        {
+          x: 92,
+          y: 3,
+          title: "A name tag, not a queue",
+          body: "Two names sit on this job, but there's no dispatch list either person can open on a phone.",
+        },
+        {
+          x: 92,
+          y: 5,
+          title: "Even the team wasn't sure what this pointed to",
+          body: "\"We are not quite sure about that as well\" — the ops team, when I asked what this reference links to.",
+        },
+        {
+          x: 92,
+          y: 6,
+          title: "Every field carries equal weight",
+          body: "Service, job type, and status look the same. Nothing shows which one gates the others.",
+        },
+        {
+          x: 92,
+          y: 8,
+          title: "The partner lives in a fourth base",
+          body: "Read-only here. Changing the partner means leaving this record for yet another base.",
+        },
+      ],
+      plain: true,
+    },
+    darkVisuals: true,
     content: [
       { type: "section", id: "problem", title: "Problem" },
       {
         type: "paragraph",
-        text: "Giant Pumpkin installs and maintains digital signage and audio-for-business hardware for retail chains — KFC, Apple resellers, Starbucks, Uniqlo, Zus Coffee — across Southeast Asia and Latin America. Every install, every broken screen, every renewed contract ran through Airtable.",
+        text: "Giant Pumpkin installs and maintains digital signage and audio hardware for retail chains like KFC, Apple resellers, Starbucks, and Uniqlo. Every install, broken screen, and renewed contract ran through Airtable, Fillout forms, and Slack messages.",
       },
       {
-        type: "paragraph",
-        text: "Airtable keeps data in separate bases, on purpose. That's fine for a spreadsheet. It's not fine when one job touches a customer record, a location, a contract, and an inventory item — bases that can't talk to each other on one screen. The team had already patched around it once, with a separate form tool bolted onto Airtable just so field agents could reach into the inventory table from their phones.",
-      },
-      {
-        type: "list",
-        items: [
-          "No tool built for the field — agents worked from a form bolted onto Airtable, typing serial numbers by hand.",
-          "One job, four interfaces — a customer, its location, a contract, and a bill of materials each lived in a different base.",
-          "No client-facing view — a job's status only ever traveled by phone call or a manually exported PDF.",
-        ],
-      },
-      {
-        type: "paragraph",
-        text: "This is the full job record, printed straight out of Airtable, uncropped — browser tab title down to the last empty state. Scroll it and hover the markers for what's actually going on underneath it.",
-      },
-      {
-        type: "annotated-image",
-        src: "/projects/connectiq/airtable-job-record.webp",
-        alt: "The complete Airtable job record, printed uncropped from the browser: assignment avatars, a quote reference next to an empty BOM reference, service/job-type/status pills, a linked partner panel, a job-checks checklist, then a long run of mostly-empty sections — tasks, location details, BOM, contract, documents, related jobs, images, tickets, inventory — down to the record's last-modified footer",
-        maxWidth: 720,
-        viewportHeight: 620,
-        pins: [
-          {
-            x: 92,
-            y: 3,
-            title: "A name tag, not a queue",
-            body: "Two names sit on this job, but neither is a dispatch list either can open on a phone — that had to be built as a separate tool outside Airtable entirely.",
-          },
-          {
-            x: 92,
-            y: 5,
-            title: "Even the team wasn't sure what this pointed to",
-            body: "\"We are not quite sure about that as well\" — the internal ops team's own answer when I asked whether this reference is client-specific or tied to inventory. Even they had to guess at what it actually points to.",
-          },
-          {
-            x: 92,
-            y: 6,
-            title: "Every field carries equal weight",
-            body: "Service, job type, and status sit side by side with the same visual weight. Nothing on the page signals which one actually gates the others.",
-          },
-          {
-            x: 92,
-            y: 8,
-            title: "The partner lives in a fourth base",
-            body: "This panel is a linked-record embed, read-only from here. Changing anything about the partner means leaving this record and opening yet another base.",
-          },
-        ],
-        caption:
-          "Nothing here is broken — this is Airtable working exactly as designed. Scroll past the checklist and it's mostly empty states: tasks, documents, images, tickets, all waiting for data that lives somewhere else. One job record, sixteen thousand pixels tall.",
-      },
-      { type: "heading", text: "How I tackled it" },
-      {
-        type: "numbered-list",
-        items: [
-          "Sat in on the founder and PM's own walkthrough of their Airtable base, screen by screen, before opening Figma.",
-          "Ran a separate session with the internal planning and operations team, asking them to set up a client, a contract, and a job in their own words — and to show me exactly where they got stuck.",
-          "Mapped a full user flow for all three groups — internal ops, partners, clients — as a plain flowchart with no visual design, so the founder could sign off on the logic before a single screen got designed.",
-        ],
-      },
-      {
-        type: "image",
-        src: "/projects/connectiq/user-flow.webp",
-        alt: "A boxes-and-arrows user flow diagram for the internal deployment team, internal support, and partner dispatch manager and field service agent roles — onboarding, adding a customer and locations, adding a contract, creating jobs, generating tasks and BOM, and the incident-report thread back to support",
-        caption:
-          "No visual design yet — just boxes, arrows, and the logic between three user groups. This is what got signed off before I opened Figma.",
+        type: "chips",
+        items: ["One job, four bases", "No tool for field installation", "No client view"],
       },
 
-      { type: "section", id: "solution", title: "Solution" },
+      { type: "section", id: "discovery", title: "Discovery" },
       {
         type: "paragraph",
-        text: "So how do you turn four separate Airtable bases into one product, when the founder and the PM don't even agree yet on how much the internal side matters?",
+        text: "Before designing anything, I ran deep-dive sessions with the CEO, CTO, deployment, support, partner dispatch leads, and sales. Internal users walked me through their real process in Airtable, the dispatch system, and Fillout forms, so I could see where data broke between teams.",
       },
+      { type: "paragraph", text: "These conversations clarified:" },
       {
-        type: "paragraph",
-        text: "That tension was real from the first kickoff call. Yves wanted to focus entirely on partners and clients; Sebastian pushed back, since he'd watched his own ops team fight the tool every day. We did both, starting with partners — their screens overlapped so heavily with internal ops that designing one meant most of the other was already done.",
-      },
-      {
-        type: "list",
+        type: "chips",
         items: [
-          "One guided flow to create a job — a single stepped form (basic info, then location & bill of materials) instead of the four-interface hop.",
-          "Serial numbers that autocomplete from the last three digits, matched live against inventory, replacing the separate bolted-on form tool.",
-          "One component set for both portals, so the internal and partner sides read as one product instead of two.",
+          "Data models and dependencies",
+          "How jobs are created, scheduled, and executed",
+          "Every bottleneck across internal tools",
+          "How partners dispatch and complete tasks",
+          "What clients expect to see",
+          "How field agents work on-site",
+        ],
+      },
+
+      { type: "section", id: "research", title: "Research" },
+      {
+        type: "paragraph",
+        text: "I analyzed Jobber, Linear, Monday, Jira Service, Retool, Asana, and Upwork, plus enterprise dispatching systems, to see how each handles complex, multi-role work.",
+      },
+      {
+        type: "tool-map",
+        items: [
+          {
+            names: ["Jobber", "Upwork"],
+            plus: "Guided multi-step flow: job → contract → delivery",
+            minus: "Too simple for multidimensional data",
+          },
+          {
+            names: ["Linear"],
+            plus: "Clear hierarchy; collapsible sections feel light",
+            minus: "Bare-bones customization for multi-role teams",
+          },
+          {
+            names: ["Monday", "Retool"],
+            plus: "Flexible boards and views for cross-team visibility",
+            minus: "Too much flexibility; users get lost in custom boards",
+          },
+          {
+            names: ["Jira Service", "Asana"],
+            plus: "Robust ticket lifecycle, automation, and dependencies",
+            minus: "Too many fields visible at once",
+          },
+        ],
+      },
+
+      { type: "section", id: "users", title: "Users" },
+      {
+        type: "paragraph",
+        text: "Three groups, each with a very different day.",
+      },
+      {
+        type: "user-groups",
+        groups: [
+          {
+            name: "Internal deployment team",
+            pains: [
+              "Massive scrolling lists",
+              "Repeated data entry",
+              "Siloed screens",
+              "Hard to trace dependencies",
+            ],
+            needsLabel: "Creates",
+            needs: [
+              "Customers, locations, contracts",
+              "BOMs and inventory",
+              "Jobs, tasks, templates",
+              "Post-installation reviews",
+            ],
+          },
+          {
+            name: "Partners (external installers)",
+            pains: [
+              "Work across 2–3 tools",
+              "Fragmented workflow",
+              "Often on poor mobile devices, so speed matters",
+            ],
+            needsLabel: "Two roles",
+            needs: [
+              "Dispatch managers assign jobs to installers",
+              "Field agents do the job on mobile and upload serials, photos, videos",
+            ],
+          },
+          {
+            name: "Enterprise clients",
+            pains: ["Data scattered across Airtable and Freshdesk"],
+            needsLabel: "They need",
+            needs: [
+              "Installations and job statuses",
+              "Problem reports",
+              "Subscriptions and maintenance",
+              "Warranty and lifecycle timelines",
+            ],
+          },
+        ],
+      },
+
+      { type: "section", id: "system", title: "System map" },
+      {
+        type: "paragraph",
+        text: "Everything was technically connected, but visually fragmented. Airtable has no conditional fields, so installation jobs and maintenance jobs showed the same irrelevant sections. The goal: one adaptive system.",
+      },
+      {
+        type: "silos",
+        from: ["Locations", "Inventory", "Jobs", "Tickets"],
+        to: "One adaptive system",
+      },
+      { type: "paragraph", text: "I created complete flows for each user group:" },
+      { type: "diagram", name: "connectiq-user-flow" },
+
+      { type: "section", id: "wireframes", title: "Wireframes & testing" },
+      {
+        type: "paragraph",
+        text: "I worked in mid-fidelity wireframes: not styled, but detailed enough for users to follow the flow instantly. Claude helped me break complex workflows into structured layouts that I then refined by hand.",
+      },
+      {
+        type: "slides",
+        label: "Wireframes",
+        slides: [
+          {
+            title: "Job record",
+            src: "/projects/connectiq/wireframe-job-record.webp",
+            alt: "Wireframe of a job record: status, time slot, type, scheduled date and address, then documentation, bill of materials, checklists, and an activity log with sign-off and an incident report",
+            scroll: true,
+          },
+          {
+            title: "Add customer",
+            src: "/projects/connectiq/wireframe-add-customer.webp",
+            alt: "Wireframe of the Add customer form: brand name, brand owner, service, store, country, status, and an auto-generated customer ID",
+          },
+          {
+            title: "Add location",
+            src: "/projects/connectiq/wireframe-add-location.webp",
+            alt: "Wireframe of the Add location form, step two of four: contact details and operating hours",
+          },
+          {
+            title: "Activity & incident reports",
+            src: "/projects/connectiq/wireframe-activity.webp",
+            alt: "Wireframe of a job activity log: inventory created and installed, a comment, an incident report, and the subscription going active, with a comment and incident report input below",
+          },
         ],
       },
       {
         type: "paragraph",
-        text: "One thing got cut almost immediately: statuses. Airtable's list had grown to unscheduled, tentative, scheduled, rescheduled, dispatched, and more, but the ops team only ever used to-do and done. I dropped it to three — to-do, in progress, done — which also turned marking a task complete from two clicks into one.",
+        text: "Before moving into UI, we ran usability tests with internal users and partner representatives.",
+      },
+      {
+        type: "findings",
+        tested: [
+          "Job creation flow",
+          "BOM assignment",
+          "Partner dispatch flow",
+          "Field-agent mobile flow",
+          "Moving between tasks, BOM, incidents, and media",
+          "Following location → job → inventory without confusion",
+        ],
+        findings: [
+          "Users loved collapsible sections: “Finally I don't have to scroll a kilometer.”",
+          "Task templates made sense and cut cognitive load.",
+          "Field agents needed clearer micro-copy for serial matching.",
+          "Partners wanted a “You have X jobs today” entry point.",
+          "Cross-screen referencing was hard, so we added a side panel instead of page changes.",
+        ],
+      },
+
+      { type: "section", id: "decisions", title: "Key decisions" },
+      {
+        type: "paragraph",
+        text: "The founder wanted ops fixed first; the PM wanted partners and clients. We did both, starting with partners. Their screens overlapped so much with internal ops that designing one mostly designed the other.",
+      },
+      {
+        type: "decisions",
+        items: [
+          {
+            title: "Job creation",
+            before: "Hopping across four Airtable bases",
+            after: "One guided, stepped form",
+          },
+          {
+            title: "Serial numbers",
+            before: "Typed by hand in a form bolted onto Airtable",
+            after: "Autocomplete from the last 3 digits, matched live to inventory",
+          },
+          {
+            title: "Statuses",
+            before: "Unscheduled, tentative, scheduled, rescheduled, dispatched, and more",
+            after: "To do · In progress · Done",
+            note: "Completing a task: 2 clicks → 1",
+          },
+        ],
+      },
+
+      { type: "section", id: "design-system", title: "Design system" },
+      {
+        type: "paragraph",
+        text: "One component system for every portal: lists, cards, overlays, tabs, and filters, plus reusable pieces for tasks, BOMs, subscriptions, and incidents.",
+      },
+      {
+        type: "slides",
+        label: "Design system components",
+        appearance: "figma",
+        slides: [
+          {
+            title: "Page headers",
+            // 1249px wide: it fills the slider frame, so it lives on the canvas only.
+            gridOnly: true,
+            images: [
+              {
+                src: "/projects/connectiq/fig-headers.webp",
+                alt: "Page header component set: Jobs with search, filter, display and notifications; Customers with an Add customer button; Customers with bulk actions; and a modal header with a step indicator",
+                width: 1249,
+              },
+            ],
+          },
+          {
+            title: "Sidebar \u00b7 3 portals",
+            images: [
+              {
+                src: "/projects/connectiq/fig-sidebar-partner.webp",
+                alt: "Partner portal sidebar: ConnectIQ logo with a Partner badge and a single Jobs item, selected",
+                width: 220,
+              },
+              {
+                src: "/projects/connectiq/fig-sidebar-internal.webp",
+                alt: "Internal portal sidebar: Dashboard, Jobs (selected) and Locations, then an Admin group with Inventory, Customers and Partners",
+                width: 220,
+              },
+              {
+                src: "/projects/connectiq/fig-sidebar-client.webp",
+                alt: "Client portal sidebar: Dashboard (selected), Installations, Tickets, Subscriptions, Inventory and Locations",
+                width: 220,
+              },
+            ],
+          },
+          {
+            title: "Navigation",
+            images: [
+              {
+                src: "/projects/connectiq/fig-tab-bar.webp",
+                alt: "Tab bar component set: Documentation, Checklist, Incident report and Sign off, plus a compact variant",
+                width: 729,
+              },
+              {
+                src: "/projects/connectiq/fig-progress.webp",
+                alt: "Step progress indicator with completed, current and upcoming steps",
+                width: 573,
+              },
+              {
+                src: "/projects/connectiq/fig-tab.webp",
+                alt: "Single tab component in default, hover and selected states",
+                width: 242,
+              },
+              {
+                src: "/projects/connectiq/fig-sidebar-item.webp",
+                alt: "Sidebar item component in default, hover and selected states",
+                width: 225,
+              },
+            ],
+          },
+          {
+            title: "Buttons",
+            images: [
+              {
+                src: "/projects/connectiq/fig-buttons.webp",
+                alt: "Button component set: primary, secondary, dark, outline, link, icon and destructive buttons across states",
+                width: 904,
+              },
+            ],
+          },
+          {
+            title: "Icons",
+            images: [
+              {
+                // New file name on purpose: browsers had cached the old one-row strip under fig-icons.webp.
+                src: "/projects/connectiq/fig-icons-2rows.webp",
+                alt: "Icon set used across the product: 46 icons in two rows, from calendar, clock and trash to chevrons, filters and status markers",
+                // The Figma frame's 46 icons shown at 2× (24px) in two rows of 23, exported at 4× so they stay sharp.
+                width: 820,
+              },
+              {
+                src: "/projects/connectiq/fig-icons-viewer.webp",
+                alt: "Icon viewer component with a selected icon",
+                width: 279,
+              },
+            ],
+          },
+          {
+            title: "Text inputs",
+            images: [
+              {
+                src: "/projects/connectiq/fig-input.webp",
+                alt: "Text input and textarea component set: empty, focused, filled and disabled states",
+                width: 724,
+              },
+            ],
+          },
+          {
+            title: "Select & dropdown items",
+            images: [
+              {
+                src: "/projects/connectiq/fig-select.webp",
+                alt: "Select component set for service and country: default, open with options, and selected",
+                width: 930,
+              },
+              {
+                src: "/projects/connectiq/fig-dropdown-item.webp",
+                alt: "Dropdown item component set: default, hover, selected, with icon and with description",
+                width: 823,
+              },
+            ],
+          },
+          {
+            title: "Dropdowns",
+            images: [
+              {
+                src: "/projects/connectiq/fig-dropdowns.webp",
+                // A row of menus that each carry their own card: one backing
+                // behind the lot would glue them into a single white slab.
+                bare: true,
+                alt: "Dropdown menus component set: brand autocomplete, display options, job type, and nested status, assignee and customer filters",
+                width: 3401,
+              },
+            ],
+          },
+          {
+            title: "Selection controls",
+            images: [
+              {
+                src: "/projects/connectiq/fig-radio-checkbox.webp",
+                alt: "Radio and checkbox group component set: full-width options in default and selected states",
+                width: 1048,
+              },
+              {
+                src: "/projects/connectiq/fig-checkbox-item.webp",
+                alt: "Checkbox list item component in default, hover, checked and disabled states",
+                width: 640,
+              },
+              {
+                src: "/projects/connectiq/fig-toggles.webp",
+                alt: "Toggle switches in on, off and disabled states",
+                width: 618,
+              },
+              {
+                src: "/projects/connectiq/fig-checkbox-base.webp",
+                alt: "Checkbox and radio base component set: every size, state and checked combination",
+                width: 329,
+              },
+            ],
+          },
+          {
+            title: "Date picker",
+            images: [
+              {
+                src: "/projects/connectiq/fig-date-picker.webp",
+                alt: "Date picker menu for January 2025 with the selected day in orange",
+                width: 350,
+                // Already a white rounded card with its own shadow in Figma.
+                bare: true,
+              },
+              {
+                src: "/projects/connectiq/fig-calendar-cell.webp",
+                alt: "Calendar cell component set: default, hover, selected and today",
+                width: 252,
+              },
+            ],
+          },
+          {
+            title: "Status & feedback",
+            images: [
+              {
+                src: "/projects/connectiq/fig-status.webp",
+                alt: "Status component set: coloured dots for unassigned, to do, in progress and done",
+                width: 176,
+              },
+              {
+                src: "/projects/connectiq/fig-pills.webp",
+                alt: "Pill component set: status pills with coloured dots and outlines",
+                width: 192,
+              },
+              {
+                src: "/projects/connectiq/fig-banners.webp",
+                alt: "Banner component set: info, success, warning and error messages",
+                width: 406,
+              },
+              {
+                src: "/projects/connectiq/fig-tooltips.webp",
+                alt: "Dark tooltip component set: installations by country and a bill-of-materials breakdown",
+                width: 813,
+              },
+            ],
+          },
+          {
+            title: "Cards",
+            images: [
+              {
+                src: "/projects/connectiq/fig-cards.webp",
+                alt: "Kanban job card component set: default, empty slot, alerts, selected, and compact row variants",
+                width: 613,
+              },
+              {
+                src: "/projects/connectiq/fig-checkbox-cards.webp",
+                alt: "Task checkbox card component set: default, hover, completed, and overdue incident-report tasks",
+                width: 1153,
+              },
+            ],
+          },
+          {
+            title: "Tables",
+            images: [
+              {
+                src: "/projects/connectiq/fig-table-locations.webp",
+                alt: "Locations table component with status pills",
+                width: 1172,
+              },
+              {
+                src: "/projects/connectiq/fig-table-bom.webp",
+                alt: "Bill of materials table component with serial number inputs",
+                width: 652,
+              },
+              {
+                src: "/projects/connectiq/fig-tables.webp",
+                alt: "Table component set",
+                width: 685,
+              },
+            ],
+          },
+          {
+            title: "Table cells",
+            images: [
+              {
+                src: "/projects/connectiq/fig-table-cells.webp",
+                alt: "Table cell component set: headers, text, links, pills, avatars, inputs and actions in every state",
+                width: 729,
+              },
+            ],
+          },
+          {
+            title: "Files & media",
+            images: [
+              {
+                src: "/projects/connectiq/fig-drag-drop.webp",
+                alt: "File upload component set: empty, drag-over, analyzing, and uploaded with replace and remove",
+                width: 681,
+              },
+              {
+                src: "/projects/connectiq/fig-files.webp",
+                alt: "File type component set: document, spreadsheet, image and video attachments",
+                width: 197,
+              },
+              {
+                src: "/projects/connectiq/fig-avatar-user.webp",
+                alt: "User avatar component set: initials and photo",
+                width: 134,
+              },
+              {
+                src: "/projects/connectiq/fig-avatar-photo.webp",
+                alt: "User photo component set: upload, uploaded, and edit states",
+                width: 193,
+              },
+              {
+                src: "/projects/connectiq/fig-attachments.webp",
+                alt: "Attachment thumbnail component set with remove buttons",
+                width: 147,
+              },
+            ],
+          },
+          {
+            title: "Comments",
+            images: [
+              {
+                src: "/projects/connectiq/fig-comments.webp",
+                alt: "Comment component set: threads, mentions, hover actions, replies, and comment and incident-report inputs",
+                width: 657,
+              },
+            ],
+          },
+          {
+            title: "Item details panel",
+            images: [
+              {
+                src: "/projects/connectiq/fig-item-details.webp",
+                // Already a white card with its own shadow in Figma.
+                bare: true,
+                alt: "Inventory item details panel built from the system: status, dates, switches, subscription table, inventory log and activity feed",
+                width: 722,
+              },
+            ],
+          },
+        ],
       },
 
       { type: "section", id: "final-design", title: "Final design" },
+      { type: "heading", text: "Internal dashboard and job creation" },
       {
         type: "paragraph",
-        text: "ConnectIQ shipped as two portals built from the same components: an internal one for planning and dispatch, and a partner one for the field teams who execute jobs.",
-      },
-
-      { type: "heading", text: "Internal: a dashboard built around how the team actually thinks" },
-      {
-        type: "paragraph",
-        text: "Sebastian sketched this himself on an early call, before I'd designed a single screen: ops thinks in brands first, then the jobs and subscriptions underneath each one — not four separate tables. The shipped dashboard follows that shape, with unassigned, dispatched, overdue, and incident counts up top and a brand-by-brand breakdown underneath.",
+        text: "Sebastian sketched this shape himself: ops thinks brand first, then the jobs underneath. Counts sit up top, with a brand-by-brand breakdown below.",
       },
       {
         type: "image",
+        plain: true,
         src: "/projects/connectiq/internal-dashboard.webp",
         alt: "Internal dashboard: KPI tiles for unassigned, dispatched, due soon, overdue, and incident-report counts, a brand-by-brand breakdown of jobs with completion rings, a task checklist, and an incident-report list",
-        caption:
-          "Brand first, jobs underneath — the shape the ops team already thought in, not the shape four separate Airtable bases happened to be in.",
       },
-
-      { type: "heading", text: "Internal: one guided flow instead of four Airtable tabs" },
+      {
+        type: "click-through",
+        label: "Creating a job in ConnectIQ, step by step: from the jobs board, basic info, location and partner, loading the bill of materials, supporting documents, uploading installation files, creating the job, and the new job on the board",
+        steps: [
+          { src: "/projects/connectiq/job-creation-0.webp", alt: "The internal jobs board before creating a job, with the Add job button in the header", click: { x: 95.6, y: 2.7 } },
+          { src: "/projects/connectiq/job-creation-1.webp", alt: "Add job, step 1: customer, job type, scheduled date and time slot", click: { x: 64.1, y: 68.9 } },
+          { src: "/projects/connectiq/job-creation-2.webp", alt: "Add job, step 2: location, partner and a contract ID ready to load the BOM", click: { x: 66.9, y: 61.7 } },
+          { src: "/projects/connectiq/job-creation-3.webp", alt: "Add job, step 2: the bill of materials loaded from the contract", click: { x: 64.3, y: 80.9 } },
+          { src: "/projects/connectiq/job-creation-4.webp", alt: "Add job, step 3: supporting documents with the quote attached and an empty installation files drop zone", click: { x: 56.3, y: 65.6 } },
+          { src: "/projects/connectiq/job-creation-5.webp", alt: "Add job, step 3: installation files uploading", holdMs: 1000 },
+          { src: "/projects/connectiq/job-creation-6.webp", alt: "Add job, step 3: installation files uploaded, ready to create the job", click: { x: 66.6, y: 79.7 }, holdMs: 650 },
+          { src: "/projects/connectiq/job-creation-7.webp", alt: "The job created: back on the jobs board with a success banner, and the new job at the top of Unassigned — THA - KFC - CRG - PTT Phanom Phrai, JOB-0003941, Aug 16, 9-11 AM, Installation", holdMs: 2600 },
+        ],
+      },
+      { type: "heading", text: "Partners: board, map, and side panel" },
       {
         type: "paragraph",
-        text: "That's the same job record from the Problem section above. Setting one up meant visiting three other bases first; the ConnectIQ version folds the same information into a single three-step modal.",
-      },
-      {
-        type: "before-after",
-        before: "/projects/connectiq/airtable-job-record.webp",
-        after: "/projects/connectiq/job-creation-modal.webp",
-        beforeAlt:
-          "A real Airtable job record: assignment, quote reference, service and status fields, a separate linked partner panel, and a job-checks checklist, all on one long scrolling page",
-        afterAlt:
-          "ConnectIQ's Add job modal, step one: customer, job type, scheduled date, and time slot fields, with a progress indicator for the two steps ahead",
-        beforeLabel: "Airtable",
-        afterLabel: "ConnectIQ",
-        maxWidth: 800,
-        viewportHeight: 560,
-        caption:
-          "Same information, one scrolling record versus one short step. Location and the bill of materials are steps two and three of the same modal.",
-      },
-
-      { type: "heading", text: "Partners: dispatch, from a board or a map" },
-      {
-        type: "paragraph",
-        text: "A dispatch manager with a dozen jobs wants a board. One with fifty spread across a city wants a map. Both read from the same job data — I didn't make anyone pick one view and live with it.",
+        text: "A dozen jobs wants a board; fifty across a city wants a map. Both read the same data, and job details open in a side panel so partners never lose their place.",
       },
       {
         type: "image",
-        src: "/projects/connectiq/partner-jobs-kanban.webp",
-        alt: "Partner-facing jobs board, columns for Unassigned, To do, In progress, and Done, with a job card mid-drag showing avatars and job details",
-        caption:
-          "Unassigned, to-do, in progress, done — the same three-status model the ops team actually used, not Airtable's longer list.",
-      },
-      {
-        type: "image",
+        plain: true,
         src: "/projects/connectiq/dispatch-map.webp",
         alt: "Jobs board next to a live map, with pins colored and counted by field-agent name across a city",
-        caption:
-          "The same jobs, plotted by location and colored by which field agent owns them — for deciding who's closest, not just who's next.",
       },
-
-      { type: "heading", text: "The same components, either portal" },
+      {
+        type: "click-through",
+        label: "Changing a job's location in the partner portal, step by step: opening the job's location, typing into the location field, picking Central Plaza Rama 9 from the Google suggestions, saving, and the job showing the new address with a success banner",
+        steps: [
+          { src: "/projects/connectiq/edit-location-1.webp", alt: "Partner portal: a job open in a side panel, with its current location 123 Sukhumvit Road, Bangkok", click: { x: 79.6, y: 26.1 } },
+          { src: "/projects/connectiq/edit-location-2.webp", alt: "The Edit location modal open, showing the job's current address", click: { x: 50.0, y: 50.5 } },
+          { src: "/projects/connectiq/edit-location-3.webp", alt: "Typing Cen into the location field, with Google suggestions: Central Plaza Rama 9, CentralWorld, Central Festival EastVille", click: { x: 37.5, y: 54.7 } },
+          { src: "/projects/connectiq/edit-location-2.webp", alt: "The chosen address filled into the Edit location modal, ready to save", click: { x: 65.8, y: 56.7 } },
+          { src: "/projects/connectiq/edit-location-4.webp", alt: "The job showing its new address, 9/9 Rama IX Rd, Huai Khwang, Bangkok, with a Location successfully updated banner", holdMs: 2600 },
+        ],
+      },
+      { type: "heading", text: "Client portal (concept)" },
       {
         type: "paragraph",
-        text: "Settings is the least dramatic screen in the product, and that's the point — same fields, spacing, and structure as the job flow above it, so even a screen nobody lingers on still reads as part of one system.",
+        text: "The client portal was sequenced last and wasn't built before the engagement ended in November 2025. This concept gives clients their own slice of the same data: installations, tickets, subscriptions, and SLA compliance.",
       },
       {
         type: "image",
-        src: "/projects/connectiq/settings-profile.webp",
-        alt: "Settings screen showing profile information — name, email, password, phone number, and role — for a dispatch manager",
-        caption: "Even the screen nobody lingers on carries the same inputs and layout as everything else.",
+        plain: true,
+        // From Niia's own 3× export (Desktop/Dashboard.png), downsized to 2×; new name so old caches don't linger.
+        src: "/projects/connectiq/client-dashboard-figma.webp",
+        alt: "Client portal concept: a greeting, tiles for installations done, in progress, tickets open, and subscriptions expiring, a location table with hardware serials and warranty dates, an installations-over-time chart, SLA compliance, and issues by category",
       },
 
-      { type: "section", id: "results", title: "Results" },
+      { type: "section", id: "results", title: "Outcome" },
       {
         type: "paragraph",
-        text: "ConnectIQ shipped both portals, and the team moved its day-to-day dispatch and job tracking onto it. There was no analytics platform behind this engagement, so I'm not going to invent a percentage here — the only account I have is Sebastian's, and he described it as cutting down real time his team used to lose stitching one job together across four separate interfaces.",
+        text: "After three months, the team had a platform that feels like a modern SaaS product, and moved day-to-day dispatch and job tracking onto it.",
       },
       {
-        type: "paragraph",
-        text: "We hadn't started the client-facing portal when the engagement ended in November 2025 — that was sequenced last on purpose, on the bet that once partners and internal ops held together, giving a client their own slice of the same data would be the easiest part.",
+        type: "cards",
+        columns: 4,
+        items: [
+          { text: "Complete component system ready for dev", tone: "green" },
+          { text: "Fully reorganized, scalable information architecture", tone: "outline" },
+          { text: "Validated, user-tested wireframe flow", tone: "outline" },
+          { text: "One UX model replacing Airtable, Fillout, and Slack", tone: "outline" },
+          { text: "Refactored client portal with value-based tiering", tone: "outline" },
+          { text: "3× fewer screens, thanks to intelligent reuse", tone: "green" },
+          { text: "Merged internal + partner workflows", tone: "outline" },
+          { text: "Reduced onboarding time for new internal staff", tone: "green" },
+        ],
+      },
+      {
+        type: "image",
+        src: "/projects/connectiq/job-modal-dark.webp",
+        alt: "ConnectIQ partner portal in dark mode: the job details modal for THA - KFC - CRG - Mega Bangna, with a map header, date, time slot and installation tags, a documentation upload area, a bill of materials with serial number fields, a pre-installation checklist, and a Create job button",
+        plain: true,
       },
     ],
   },

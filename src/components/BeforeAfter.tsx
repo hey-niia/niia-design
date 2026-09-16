@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import AnnotatedImage, { type Pin } from "./AnnotatedImage";
 import { FRAME_RADIUS, ScrollHint } from "./ScreenshotFrame";
 
 const ACCENT = "#e65f2e";
@@ -6,7 +7,7 @@ const ACCENT = "#e65f2e";
 const END_SLOP = 24;
 
 export interface ZoomCursorHandlers {
-  onMouseMove: (e: React.MouseEvent) => void;
+  onMouseMove: (e: React.MouseEvent, label?: string) => void;
   onMouseLeave: () => void;
 }
 
@@ -33,6 +34,9 @@ export default function BeforeAfter({
   caption,
   onImageClick,
   zoomCursor,
+  dark = false,
+  plain = false,
+  beforePins,
 }: {
   before: string;
   after: string;
@@ -48,11 +52,40 @@ export default function BeforeAfter({
   caption?: string;
   onImageClick?: (src: string) => void;
   zoomCursor?: ZoomCursorHandlers;
+  /** Dark grey panel, as in the PDF case study. */
+  dark?: boolean;
+  /** No panel: the frame sits on the page itself with a soft shadow. */
+  plain?: boolean;
+  /** Numbered markers on the "before" screen, with notes on hover. */
+  beforePins?: Pin[];
 }) {
   const [showAfter, setShowAfter] = useState(true);
   // Per-pane, because the two states are rarely the same length.
   const [hasMore, setHasMore] = useState<[boolean, boolean]>([false, false]);
   const boxRef = useRef<HTMLDivElement>(null);
+  // Height ÷ width of each image. The frame takes the shorter image's shape,
+  // capped at `viewportHeight`, so a narrow screen doesn't leave an empty band
+  // under a screenshot that's shorter than the window.
+  const [ratios, setRatios] = useState<[number, number]>([Infinity, Infinity]);
+
+  // Read off the DOM rather than only in onLoad: a cached image can finish
+  // loading before React attaches the handler, so onLoad never fires.
+  const readRatios = useCallback(() => {
+    const imgs = boxRef.current?.querySelectorAll("img");
+    if (!imgs) return;
+    const next = [0, 1].map((i) => {
+      const img = imgs[i];
+      return img?.naturalWidth ? img.naturalHeight / img.naturalWidth : Infinity;
+    });
+    setRatios([next[0], next[1]]);
+  }, []);
+
+  useEffect(readRatios, [readRatios]);
+
+  const shortestRatio = Math.min(...ratios);
+  const frameStyle: React.CSSProperties = Number.isFinite(shortestRatio)
+    ? { maxWidth, aspectRatio: 1 / shortestRatio, maxHeight: viewportHeight }
+    : { maxWidth, height: viewportHeight };
 
   // Panes are read off the container at call time rather than held in refs, so
   // there's no stale closure to get wrong.
@@ -78,7 +111,7 @@ export default function BeforeAfter({
       cancelAnimationFrame(raf);
       window.removeEventListener("resize", measure);
     };
-  }, [measure, showAfter]);
+  }, [measure, showAfter, shortestRatio]);
 
   const states = [
     { src: before, alt: beforeAlt, shown: !showAfter },
@@ -87,13 +120,21 @@ export default function BeforeAfter({
 
   return (
     <div>
-      <div className="bg-neutral-100 px-4 py-8 sm:px-10 sm:py-10">
+      <div
+        className={
+          plain
+            ? ""
+            : `px-4 py-8 sm:px-10 sm:py-10 ${dark ? "bg-[#292929]" : "bg-neutral-100"}`
+        }
+      >
         <div
           ref={boxRef}
-          className={`relative mx-auto overflow-hidden ring-1 ring-black/10 ${FRAME_RADIUS}`}
-          style={{ maxWidth, height: viewportHeight }}
+          className={`relative mx-auto overflow-hidden ring-1 ${dark ? "ring-white/10" : "ring-black/10"} ${
+            plain ? "shadow-[0_2px_4px_rgba(0,0,0,0.04),0_12px_32px_rgba(0,0,0,0.08)]" : ""
+          } ${FRAME_RADIUS}`}
+          style={frameStyle}
         >
-          {states.map((state) => (
+          {states.map((state, i) => (
             <div
               key={state.src}
               aria-hidden={!state.shown}
@@ -104,17 +145,38 @@ export default function BeforeAfter({
                 pointerEvents: state.shown ? "auto" : "none",
               }}
             >
-              <img
-                src={state.src}
-                alt={state.alt}
-                onLoad={() => requestAnimationFrame(measure)}
-                className={`block w-full ${onImageClick ? "cursor-none" : ""}`}
-                onClick={
-                  onImageClick ? () => onImageClick(state.src) : undefined
-                }
-                onMouseMove={zoomCursor?.onMouseMove}
-                onMouseLeave={zoomCursor?.onMouseLeave}
-              />
+              {i === 0 && beforePins ? (
+                <AnnotatedImage
+                  src={state.src}
+                  alt={state.alt}
+                  pins={beforePins}
+                  showList={false}
+                  onLoad={() => {
+                    readRatios();
+                    requestAnimationFrame(measure);
+                  }}
+                  onImageClick={onImageClick}
+                  zoomCursor={
+                    zoomCursor && {
+                      onMouseMove: (e) => zoomCursor.onMouseMove(e, "Hover the markers"),
+                      onMouseLeave: zoomCursor.onMouseLeave,
+                    }
+                  }
+                />
+              ) : (
+                <img
+                  src={state.src}
+                  alt={state.alt}
+                  onLoad={() => {
+                    readRatios();
+                    requestAnimationFrame(measure);
+                  }}
+                  className={`block w-full ${onImageClick ? "cursor-none" : ""}`}
+                  onClick={onImageClick ? () => onImageClick(state.src) : undefined}
+                  onMouseMove={zoomCursor?.onMouseMove}
+                  onMouseLeave={zoomCursor?.onMouseLeave}
+                />
+              )}
             </div>
           ))}
 
@@ -126,7 +188,7 @@ export default function BeforeAfter({
             type="button"
             onClick={() => setShowAfter(false)}
             className={`text-sm font-medium transition-colors ${
-              showAfter ? "text-gray-400" : "text-black"
+              showAfter ? "text-gray-400" : dark ? "text-white" : "text-black"
             }`}
           >
             {beforeLabel}
@@ -140,8 +202,8 @@ export default function BeforeAfter({
             onClick={() => setShowAfter((v) => !v)}
             className="relative h-6 w-11 shrink-0 cursor-pointer rounded-full border transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
             style={{
-              backgroundColor: showAfter ? ACCENT : "#d4d4d4",
-              borderColor: showAfter ? ACCENT : "#d4d4d4",
+              backgroundColor: showAfter ? ACCENT : dark ? "#525252" : "#d4d4d4",
+              borderColor: showAfter ? ACCENT : dark ? "#525252" : "#d4d4d4",
             }}
           >
             <span
@@ -157,7 +219,7 @@ export default function BeforeAfter({
             type="button"
             onClick={() => setShowAfter(true)}
             className={`text-sm font-medium transition-colors ${
-              showAfter ? "text-black" : "text-gray-400"
+              showAfter ? (dark ? "text-white" : "text-black") : "text-gray-400"
             }`}
           >
             {afterLabel}
@@ -165,7 +227,7 @@ export default function BeforeAfter({
         </div>
 
         {caption && (
-          <p className="mx-auto mt-5 max-w-[30rem] text-center text-sm italic text-gray-500">
+          <p className={`mx-auto mt-5 max-w-[30rem] text-center text-sm italic ${dark ? "text-gray-400" : "text-gray-500"}`}>
             {caption}
           </p>
         )}

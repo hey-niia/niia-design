@@ -47,10 +47,15 @@ export default function AnnotatedImage({
   viewportHeight,
   onImageClick,
   zoomCursor,
+  showList = true,
+  onLoad,
 }: {
   src: string;
   alt: string;
   pins: Pin[];
+  /** The notes repeated as a list underneath. Off when something else frames the image. */
+  showList?: boolean;
+  onLoad?: () => void;
   maxWidth?: number;
   /** Height of the scroll window, in px. Omit to render the image full height. */
   viewportHeight?: number;
@@ -226,6 +231,7 @@ export default function AnnotatedImage({
               ref={imgRef}
               src={src}
               alt={alt}
+              onLoad={onLoad}
               className={`block w-full ${onImageClick ? "cursor-none" : ""}`}
               onClick={onImageClick ? () => onImageClick(src) : undefined}
               onMouseMove={zoomCursor?.onMouseMove}
@@ -294,22 +300,24 @@ export default function AnnotatedImage({
           document.body,
         )}
 
-      <ol className="mt-6 flex flex-col gap-4">
-        {pins.map((pin, i) => (
-          <li key={i} className="flex items-start gap-4">
-            <span
-              className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white"
-              style={{ backgroundColor: ACCENT }}
-            >
-              {i + 1}
-            </span>
-            <p className="text-sm">
-              <span className="font-medium">{pin.title}</span>{" "}
-              <span className="text-gray-500">{pin.body}</span>
-            </p>
-          </li>
-        ))}
-      </ol>
+      {showList && (
+        <ol className="mt-6 flex flex-col gap-4">
+          {pins.map((pin, i) => (
+            <li key={i} className="flex items-start gap-4">
+              <span
+                className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white"
+                style={{ backgroundColor: ACCENT }}
+              >
+                {i + 1}
+              </span>
+              <p className="text-sm">
+                <span className="font-medium">{pin.title}</span>{" "}
+                <span className="text-gray-500">{pin.body}</span>
+              </p>
+            </li>
+          ))}
+        </ol>
+      )}
     </div>
   );
 }
