@@ -459,7 +459,11 @@ export default function Slides({
                   // Figma slides run edge to edge (as wide as the wireframe box) with the
                   // arrows floating inside; Nadiia slides leave side gutters for them.
                   className={`flex h-[520px] w-full shrink-0 flex-col sm:h-[600px] ${
-                    figma ? "items-stretch" : "items-center px-12 sm:px-16"
+                    figma
+                      ? "items-stretch"
+                      : // Centred in the frame: a wireframe narrower or shorter than the
+                        // slide would otherwise sit at the top with dead space under it.
+                        "items-center justify-center px-12 sm:px-16"
                   }`}
                 >
                   {figma ? (
