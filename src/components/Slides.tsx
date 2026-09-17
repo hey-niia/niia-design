@@ -8,7 +8,18 @@ import {
   type PointerEvent,
   type ReactNode,
 } from "react";
-import { FIGMA_SECTION_BG, FIGMA_SECTION_GRID, NADIIA_AREA, NADIIA_SHAPE, NADIIA_SURFACE } from "./nadiia";
+import {
+  DARK_MATTER_AREA,
+  DARK_MATTER_CHIP,
+  DARK_MATTER_SECTION,
+  DARK_MATTER_SURFACE,
+  DARK_MATTER_SHADOW,
+  FIGMA_SECTION_BG,
+  FIGMA_SECTION_GRID,
+  NADIIA_AREA,
+  NADIIA_SHAPE,
+  NADIIA_SURFACE,
+} from "./nadiia";
 import { slideImages, type Slide, type SlideImage } from "../lib/slides";
 import { Tag } from "./NadiiaParts";
 
@@ -43,10 +54,11 @@ const ARROW =
 const CHIP = "rounded-md text-[13px] font-medium text-neutral-800 ring-1 ring-black/10";
 
 /**
- * A scrollable panel that opens scrolled to the middle of its content, so a
- * slide bigger than the panel shows its centre first and every edge is still
- * reachable by scrolling. It keeps re-centring while images load or the panel
- * resizes, and stops for good as soon as the person scrolls it themselves.
+ * A scrollable panel that opens at the top of its content, centred across, so
+ * a slide taller than the panel shows where it starts rather than a slice of its
+ * middle, and every edge is still reachable by scrolling. A slide that fits is
+ * centred by its own layout. It keeps re-aligning while images load or the
+ * panel resizes, and stops for good as soon as the person scrolls it themselves.
  */
 function CenteredScroll({ className, style, children }: { className: string; style: React.CSSProperties; children: ReactNode }) {
   const ref = useRef<HTMLDivElement>(null);
@@ -56,7 +68,7 @@ function CenteredScroll({ className, style, children }: { className: string; sty
     const el = ref.current;
     if (!el || touched.current) return;
     el.scrollLeft = Math.max(0, (el.scrollWidth - el.clientWidth) / 2);
-    el.scrollTop = Math.max(0, (el.scrollHeight - el.clientHeight) / 2);
+    el.scrollTop = 0;
   }, []);
 
   useLayoutEffect(() => {
@@ -95,11 +107,21 @@ export default function Slides({
   appearance = "nadiia",
   onImageClick,
   zoomCursor,
+  look = "light",
+  canvasRows = [],
 }: {
   slides: Slide[];
   /** What the slideshow is, for screen readers. */
   label: string;
   appearance?: "nadiia" | "figma";
+  /**
+   * Figma look only. `light`: Figma's pale section grid, a white card and soft
+   * shadow behind each component. `darkMatter`: the dark dotted panel, no card,
+   * just a small shadow following each component — for a dark product's UI.
+   */
+  look?: "light" | "darkMatter";
+  /** Explore canvas: sections placed side by side as one row, by title. The row sits where its first section would. */
+  canvasRows?: string[][];
   onImageClick?: (src: string) => void;
   zoomCursor?: ZoomCursorHandlers;
 }) {
@@ -117,10 +139,30 @@ export default function Slides({
   const pointers = useRef(new Map<number, { x: number; y: number }>());
   const pinchFrom = useRef<number | null>(null);
   const figma = appearance === "figma";
+  const dark = figma && look === "darkMatter";
+  const panelStyle = dark ? DARK_MATTER_AREA : FIGMA_SECTION_GRID;
   // Components too big to read in the frame are kept for the canvas only.
   const shown = figma ? slides.filter((slide) => !slide.gridOnly) : slides;
   // The canvas keeps the sections: each slide stays one labelled group.
   const groups = figma ? slides.map((slide) => ({ title: slide.title, images: slideImages(slide) })) : [];
+  // Canvas rows: every section on its own line, except the ones named together in
+  // `canvasRows`, which share a line in the order given, placed where the first one was.
+  const canvasLines = (() => {
+    const byTitle = new Map(groups.map((g) => [g.title, g]));
+    const rowOf = new Map<string, string[]>();
+    for (const row of canvasRows) for (const title of row) rowOf.set(title, row);
+    const lines: (typeof groups)[] = [];
+    const placed = new Set<string>();
+    for (const group of groups) {
+      if (placed.has(group.title)) continue;
+      const row = rowOf.get(group.title);
+      if (row && row[0] !== group.title && byTitle.has(row[0])) continue;
+      const line = (row ?? [group.title]).map((t) => byTitle.get(t)).filter((g): g is (typeof groups)[number] => !!g);
+      line.forEach((g) => placed.add(g.title));
+      lines.push(line);
+    }
+    return lines;
+  })();
   const count = shown.length;
   // The component that was clicked, and where it sat, so the canvas opens on it.
   const openFrom = useRef<{ src: string; left: number; top: number } | null>(null);
@@ -369,7 +411,7 @@ export default function Slides({
           aria-label={`${label}: drag to move, pinch to zoom`}
           className="relative h-[520px] w-full cursor-grab touch-none overflow-hidden rounded-[3px] select-none active:cursor-grabbing sm:h-[600px]"
           style={{
-            ...FIGMA_SECTION_GRID,
+            ...panelStyle,
             backgroundSize: `${16 * view.z}px ${16 * view.z}px`,
             backgroundPosition: `${view.x}px ${view.y}px`,
           }}
@@ -387,37 +429,49 @@ export default function Slides({
             }}
           >
             <div className="flex flex-col gap-11">
-              {groups.map((group) => (
-                <section key={group.title} className="flex w-max flex-col gap-3">
-                  <p
-                    className={`${CHIP} w-fit px-2.5 py-1 tracking-wide uppercase`}
-                    style={{ backgroundColor: FIGMA_SECTION_BG }}
-                  >
-                    {group.title}
-                  </p>
-                  <div className="flex items-start gap-7">
-                    {group.images.map((img) => (
-                      // White behind every component so transparent ones don't show
-                      // the grid through them, except the ones bringing their own card.
-                      <div
-                        key={img.src}
-                        className={`shrink-0 ${
-                          img.bare
-                            ? ""
-                            : "overflow-hidden rounded-[6px] bg-white shadow-[0_1px_2px_rgba(0,0,0,0.05),0_6px_20px_rgba(0,0,0,0.07)]"
-                        }`}
-                        style={{ width: img.width }}
+              {canvasLines.map((line) => (
+                <div key={line.map((g) => g.title).join("|")} className="flex items-start gap-16">
+                  {line.map((group) => (
+                    <section key={group.title} className="flex w-max flex-col gap-3">
+                      <p
+                        className={`${dark ? DARK_MATTER_CHIP : CHIP} w-fit px-2.5 py-1 tracking-wide uppercase`}
+                        style={dark ? undefined : { backgroundColor: FIGMA_SECTION_BG }}
                       >
-                        <img
-                          src={img.src}
-                          alt={img.alt}
-                          draggable={false}
-                          className="pointer-events-none block h-auto w-full max-w-none"
-                        />
+                        {group.title}
+                      </p>
+                      <div className="flex items-start gap-7">
+                        {group.images.map((img) => (
+                          // White behind every component so transparent ones don't show
+                          // the grid through them, except the ones bringing their own card.
+                          <div
+                            key={img.src}
+                            className={`shrink-0 ${
+                              img.bare
+                                ? ""
+                                : dark
+                                ? img.backed
+                                  ? DARK_MATTER_SECTION
+                                  : ""
+                                : "overflow-hidden rounded-[6px] bg-white shadow-[0_1px_2px_rgba(0,0,0,0.05),0_6px_20px_rgba(0,0,0,0.07)]"
+                            }`}
+                            style={{
+                          width: img.width,
+                          filter: dark && !img.bare && !img.backed ? DARK_MATTER_SHADOW : undefined,
+                          backgroundColor: dark && img.backed ? DARK_MATTER_SURFACE : undefined,
+                        }}
+                          >
+                            <img
+                              src={img.src}
+                              alt={img.alt}
+                              draggable={false}
+                              className="pointer-events-none block h-auto w-full max-w-none"
+                            />
+                          </div>
+                        ))}
                       </div>
-                    ))}
-                  </div>
-                </section>
+                    </section>
+                  ))}
+                </div>
               ))}
             </div>
           </div>
@@ -425,8 +479,10 @@ export default function Slides({
             type="button"
             onClick={() => setExplore(false)}
             onPointerDown={(e) => e.stopPropagation()}
-            className={`${CHIP} absolute top-3 right-3 z-10 cursor-pointer px-2.5 py-1 text-neutral-600 transition-colors hover:text-[#d9723f]`}
-            style={{ backgroundColor: FIGMA_SECTION_BG }}
+            className={`${
+              dark ? DARK_MATTER_CHIP : `${CHIP} text-neutral-600`
+            } absolute top-3 right-3 z-10 cursor-pointer px-2.5 py-1 transition-colors hover:text-[#d9723f]`}
+            style={dark ? undefined : { backgroundColor: FIGMA_SECTION_BG }}
           >
             Press Esc to exit
           </button>
@@ -473,7 +529,7 @@ export default function Slides({
                         // side by side, wrapping; anything bigger than the panel scrolls.
                         <CenteredScroll
                           className="min-h-0 flex-1 overflow-auto overscroll-contain rounded-[3px]"
-                          style={FIGMA_SECTION_GRID}
+                          style={panelStyle}
                         >
                           {/* "safe center": centred when it fits, but a component wider or
                               taller than the panel starts at its edge so all of it can be
@@ -490,9 +546,17 @@ export default function Slides({
                                 className={`shrink-0 ${
                                   img.bare
                                     ? ""
+                                    : dark
+                                    ? img.backed
+                                      ? DARK_MATTER_SECTION
+                                      : ""
                                     : "overflow-hidden rounded-[6px] bg-white shadow-[0_1px_2px_rgba(0,0,0,0.05),0_6px_20px_rgba(0,0,0,0.07)]"
                                 }`}
-                                style={{ width: img.width }}
+                                style={{
+                          width: img.width,
+                          filter: dark && !img.bare && !img.backed ? DARK_MATTER_SHADOW : undefined,
+                          backgroundColor: dark && img.backed ? DARK_MATTER_SURFACE : undefined,
+                        }}
                               >
                                 {image(img, i === 0 && k === 0, "h-auto w-full max-w-none")}
                               </div>
@@ -503,7 +567,7 @@ export default function Slides({
                         <div
                           className="grid min-h-0 flex-1 gap-5 rounded-[3px] p-5 sm:gap-8 sm:p-8"
                           style={{
-                            ...FIGMA_SECTION_GRID,
+                            ...panelStyle,
                             gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))`,
                             gridTemplateRows: `repeat(${rows}, minmax(0, 1fr))`,
                           }}

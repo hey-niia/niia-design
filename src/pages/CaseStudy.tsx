@@ -625,6 +625,8 @@ function Block({
           slides={block.slides}
           label={block.label}
           appearance={block.appearance}
+          look={block.look}
+          canvasRows={block.canvasRows}
           onImageClick={onImageClick}
           zoomCursor={zoomCursor}
         />

@@ -74,3 +74,44 @@ export const NADIIA_LABEL = "font-mono text-xs tracking-wider text-neutral-800 u
 
 /** Body text inside a box: findings, bullet points. */
 export const NADIIA_SMALL = "font-mono text-[11px] leading-relaxed tracking-wide uppercase";
+
+/**
+ * "Dark Matter" — Nadiia's dark sibling, named by Niia for the Matter case
+ * study, whose app is dark. A charcoal panel with a faint square grid (Figma's
+ * canvas grid, in light lines on the grey); the components sit straight on it
+ * with no box behind them, lifted only by a small shadow that follows each
+ * component's own shape.
+ */
+const DARK_MATTER_LINE = "rgba(255,255,255,0.04)";
+export const DARK_MATTER_AREA = {
+  backgroundColor: "#232425",
+  backgroundImage: `linear-gradient(to right, ${DARK_MATTER_LINE} 1px, transparent 1px), linear-gradient(to bottom, ${DARK_MATTER_LINE} 1px, transparent 1px)`,
+  backgroundSize: "16px 16px",
+  backgroundAttachment: "local",
+};
+
+/** Shadow for a component on a Dark Matter panel: a drop-shadow, so a transparent export casts no rectangle. */
+export const DARK_MATTER_SHADOW = "drop-shadow(0 1px 1px rgba(0,0,0,0.4)) drop-shadow(0 4px 10px rgba(0,0,0,0.35))";
+
+/** A label chip sitting on a Dark Matter panel. */
+export const DARK_MATTER_CHIP = "rounded-md bg-[#2c2d2f] text-[13px] font-medium text-neutral-300 ring-1 ring-white/10";
+
+/** Matter's surface-primary token, behind see-through and tiny components on a Dark Matter panel. */
+export const DARK_MATTER_SURFACE = "#121517";
+
+/** The section those components sit in: a hairline of padding and a subtle shadow. */
+export const DARK_MATTER_SECTION =
+  "box-content rounded-xl p-3 shadow-[0_1px_2px_rgba(0,0,0,0.3),0_6px_18px_rgba(0,0,0,0.28)]";
+
+/**
+ * A Nadiia card: the light dotted field (`NADIIA_AREA.neutral`, the same one
+ * the user-flow lanes sit on) with a soft shadow. Pair with that as its style.
+ */
+export const NADIIA_CARD =
+  "rounded-2xl p-6 shadow-[0_1px_2px_rgba(0,0,0,0.04),0_6px_20px_rgba(0,0,0,0.05)] ring-1 ring-black/5";
+
+/** A Nadiia card's header: Geist Mono capitals. */
+export const NADIIA_CARD_TITLE = "font-mono text-xs tracking-wider text-neutral-800 uppercase";
+
+/** A Nadiia card's text: 14px grey, the same size as Role and Team in a case study header. */
+export const NADIIA_CARD_TEXT = "text-sm text-neutral-500";

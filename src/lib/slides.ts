@@ -14,6 +14,12 @@ export interface SlideImage {
    * sits straight on the panel grid without the white backing and extra shadow.
    */
   bare?: boolean;
+  /**
+   * Dark Matter only: a see-through or very small component (icons, strokes,
+   * controls) gets its own surface-primary section with a hairline of padding,
+   * so it doesn't dissolve into the grid. Solid cards float without one.
+   */
+  backed?: boolean;
 }
 
 export interface Slide {

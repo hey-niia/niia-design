@@ -112,12 +112,16 @@ export type ContentBlock =
       label: string;
       /** `figma`: each slide as a Figma section in the app's placeholder colour. Default: Nadiia frames on orange. */
       appearance?: "nadiia" | "figma";
+      /** Figma look: `light` (pale grid, white cards) or `darkMatter` (dark dotted panel, shadow only). */
+      look?: "light" | "darkMatter";
+      /** Explore canvas: sections to sit side by side, left to right, as one row (by slide title). */
+      canvasRows?: string[][];
       slides: {
         title: string;
         src?: string;
         alt?: string;
         /** Several related components on one screen (figma look). */
-        images?: { src: string; alt: string; width?: number; bare?: boolean }[];
+        images?: { src: string; alt: string; width?: number; bare?: boolean; backed?: boolean }[];
         columns?: number;
         scroll?: boolean;
         /** Too big to read in the slider: shown only on the explore canvas. */
@@ -1006,6 +1010,10 @@ export const projects: Project[] = [
       {
         type: "slides",
         label: "Design system components",
+        canvasRows: [
+          ["Table cells", "Files & media", "Text inputs"],
+          ["Comments", "Item details panel"],
+        ],
         appearance: "figma",
         slides: [
           {
