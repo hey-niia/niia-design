@@ -113,7 +113,7 @@ const ANSWERS: CannedAnswer[] = [
       "how much time",
     ],
     answer:
-      "It varies. Anywhere from a focused 1-month site (Digital Screen Co.) to a 4-month end-to-end redesign (the Popular Wellness App's AI Pivot). Most run 1–4 months, usually as the sole designer working directly with a founder or ops lead, start to shipped.",
+      "It varies. Anywhere from a focused 1-month site (Digital Screen Co.) to a 4-month end-to-end redesign (the Neuroscience App's AI Pivot). Most run 1–4 months, usually as the sole designer working directly with a founder or ops lead, start to shipped.",
   },
 
   // Case-study-specific answers, checked before the generic "ai" catch-all
@@ -129,7 +129,7 @@ const ANSWERS: CannedAnswer[] = [
       "coaching app",
     ],
     answer:
-      "Yes — the Popular Wellness App's AI Pivot is a neuroscience-backed iOS app I redesigned, folding six validated neurotransmitter systems (dopamine, serotonin, testosterone, oxytocin, opioids, cannabinoids) into one guided AI coach. It was picked as Apple's App of the Day across multiple countries and is now expanding into clinical research.",
+      "Yes — the Neuroscience App's AI Pivot is a neuroscience-backed iOS app I redesigned, folding six validated neurotransmitter systems (dopamine, serotonin, testosterone, oxytocin, opioids, cannabinoids) into one guided AI coach. It was picked as Apple's App of the Day across multiple countries and is now expanding into clinical research.",
     cards: projectCard("ios-app"),
   },
   {
@@ -180,7 +180,7 @@ const ANSWERS: CannedAnswer[] = [
       "what should i read first",
     ],
     answer:
-      "Start with the Popular Wellness App's AI Pivot — it's the most complete start-to-finish (research, design system, App Store creative), and it's the one I'm proudest of. Enterprise Dashboard and Hirement are good next if you want more dashboard or AI-tooling work, and Digital Screen Co. is the quick one if you're short on time.",
+      "Start with the Neuroscience App's AI Pivot — it's the most complete start-to-finish (research, design system, App Store creative), and it's the one I'm proudest of. Enterprise Dashboard and Hirement are good next if you want more dashboard or AI-tooling work, and Digital Screen Co. is the quick one if you're short on time.",
     cards: PROJECT_CARDS,
   },
   {
@@ -210,7 +210,7 @@ const ANSWERS: CannedAnswer[] = [
   {
     keywords: ["favorite project", "proudest", "best project", "most proud", "which project"],
     answer:
-      "The Popular Wellness App's AI Pivot — folding six neuroscience-validated systems into one guided AI coach. It got picked as Apple's App of the Day across multiple countries, which felt like proof that hiding complexity (not the effort behind it) actually works.",
+      "The Neuroscience App's AI Pivot — folding six neuroscience-validated systems into one guided AI coach. It got picked as Apple's App of the Day across multiple countries, which felt like proof that hiding complexity (not the effort behind it) actually works.",
     cards: projectCard("ios-app"),
   },
   {

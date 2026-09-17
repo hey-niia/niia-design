@@ -40,7 +40,7 @@ export default function WorkGridCard({
 
   return (
     <Link to={`/work/${slug}`} className="block">
-      <div className={slug === "ios-app" ? "flex justify-center bg-neutral-100 p-10" : undefined}>
+      <div className={slug === "ios-app" ? "flex justify-center bg-[#36383b] p-10" : undefined}>
         {coverAnimation === "connectiq-kanban" ? (
           <KanbanDragCover label={cover.alt} />
         ) : coverVideo ? (
@@ -53,7 +53,7 @@ export default function WorkGridCard({
             loop
             muted
             playsInline
-            className={`${FRAME_RADIUS} ring-1 ring-black/10`}
+            className={`${FRAME_RADIUS} ring-1 ring-white/10`}
             style={{ width: 200, maxWidth: "100%" }}
           />
         ) : (

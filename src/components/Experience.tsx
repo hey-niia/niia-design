@@ -55,14 +55,15 @@ export function ExperienceTimeline() {
             </p>
             <p className="col-start-2 text-[15px] leading-6 text-neutral-400 @lg:col-start-3">{item.role}</p>
 
-            {/* Height animates from 0 via a one-row grid, so the text can wrap to any length. */}
+            {/* Height animates from 0 via a one-row grid, so the text can wrap to any length.
+                It spans the whole section, out past the button's gutter. */}
             <div
-              className={`col-start-2 grid transition-[grid-template-rows,opacity] duration-300 ease-out @lg:col-span-2 ${
+              className={`col-span-full -mr-10 grid transition-[grid-template-rows,opacity] duration-300 ease-out ${
                 open ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
               }`}
               aria-hidden={!open}
             >
-              <p className="overflow-hidden text-[15px] leading-6 text-neutral-500">
+              <p className="overflow-hidden text-[15px] leading-6 text-neutral-800">
                 <span className="block pt-1.5 pb-1">{item.description}</span>
               </p>
             </div>

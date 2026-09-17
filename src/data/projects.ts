@@ -239,7 +239,7 @@ export const projects: Project[] = [
     // for the install surge.
     slug: "ios-app",
     category: "iOS App",
-    name: "Popular Wellness App's AI Pivot",
+    name: "Neuroscience App's AI Pivot",
     title: "Turning six neuroscience systems into one AI coaching experience",
     summary:
       "Redesigned an Apple App of the Day: a neuroscience-backed wellness app, taken from a complex multi-feature product to a single guided AI coach. First-memory activation went from 39% to 60%.",
