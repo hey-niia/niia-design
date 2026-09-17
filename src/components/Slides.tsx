@@ -54,10 +54,10 @@ const ARROW =
 const CHIP = "rounded-md text-[13px] font-medium text-neutral-800 ring-1 ring-black/10";
 
 /**
- * A scrollable panel that opens at the top of its content, centred across, so
- * a slide taller than the panel shows where it starts rather than a slice of its
- * middle, and every edge is still reachable by scrolling. A slide that fits is
- * centred by its own layout. It keeps re-aligning while images load or the
+ * A scrollable panel that opens at the top-left of its content, so a slide
+ * taller or wider than the panel shows where it starts rather than a slice of
+ * its middle, and every edge is still reachable by scrolling. A slide that fits
+ * is centred by its own layout. It keeps re-aligning while images load or the
  * panel resizes, and stops for good as soon as the person scrolls it themselves.
  */
 function CenteredScroll({ className, style, children }: { className: string; style: React.CSSProperties; children: ReactNode }) {
@@ -67,7 +67,7 @@ function CenteredScroll({ className, style, children }: { className: string; sty
   const center = useCallback(() => {
     const el = ref.current;
     if (!el || touched.current) return;
-    el.scrollLeft = Math.max(0, (el.scrollWidth - el.clientWidth) / 2);
+    el.scrollLeft = 0;
     el.scrollTop = 0;
   }, []);
 
