@@ -48,11 +48,15 @@ export default function Home() {
         <ExperienceTimeline />
       </section>
 
+      {/* On phones the columns dissolve into one list that reads across the rows
+          (left, right, left, right), not down the first column and then the second. */}
       <section id="work" className="flex flex-col gap-8 sm:flex-row">
         {splitIntoColumns(homeProjects).map((column, i) => (
-          <div key={i} className="flex flex-1 flex-col gap-8">
-            {column.map((project) => (
-              <WorkGridCard key={project.slug} project={project} />
+          <div key={i} className="max-sm:contents sm:flex sm:flex-1 sm:flex-col sm:gap-8">
+            {column.map((project, row) => (
+              <div key={project.slug} style={{ order: row * 2 + i }}>
+                <WorkGridCard project={project} />
+              </div>
             ))}
           </div>
         ))}

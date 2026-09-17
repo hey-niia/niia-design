@@ -53,7 +53,7 @@ export default function WorkGridCard({
             loop
             muted
             playsInline
-            className={`${FRAME_RADIUS} ring-1 ring-white/10`}
+            className={FRAME_RADIUS}
             style={{ width: 200, maxWidth: "100%" }}
           />
         ) : (

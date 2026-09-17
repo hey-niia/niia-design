@@ -185,10 +185,12 @@ export default function KanbanDragCover({ label }: { label: string }) {
       <div
         ref={boardRef}
         className="absolute top-1/2 left-[7.2%] w-[85.6%] -translate-y-1/2 overflow-hidden rounded-[6px] shadow-[0_24px_60px_rgba(0,0,0,0.28)]"
-        style={{ aspectRatio: `${W} / ${H}` }}
+        // Height is set outright as well: iOS Safari sizes an absolute box by its content
+        // (the 1024px stage) rather than aspect-ratio, which pushed the board out of view.
+        style={{ aspectRatio: `${W} / ${H}`, height: H * scale }}
       >
         <div
-          className="relative"
+          className="absolute top-0 left-0"
           style={{ width: W, height: H, transform: `scale(${scale})`, transformOrigin: "0 0", background: COLUMN_BG }}
         >
           {/* App chrome */}
