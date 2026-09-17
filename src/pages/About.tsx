@@ -1,5 +1,5 @@
 import Nav from "../components/Nav";
-import Journey from "../components/Journey";
+import { ExperienceList } from "../components/Experience";
 import WiggleText from "../components/WiggleText";
 import { useNiiaChat } from "../context/useNiiaChat";
 
@@ -66,48 +66,7 @@ export default function About() {
           <p className="mb-8 font-mono text-xs tracking-widest text-neutral-400 uppercase">
             My Journey
           </p>
-          <Journey />
-        </section>
-
-        <section className="pt-16">
-          <p className="mb-8 font-mono text-xs tracking-widest text-neutral-400 uppercase">
-            Values I Believe In
-          </p>
-          <div className="flex flex-col gap-8 md:flex-row">
-            <div className="group border-t border-neutral-200 pt-4 transition-colors duration-200 hover:border-[#e65f2e] md:flex-1">
-              <p className="font-mono text-6xl leading-none text-neutral-200">01</p>
-              <p className="mt-4 transition-transform duration-200 md:group-hover:translate-x-1">
-                Build the thing, not the deck.
-              </p>
-              <p className="mt-2 text-sm">
-                Leap didn't leave room for slideware — customers cared whether the box worked, not
-                why. That bias never left. I'd rather ship a rough prototype than defend a
-                polished one.
-              </p>
-            </div>
-            <div className="group border-t border-neutral-200 pt-4 transition-colors duration-200 hover:border-[#e65f2e] md:flex-1">
-              <p className="font-mono text-6xl leading-none text-neutral-200">02</p>
-              <p className="mt-4 transition-transform duration-200 md:group-hover:translate-x-1">
-                Hide the complexity, not the effort.
-              </p>
-              <p className="mt-2 text-sm">
-                AI products get complicated fast, and the job is making sure the person using them
-                never has to know that. If a feature needs a tooltip to explain itself, the design
-                isn't done yet.
-              </p>
-            </div>
-            <div className="group border-t border-neutral-200 pt-4 transition-colors duration-200 hover:border-[#e65f2e] md:flex-1">
-              <p className="font-mono text-6xl leading-none text-neutral-200">03</p>
-              <p className="mt-4 transition-transform duration-200 md:group-hover:translate-x-1">
-                Trust compounds faster than good ideas.
-              </p>
-              <p className="mt-2 text-sm">
-                Running a studio taught me the best outcome rarely comes from being the smartest
-                person in the room — it comes from a client or team that trusts the process enough
-                to let it actually play out.
-              </p>
-            </div>
-          </div>
+          <ExperienceList />
         </section>
 
         <section className="pt-12">
@@ -117,7 +76,7 @@ export default function About() {
           <p className="mb-6 max-w-xl">Work isn't the whole file.</p>
           <div className="grid grid-cols-1 gap-8 sm:grid-cols-2">
             <div>
-              <img src="/photos/drawing.jpg" alt="" className="mb-3 h-80 w-full object-cover" />
+              <img src="/photos/sketchbook.jpg" alt="" className="mb-3 h-80 w-full object-cover object-top" />
               <p>I draw</p>
               <p className="mt-2 font-mono text-xs tracking-widest text-neutral-400 uppercase">
                 Sketchbook
