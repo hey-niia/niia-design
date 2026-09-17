@@ -6,6 +6,15 @@ import WorkGridCard from "../components/WorkGridCard";
 import { projects } from "../data/projects";
 import { splitIntoColumns } from "../lib/columns";
 
+// The order projects appear in on the home page. Separate from the data's order,
+// which the case studies' previous/next links follow.
+const HOME_ORDER = ["ios-app", "hirement", "connectiq", "other-projects"];
+const rank = (slug: string) => {
+  const i = HOME_ORDER.indexOf(slug);
+  return i === -1 ? HOME_ORDER.length : i;
+};
+const homeProjects = [...projects].sort((a, b) => rank(a.slug) - rank(b.slug));
+
 export default function Home() {
   const location = useLocation();
 
@@ -83,7 +92,7 @@ export default function Home() {
       </section>
 
       <section id="work" className="flex flex-col gap-8 sm:flex-row">
-        {splitIntoColumns(projects).map((column, i) => (
+        {splitIntoColumns(homeProjects).map((column, i) => (
           <div key={i} className="flex flex-1 flex-col gap-8">
             {column.map((project) => (
               <WorkGridCard key={project.slug} project={project} />

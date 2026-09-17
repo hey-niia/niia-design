@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import type { Project } from "../data/projects";
 import { FRAME_RADIUS } from "./ScreenshotFrame";
 import { useAutoplayInView } from "../lib/useAutoplayInView";
+import KanbanDragCover from "./KanbanDragCover";
 
 // The meta line is all-caps (via the parent's `uppercase` class) except "iOS",
 // which keeps its brand casing — wrap it in `normal-case` so it survives the
@@ -26,19 +27,23 @@ export default function WorkGridCard({
   /** Override the title's text size — e.g. a smaller size for a denser grid. */
   titleClassName?: string;
 }) {
-  const { slug, name, category, client, lastUpdated, screenshots, coverVideo } = project;
+  const { slug, name, category, client, lastUpdated, screenshots, coverVideo, coverAnimation } = project;
   const cover = screenshots[0];
   const videoRef = useAutoplayInView<HTMLVideoElement>();
   // Some projects reuse the category as a stand-in `client` (e.g. Hirement, which
   // has no nameable client) — drop it from the meta line when it just repeats.
-  const metaParts = [category, client, lastUpdated].filter(
-    (part, i, parts) => i === 0 || part.toLowerCase() !== parts[i - 1].toLowerCase(),
-  );
+  const metaParts = project.cardMeta
+    ? [project.cardMeta]
+    : [category, client, lastUpdated].filter(
+        (part, i, parts) => i === 0 || part.toLowerCase() !== parts[i - 1].toLowerCase(),
+      );
 
   return (
     <Link to={`/work/${slug}`} className="block">
       <div className={slug === "ios-app" ? "flex justify-center bg-neutral-100 p-10" : undefined}>
-        {coverVideo ? (
+        {coverAnimation === "connectiq-kanban" ? (
+          <KanbanDragCover label={cover.alt} />
+        ) : coverVideo ? (
           <video
             ref={videoRef}
             src={coverVideo}

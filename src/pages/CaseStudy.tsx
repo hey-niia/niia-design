@@ -780,8 +780,11 @@ export default function CaseStudy() {
 
   return (
     // `clip`, not `hidden`: full-bleed bands are 100vw, which includes the
-    // scrollbar, and `hidden` would break the TOC's sticky positioning.
-    <main className={project.darkVisuals ? "overflow-x-clip" : undefined}>
+    // scrollbar, and `hidden` would break the TOC's sticky positioning. It
+    // reaches out over the body's 16px side padding and pads back in, so the
+    // clip sits at the screen edge: on a phone the column is the text width,
+    // and clipping there would cut every card's shadow off at its sides.
+    <main className={project.darkVisuals ? "-mx-4 overflow-x-clip px-4" : undefined}>
       <Nav />
       <div className="mx-auto max-w-4xl pt-6 md:pt-24">
         <div className="relative">

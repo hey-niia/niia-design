@@ -9,6 +9,7 @@ import {
   type ReactNode,
 } from "react";
 import {
+  CANVAS_BUTTON_SHADOW,
   DARK_MATTER_AREA,
   DARK_MATTER_CHIP,
   DARK_MATTER_SECTION,
@@ -132,6 +133,21 @@ export default function Slides({
   const swipeStart = useRef<number | null>(null);
   // The Figma-like canvas: every component on one plane you drag and pinch freely.
   const [explore, setExplore] = useState(false);
+  // Real size on the canvas, but on a phone that is a lot of scrolling: start at 75% there.
+  // Phones show components at 75% of real size, in the slider and on the canvas alike.
+  const exploreZoom = () => (window.matchMedia("(max-width: 39.99rem)").matches ? 0.75 : 1);
+  // Below desktop width (tablets, phones) or on any screen without hover, nobody clicks:
+  // "Click to explore" gives way to a "Tap to explore" button. Checked at the moment of
+  // each mouse move as well as on resize, so a narrowed desktop window gets it right.
+  const tapQuery = "(max-width: 63.99rem), (hover: none)";
+  const [touch, setTouch] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia(tapQuery);
+    const sync = () => setTouch(mq.matches);
+    sync();
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
+  }, []);
   const [view, setView] = useState({ x: 0, y: 0, z: 1 });
   const canvasRef = useRef<HTMLDivElement>(null);
   const panFrom = useRef<{ x: number; y: number; ox: number; oy: number } | null>(null);
@@ -307,7 +323,7 @@ export default function Slides({
       src={img.src}
       alt={img.alt}
       loading={eager ? undefined : "lazy"}
-      className={`block ${className} ${figma || onImageClick ? "cursor-none" : ""}`}
+      className={`block ${className} ${figma ? (touch ? "" : "lg:cursor-none") : onImageClick ? "cursor-none" : ""}`}
       onClick={
         figma
           ? (e) => {
@@ -315,7 +331,7 @@ export default function Slides({
               openFrom.current = { src: img.src, left: rect.left, top: rect.top };
               // The image goes away on this click, so its own mouseleave never fires.
               zoomCursor?.onMouseLeave();
-              setView({ x: 0, y: 0, z: 1 });
+              setView({ x: 0, y: 0, z: exploreZoom() });
               setExplore(true);
             }
           : onImageClick
@@ -323,7 +339,13 @@ export default function Slides({
             : undefined
       }
       onMouseMove={
-        zoomCursor && (figma ? (e) => zoomCursor.onMouseMove(e, "Click to explore") : zoomCursor.onMouseMove)
+        zoomCursor &&
+        (figma
+          ? (e) =>
+              window.matchMedia(tapQuery).matches
+                ? zoomCursor.onMouseLeave()
+                : zoomCursor.onMouseMove(e, "Click to explore")
+          : zoomCursor.onMouseMove)
       }
       onMouseLeave={zoomCursor?.onMouseLeave}
     />
@@ -481,14 +503,31 @@ export default function Slides({
             onPointerDown={(e) => e.stopPropagation()}
             className={`${
               dark ? DARK_MATTER_CHIP : `${CHIP} text-neutral-600`
-            } absolute top-3 right-3 z-10 cursor-pointer px-2.5 py-1 transition-colors hover:text-[#d9723f]`}
+            } ${CANVAS_BUTTON_SHADOW} absolute top-3 right-3 z-10 cursor-pointer px-2.5 py-1 transition-colors hover:text-[#d9723f]`}
             style={dark ? undefined : { backgroundColor: FIGMA_SECTION_BG }}
           >
-            Press Esc to exit
+            <span className={touch ? "" : "lg:hidden"}>Tap to exit</span>
+            <span className={touch ? "hidden" : "max-lg:hidden"}>Press Esc to exit</span>
           </button>
         </div>
       ) : (
       <div className="relative">
+        {figma && (
+          <button
+            type="button"
+            onClick={() => {
+              zoomCursor?.onMouseLeave();
+              setView({ x: 0, y: 0, z: exploreZoom() });
+              setExplore(true);
+            }}
+            className={`${
+              dark ? DARK_MATTER_CHIP : `${CHIP} text-neutral-600`
+            } ${CANVAS_BUTTON_SHADOW} ${touch ? "" : "lg:hidden"} absolute top-3 right-3 z-20 cursor-pointer px-2.5 py-1 transition-colors hover:text-[#d9723f]`}
+            style={dark ? undefined : { backgroundColor: FIGMA_SECTION_BG }}
+          >
+            Tap to explore
+          </button>
+        )}
         <div
           className="touch-pan-y overflow-hidden"
           onPointerDown={onPointerDown}
@@ -535,12 +574,14 @@ export default function Slides({
                               taller than the panel starts at its edge so all of it can be
                               scrolled to — plain centring would push its start out of reach. */}
                           <div
-                            className="flex min-h-full flex-wrap gap-7 p-6"
+                            className="flex min-h-full flex-wrap gap-4 p-4 [--ds-scale:0.75] sm:gap-7 sm:p-6 sm:[--ds-scale:1]"
                             style={{ justifyContent: "safe center", alignItems: "safe center", alignContent: "safe center" }}
                           >
                             {imgs.map((img, k) => (
                               // White behind every component so transparent ones don't show
                               // the grid through them, plus the soft Nadiia shadow underneath.
+                              // Real size, times --ds-scale: 75% on phones (as on the explore
+                              // canvas there), 100% from tablet width up.
                               <div
                                 key={img.src}
                                 className={`shrink-0 ${
@@ -553,7 +594,7 @@ export default function Slides({
                                     : "overflow-hidden rounded-[6px] bg-white shadow-[0_1px_2px_rgba(0,0,0,0.05),0_6px_20px_rgba(0,0,0,0.07)]"
                                 }`}
                                 style={{
-                          width: img.width,
+                          width: `calc(${img.width}px * var(--ds-scale, 1))`,
                           filter: dark && !img.bare && !img.backed ? DARK_MATTER_SHADOW : undefined,
                           backgroundColor: dark && img.backed ? DARK_MATTER_SURFACE : undefined,
                         }}

@@ -115,3 +115,6 @@ export const NADIIA_CARD_TITLE = "font-mono text-xs tracking-wider text-neutral-
 
 /** A Nadiia card's text: 14px grey, the same size as Role and Team in a case study header. */
 export const NADIIA_CARD_TEXT = "text-sm text-neutral-500";
+
+/** Shadow under the buttons that float on the explore canvas and slider ("Tap to explore", "Press Esc to exit"). */
+export const CANVAS_BUTTON_SHADOW = "shadow-[0_1px_2px_rgba(0,0,0,0.06),0_4px_12px_rgba(0,0,0,0.08)]";

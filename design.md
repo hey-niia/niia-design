@@ -81,6 +81,66 @@ Flagged as "not even styled... text goes side to side... hard to skim through" �
 
 ---
 
+### Addendum — design-system slider and explore canvas (`Slides`, reusable)
+
+The component showcase used on ConnectIQ (design system) and Matter (Optic). Reuse it on any
+case study by adding a `slides` block with `appearance: "figma"`; everything below comes with
+it. Code: `src/components/Slides.tsx`, tokens in `src/components/nadiia.ts`.
+
+**Data** (`src/data/projects.ts`)
+
+```ts
+{
+  type: "slides",
+  label: "Design system components",   // screen-reader name
+  appearance: "figma",
+  look: "light" | "darkMatter",         // optional, default light
+  canvasRows: [["Table cells", "Files & media", "Text inputs"]], // optional
+  slides: [
+    {
+      title: "Buttons",                  // the section chip
+      gridOnly: true,                    // optional: too wide for the slider, canvas only
+      images: [{ src, alt, width, bare?, backed? }],
+    },
+  ],
+}
+```
+
+`width` is the component's real width in CSS px (Figma exports at 3×, or 2× for very wide
+sets, with the component-set outline stripped). `bare`: the export brings its own card.
+`backed` (Dark Matter only): a see-through or tiny component gets a surface-primary section.
+
+**Looks**
+- `light`: Figma's pale square grid (`FIGMA_SECTION_GRID`), each component on a white card
+  with a soft shadow.
+- `darkMatter`: charcoal panel with a faint square grid (`DARK_MATTER_AREA`), no card, a
+  drop-shadow that follows each component's shape; `backed` components sit in a
+  `DARK_MATTER_SECTION` on `DARK_MATTER_SURFACE`. No badges in showcases.
+
+**Slider**
+- The header (section chip + "Ready for dev") stays put while slides move; only the
+  section name changes.
+- Size: **100% of real size from 640px up, 75% on phones** (below 640px), via `--ds-scale`.
+  Panel padding 24px, 16px on phones (the text's side padding).
+- Opening position: a slide taller or wider than the panel opens at its **top-left**; a slide
+  that fits is **centred**. Stops re-aligning once the person scrolls the panel.
+- Auto-advances, pauses on hover and focus; arrows and dots inside the panel.
+
+**Explore canvas** (every component on one pannable, zoomable plane)
+- Enter, desktop (1024px and up, with a mouse): hovering a component shows the cursor label
+  "Click to explore"; clicking opens the canvas.
+- Enter, below 1024px or on any touch screen: **no hover label**; a **"Tap to explore"**
+  button is always visible top-right of the panel (shown by CSS, `lg:hidden`, so a narrowed
+  desktop window gets it too).
+- Exit: Esc, or the top-right button: "Press Esc to exit" on desktop, "Tap to exit" below
+  1024px or on touch. Both floating buttons carry `CANVAS_BUTTON_SHADOW`.
+- Size: the canvas **opens at the same size as the slider** — 100% on desktop and tablet,
+  75% on phones — and with the clicked component exactly where it was, so nothing jumps.
+  From there: drag to pan (the grid moves and scales with it, so it never ends), pinch or
+  ctrl-scroll to zoom between 30% and 300%.
+- Sections appear one per row in slide order; `canvasRows` puts named sections side by side,
+  placed where the first of them would be. `gridOnly` slides appear here but not in the slider.
+
 # Design System — niia.design (v6, historical — see v7 above for the current direction)
 
 **v6 was the pass that introduced the stefanietam.com-driven brutalist direction** (Cargo-template references before it, v1–v5, are further below). Read this section for the reasoning behind the current header/About shape; its Experience layout, Selected Work layout, hover treatment, and typeface call were each superseded by v7 above.

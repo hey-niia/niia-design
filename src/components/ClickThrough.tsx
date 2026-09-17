@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import HandCursor from "./HandCursor";
 import { FRAME_RADIUS } from "./ScreenshotFrame";
 
 /**
@@ -32,10 +33,6 @@ const DISSOLVE_MS = 220;
 const DEFAULT_HOLD_MS = 450;
 /** The app screens are 1440px wide in Figma, so a real cursor scales against that. */
 const DESIGN_WIDTH = 1440;
-/** macOS pointing hand: ~24×30px, hotspot at the index fingertip. */
-const CURSOR_W = 24;
-const CURSOR_H = 30;
-const CURSOR_TIP = { x: 8, y: 1.5 };
 /** A touch larger than a real cursor, so it reads clearly in a scaled-down screenshot. */
 const CURSOR_ZOOM = 1.25;
 
@@ -138,8 +135,9 @@ export default function ClickThrough({ steps, label }: { steps: ClickThroughStep
         const current = i === index;
         const behind = i === previous;
         return (
+          // Keyed by position: a flow can show the same screen twice (edit location does).
           <img
-            key={s.src}
+            key={`${i}-${s.src}`}
             src={s.src}
             alt=""
             aria-hidden
@@ -178,27 +176,7 @@ export default function ClickThrough({ steps, label }: { steps: ClickThroughStep
             }}
           />
           {/* The standard macOS pointing hand, at the size a real cursor would be on this screen. */}
-          <svg
-            width={CURSOR_W * cursor}
-            height={CURSOR_H * cursor}
-            viewBox="0 0 24 30"
-            className="absolute drop-shadow-[0_1px_2px_rgba(0,0,0,0.3)]"
-            style={{
-              left: -CURSOR_TIP.x * cursor,
-              top: -CURSOR_TIP.y * cursor,
-              transform: `scale(${phase === "press" ? 0.9 : 1})`,
-              transformOrigin: `${CURSOR_TIP.x * cursor}px ${CURSOR_TIP.y * cursor}px`,
-              transition: `transform ${PRESS_MS}ms ease-out`,
-            }}
-          >
-            <path
-              d="M8 1.5c-1 0-1.8.8-1.8 1.8v9.4l-1.4-1.2c-.8-.7-2-.6-2.7.2-.6.8-.5 1.9.2 2.6l4.5 4.6c1.1 1.1 2.6 1.8 4.2 1.8h3.3c3 0 5.4-2.4 5.4-5.4v-4.6c0-.9-.7-1.6-1.6-1.6-.4 0-.8.2-1.1.4v-.5c0-.9-.7-1.6-1.6-1.6-.5 0-.9.2-1.2.5-.2-.7-.9-1.3-1.6-1.3-.4 0-.8.2-1.1.4V3.3c0-1-.8-1.8-1.8-1.8z"
-              fill="#fff"
-              stroke="#000"
-              strokeWidth="1.2"
-              strokeLinejoin="round"
-            />
-          </svg>
+          <HandCursor scale={cursor} pressed={phase === "press"} pressMs={PRESS_MS} />
         </div>
       )}
     </div>

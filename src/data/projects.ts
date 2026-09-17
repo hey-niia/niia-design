@@ -195,6 +195,10 @@ export interface Project {
   /** Looping muted clip shown on the work grid card instead of the static cover
    *  screenshot — `screenshots[0]` stays as its poster frame and alt text. */
   coverVideo?: string;
+  /** Replaces the whole meta line under the home-page card, e.g. just "Dashboard". */
+  cardMeta?: string;
+  /** A coded animation that replaces the cover image on the home page. */
+  coverAnimation?: "connectiq-kanban";
   lastUpdated: string;
   /** Impact Overview: 2-3 stat cards surfaced at the top of the case study. */
   impact?: ImpactStat[];
@@ -727,12 +731,12 @@ export const projects: Project[] = [
     // straight from the Figma file (dashboard C) at 3×, at their real component size.
     slug: "connectiq",
     category: "Dashboard",
-    name: "Platform serving screens at Apple, Starbucks, KFC, and more across the world",
+    name: "Giant Pumpkin",
     title: "ConnectIQ",
     hideClientInHeader: true,
     summary:
       "One platform for planning, dispatch, installation, and reporting for a company that installs digital signage and audio hardware across Southeast Asia and Latin America. It replaced four disconnected Airtable bases, Fillout forms, Slack messages, and the phone calls and exported PDFs in between.",
-    client: "Giant Pumpkin",
+    client: "Platform serving screens across the world",
     role: "Product design, 0→1, information architecture, design systems",
     team: "Founder, project manager, and the internal planning & operations team",
     credits: [
@@ -747,10 +751,13 @@ export const projects: Project[] = [
     screenshots: [
       {
         src: "/projects/connectiq.webp",
-        alt: "Partner-facing jobs board, jobs grouped by status, with a job card mid-drag between columns",
+        alt: "Partner jobs board: a hand cursor drags a job card from To do into Unassigned",
       },
     ],
     lastUpdated: "2025–2026",
+    // Home page: the jobs board, animated, in place of the static cover above.
+    coverAnimation: "connectiq-kanban",
+    cardMeta: "Dashboard",
     hero: {
       src: "/projects/connectiq/partner-jobs-board.webp",
       alt: "Partner-facing jobs board, columns for Unassigned, To do, In progress, and Done, with a job card mid-drag showing avatars and job details",
