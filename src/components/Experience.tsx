@@ -43,7 +43,11 @@ export function ExperienceTimeline() {
     // whatever the window width, so a narrow column never squeezes the role into a sliver.
     <div className="@container relative">
       {/* pr-10 keeps the rows clear of the button, which sits on the first row's line. */}
-      <ul id={detailsId} className="flex flex-col gap-3 pr-10">
+      <ul
+        id={detailsId}
+        // Opened, each role becomes a paragraph, so the roles get more room between them.
+        className={`flex flex-col pr-10 transition-[gap] duration-300 ease-out ${open ? "gap-10" : "gap-3"}`}
+      >
         {experience.map((item) => (
           <li
             key={item.company}
@@ -63,7 +67,7 @@ export function ExperienceTimeline() {
               }`}
               aria-hidden={!open}
             >
-              <p className="overflow-hidden text-[15px] leading-6 text-neutral-800">
+              <p className="overflow-hidden text-[15px] leading-6 text-neutral-500">
                 <span className="block pt-1.5 pb-1">{item.description}</span>
               </p>
             </div>
