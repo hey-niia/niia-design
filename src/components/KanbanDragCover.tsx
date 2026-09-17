@@ -179,7 +179,7 @@ export default function KanbanDragCover({ label }: { label: string }) {
       ref={rootRef}
       role="img"
       aria-label={label}
-      className="relative w-full overflow-hidden bg-[#565656]"
+      className="relative w-full overflow-hidden bg-[#f07c57]"
       style={{ aspectRatio: "3360 / 2528" }}
     >
       <div
