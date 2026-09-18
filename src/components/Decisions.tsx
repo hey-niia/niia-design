@@ -15,7 +15,18 @@ export interface Decision {
   note?: string;
 }
 
-function State({ label, text, tone }: { label: string; text: string; tone: "orange" | "green" }) {
+function State({
+  label,
+  text,
+  note,
+  tone,
+}: {
+  label: string;
+  text: string;
+  /** A result line under the text, in the same box and the same grey. */
+  note?: string;
+  tone: "orange" | "green";
+}) {
   return (
     <div className={`rounded-lg px-3 py-2.5 ring-1 ${NADIIA_SURFACE[tone]}`}>
       <p
@@ -29,6 +40,7 @@ function State({ label, text, tone }: { label: string; text: string; tone: "oran
       <p className={`${NADIIA_SMALL} text-[var(--nd-tint-text,#525252)]`}>
         {text}
       </p>
+      {note && <p className={`mt-2 ${NADIIA_SMALL} text-[var(--nd-tint-text,#525252)]`}>{note}</p>}
     </div>
   );
 }
@@ -36,13 +48,13 @@ function State({ label, text, tone }: { label: string; text: string; tone: "oran
 export default function Decisions({ items }: { items: Decision[] }) {
   return (
     // From tablet width each card is a subgrid of the list's rows (title,
-    // before, arrow, after, note), so the before and after boxes line up across
+    // before, arrow, after), so the before and after boxes line up across
     // all three cards even when a title wraps or one box runs a line longer.
     <ol className="my-24 grid gap-5 md:grid-cols-3 md:gap-y-0">
       {items.map((item, i) => (
         <li
           key={item.title}
-          className={`${NADIIA_SHAPE} ${NADIIA_SURFACE.white} flex flex-col p-5 md:row-span-5 md:grid md:grid-rows-subgrid`}
+          className={`${NADIIA_SHAPE} ${NADIIA_SURFACE.white} flex flex-col p-5 md:row-span-4 md:grid md:grid-rows-subgrid`}
         >
           <p className="mb-4 flex items-baseline gap-2">
             <span
@@ -56,13 +68,7 @@ export default function Decisions({ items }: { items: Decision[] }) {
           </p>
           <State label="Before" text={item.before} tone="orange" />
           <Arrow direction="down" length={20} />
-          <State label="After" text={item.after} tone="green" />
-          {item.note && (
-            // Same surface as the "After" box above, so the result reads as part of it.
-            <div className={`mt-4 rounded-lg px-3 py-2.5 ring-1 ${NADIIA_SURFACE.green}`}>
-              <p className={`${NADIIA_SMALL} text-[var(--nd-ink,#262626)]`}>{item.note}</p>
-            </div>
-          )}
+          <State label="After" text={item.after} note={item.note} tone="green" />
         </li>
       ))}
     </ol>

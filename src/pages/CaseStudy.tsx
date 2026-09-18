@@ -1104,7 +1104,7 @@ export default function CaseStudy() {
           </DarkHalf>
         </div>
 
-        <footer className="border-t border-gray-200 py-16">
+        <footer className="py-16">
           <div className="flex items-center justify-center gap-8">
             <a href={`mailto:${EMAIL}`} className="flex items-center gap-1.5">
               <span aria-hidden>✉</span>
