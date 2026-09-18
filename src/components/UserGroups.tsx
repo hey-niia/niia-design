@@ -33,7 +33,7 @@ function ListCard({
         />
         {label}
       </p>
-      <ul className={`${NADIIA_SMALL} space-y-1.5 text-neutral-800`}>
+      <ul className={`${NADIIA_SMALL} space-y-1.5 text-[var(--nd-ink,#262626)]`}>
         {items.map((item) => (
           <li key={item} className="flex gap-2">
             <span aria-hidden className="text-neutral-400">

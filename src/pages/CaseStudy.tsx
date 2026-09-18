@@ -1,4 +1,13 @@
-import { Fragment, useCallback, useEffect, useMemo, useRef, useState, type MouseEvent } from "react";
+import {
+  Fragment,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type MouseEvent,
+  type ReactNode,
+} from "react";
 import { Link, useParams } from "react-router-dom";
 import { getProject, projects, type ContentBlock, type Credit } from "../data/projects";
 import AnnotatedImage from "../components/AnnotatedImage";
@@ -7,7 +16,9 @@ import CardCarousel from "../components/CardCarousel";
 import ClickThrough from "../components/ClickThrough";
 import ConnectIQUserFlow from "../components/ConnectIQUserFlow";
 import { Band } from "../components/DarkVisuals";
+import DataTable from "../components/DataTable";
 import Decisions from "../components/Decisions";
+import FeatureColumns from "../components/FeatureColumns";
 import Findings from "../components/Findings";
 import FramedImage from "../components/FramedImage";
 import Outcomes from "../components/Outcomes";
@@ -18,7 +29,15 @@ import ScrollableImage from "../components/ScrollableImage";
 import Silos from "../components/Silos";
 import Slides from "../components/Slides";
 import { slideImages } from "../lib/slides";
-import { NADIIA_LABEL, NADIIA_SHAPE, NADIIA_SURFACE } from "../components/nadiia";
+import {
+  NADIIA_AREA,
+  NADIIA_CARD,
+  NADIIA_CARD_TEXT,
+  NADIIA_CARD_TITLE,
+  NADIIA_LABEL,
+  NADIIA_SHAPE,
+  NADIIA_SURFACE,
+} from "../components/nadiia";
 import ToolMap from "../components/ToolMap";
 import UserGroups from "../components/UserGroups";
 import WiggleText from "../components/WiggleText";
@@ -341,7 +360,7 @@ function withCode(text: string) {
     part.startsWith("`") && part.endsWith("`") && part.length > 2 ? (
       <code
         key={i}
-        className="rounded bg-neutral-100 px-1.5 py-0.5 font-mono text-[0.85em] text-neutral-700"
+        className="rounded bg-[var(--nd-chip,#f5f5f5)] px-1.5 py-0.5 font-mono text-[0.85em] text-[var(--nd-chip-ink,#404040)] ring-1 ring-[var(--nd-chip-ring,rgba(0,0,0,0.06))]"
       >
         {part.slice(1, -1)}
       </code>
@@ -360,6 +379,9 @@ const VISUAL_TYPES = new Set<ContentBlock["type"]>([
   "before-after",
   "gallery",
 ]);
+
+// Blocks that are reading text rather than a visual.
+const TEXT_TYPES = new Set<ContentBlock["type"]>(["paragraph", "heading", "section", "list", "quote"]);
 
 // A plain image opts out of the band and sits on the white page instead.
 function isVisual(block: ContentBlock) {
@@ -381,6 +403,49 @@ function groupVisuals(content: ContentBlock[]) {
     }
   });
   return groups;
+}
+
+/**
+ * The lower half of a dark page: full-bleed charcoal, with the Dark Matter
+ * variables switched on for everything inside. `onEnter` reports whether that
+ * charcoal has reached the sticky table of contents, which then goes light.
+ */
+function DarkHalf({
+  on,
+  onEnter,
+  children,
+}: {
+  on: boolean;
+  onEnter: (over: boolean) => void;
+  children: ReactNode;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!on) return;
+    // The contents list sits at top-24 (96px) and is a few lines tall.
+    const check = () => {
+      const box = ref.current?.getBoundingClientRect();
+      onEnter(!!box && box.top <= 128 && box.bottom > 128);
+    };
+    check();
+    window.addEventListener("scroll", check, { passive: true });
+    window.addEventListener("resize", check);
+    return () => {
+      window.removeEventListener("scroll", check);
+      window.removeEventListener("resize", check);
+    };
+  }, [on, onEnter]);
+
+  if (!on) return <>{children}</>;
+  return (
+    <div
+      ref={ref}
+      className="dark-matter ml-[calc(50%-50vw)] w-screen px-4 py-10 sm:px-10"
+    >
+      <div className="mx-auto max-w-4xl">{children}</div>
+    </div>
+  );
 }
 
 function Block({
@@ -406,7 +471,11 @@ function Block({
         <p className="my-4 max-w-[46rem] text-[1.125rem] leading-[1.8]">{withCode(block.text)}</p>
       );
     case "heading":
-      return (
+      return block.mono ? (
+        <h3 className="mt-12 mb-3 font-mono text-sm tracking-widest text-[#e65f2e] uppercase">
+          {block.text}
+        </h3>
+      ) : (
         <h3 className="mt-12 mb-3 max-w-[46rem] text-[1.375rem] font-semibold">{block.text}</h3>
       );
     case "section":
@@ -458,6 +527,8 @@ function Block({
           ))}
         </div>
       );
+    case "columns":
+      return <FeatureColumns items={block.items} />;
     case "quote":
       return (
         <blockquote className="my-6 max-w-[46rem] border-l-2 pl-4 italic">
@@ -465,13 +536,24 @@ function Block({
           <footer className="mt-2 text-sm not-italic">— {block.attribution}</footer>
         </blockquote>
       );
+    case "data-table":
+      return (
+        <div className="my-10">
+          <DataTable title={block.title} source={block.source} columns={block.columns} rows={block.rows} />
+        </div>
+      );
     case "stat-row":
       return (
-        <div className="my-10 grid grid-cols-2 gap-8 sm:grid-cols-3">
+        // The same Nadiia card as Impact, with the number doing the talking.
+        <div
+          className={`my-10 grid grid-cols-1 gap-4 ${
+            block.stats.length > 2 ? "sm:grid-cols-3" : "sm:grid-cols-2"
+          }`}
+        >
           {block.stats.map((stat, i) => (
-            <div key={i}>
-              <p className="text-5xl font-medium tracking-tight">{stat.value}</p>
-              <p className="mt-2 text-sm text-gray-400">{stat.label}</p>
+            <div key={i} className={NADIIA_CARD} style={NADIIA_AREA.neutral}>
+              <p className="text-4xl font-medium tracking-tight">{stat.value}</p>
+              <p className={`mt-2 ${NADIIA_CARD_TEXT}`}>{stat.label}</p>
             </div>
           ))}
         </div>
@@ -480,13 +562,18 @@ function Block({
       return (
         <div className="my-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
           {block.items.map((item, i) => (
-            <div key={i} className="bg-neutral-100 p-6">
-              <p className="mb-3 font-mono text-xs text-gray-400">
+            // Nadiia: a white box with a soft shadow on the white page, its name
+            // in Geist Mono capitals. The description stays sentence-case — mono
+            // capitals are for labels, not for three lines of prose.
+            <div key={i} className={`${NADIIA_SHAPE} ${NADIIA_SURFACE.white} p-5`}>
+              <p className="mb-3 font-mono text-[10px] tracking-widest text-neutral-400">
                 {String(i + 1).padStart(2, "0")}
               </p>
-              <p className="font-medium">{item.title}</p>
+              <p className={NADIIA_LABEL}>{item.title}</p>
               {item.description && (
-                <p className="mt-2 text-sm text-gray-400">{item.description}</p>
+                <p className="mt-2.5 text-sm leading-relaxed text-[var(--nd-body,#737373)]">
+                  {item.description}
+                </p>
               )}
             </div>
           ))}
@@ -552,16 +639,23 @@ function Block({
             loop
             muted
             playsInline
-            className={`block w-full ${FRAME_RADIUS} ring-1 ring-black/10`}
-            style={{ maxWidth: block.maxWidth ?? 380, margin: "0 auto" }}
+            className={`block ${FRAME_RADIUS} ring-1 ring-black/10`}
+            style={
+              block.height
+                ? { height: block.height, width: "auto", maxWidth: "100%", margin: "0 auto" }
+                : { width: "100%", maxWidth: block.maxWidth ?? 380, margin: "0 auto" }
+            }
           />
           {block.caption && <p className="mt-2 text-sm italic text-gray-400">{block.caption}</p>}
         </div>
       );
     case "annotated-image":
       return (
-        <div className={dark ? "" : "my-8 bg-neutral-100 px-4 py-8 sm:px-10 sm:py-10"}>
+        // Straight on the white page, no grey field; the notes live on the markers
+        // themselves, so the numbered list underneath is left out.
+        <div className={dark ? "" : "my-8"}>
           <AnnotatedImage
+            showList={false}
             src={block.src}
             alt={block.alt}
             pins={block.pins}
@@ -599,6 +693,7 @@ function Block({
             maxWidth={block.maxWidth}
             viewportHeight={block.viewportHeight}
             caption={block.caption}
+            plain={block.plain}
             dark={block.dark ?? dark}
             onImageClick={onImageClick}
             zoomCursor={zoomCursor}
@@ -625,6 +720,8 @@ function Block({
           slides={block.slides}
           label={block.label}
           appearance={block.appearance}
+          field={block.field}
+          stickyTitle={block.stickyTitle}
           look={block.look}
           canvasRows={block.canvasRows}
           onImageClick={onImageClick}
@@ -666,6 +763,8 @@ export default function CaseStudy() {
   const { openWelcome } = useNiiaChat();
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const [activeId, setActiveId] = useState("overview");
+  // True once the dark half has scrolled up behind the contents list.
+  const [tocOnDark, setTocOnDark] = useState(false);
 
   // Every image/gallery block's images, in document order, so the lightbox
   // can step through them regardless of which block a screenshot came from.
@@ -772,6 +871,33 @@ export default function CaseStudy() {
   }
 
   const hasToc = toc.length > 1;
+  // Sections carry an orange "01/" on a numbered page, the same as on the
+  // dark-visuals pages; `groupVisuals` does the counting on those.
+  let sectionCount = 0;
+  const numberedContent = project.content.map((block) => ({
+    block,
+    sectionNumber:
+      project.darkPage && block.type === "section" ? ++sectionCount : undefined,
+  }));
+  const impactCards = project.impact && project.impact.length > 0 && (
+    // A Nadiia card on its dotted field, the same one the research columns use;
+    // on a dark page the field and the card repaint themselves (see index.css).
+    // Body text matches Role and Team above (14px).
+    <div className={project.darkPage ? "my-20" : "mt-12"}>
+      <p className="mb-4 text-sm tracking-wide text-gray-400 uppercase">Impact</p>
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        {project.impact.map((stat) => (
+          <div key={stat.metric} className={NADIIA_CARD} style={NADIIA_AREA.neutral}>
+            <p className={NADIIA_CARD_TITLE}>{stat.metric}</p>
+            <p className={`mt-2 ${NADIIA_CARD_TEXT}`}>
+              {stat.description}{" "}
+              <strong className={`font-medium ${NADIIA_CARD_TEXT}`}>{stat.result}</strong>
+            </p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
   const openImage = (src: string) =>
     setLightboxIndex(images.findIndex((img) => img.src === src));
   const featuredToggle = project.featured && (
@@ -799,7 +925,9 @@ export default function CaseStudy() {
               <div className="min-[1360px]:sticky min-[1360px]:top-24">
                 <Link
                   to="/"
-                  className="mb-6 block text-sm text-gray-400 hover:text-[#e65f2e]"
+                  className={`mb-6 block text-sm hover:text-[#e65f2e] ${
+                    tocOnDark ? "text-neutral-400" : "text-gray-400"
+                  }`}
                 >
                   <WiggleText>← Back</WiggleText>
                 </Link>
@@ -809,8 +937,14 @@ export default function CaseStudy() {
                       <li key={item.id}>
                         <a
                           href={`#${item.id}`}
-                          className={`text-sm hover:text-[#e65f2e] ${
-                            activeId === item.id ? "font-medium text-black" : "text-gray-400"
+                          className={`text-sm transition-colors hover:text-[#e65f2e] ${
+                            activeId === item.id
+                              ? tocOnDark
+                                ? "font-medium text-neutral-100"
+                                : "font-medium text-black"
+                              : tocOnDark
+                                ? "text-neutral-400"
+                                : "text-gray-400"
                           }`}
                         >
                           {item.title}
@@ -866,27 +1000,13 @@ export default function CaseStudy() {
               </div>
             </div>
 
-            {project.impact && project.impact.length > 0 && (
-              // Same treatment as the `callouts` block, so the two card rows
-              // on a page read as one family. Body stays near-legible size
-              // rather than the callouts' 14px — this is the block recruiters
-              // read first.
-              <div className="mt-12">
-                <p className="mb-4 text-sm tracking-wide text-gray-400 uppercase">Impact</p>
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-                  {project.impact.map((stat) => (
-                    <div key={stat.metric} className="bg-neutral-100 p-6">
-                      <p className="font-medium">{stat.metric}</p>
-                      <p className="mt-2 text-[1.0625rem] leading-relaxed text-gray-500">
-                        {stat.description}{" "}
-                        <strong className="font-medium text-black">{stat.result}</strong>
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
+            {/* A dark page starts here, so Impact leads the dark half instead. */}
+            {!project.darkPage && impactCards}
           </section>
+
+          {/* Impact down, on Dark Matter's charcoal: the page's own components
+              follow through the Nadiia variables the wrapper repaints. */}
+          <DarkHalf on={!!project.darkPage} onEnter={setTocOnDark}>
 
           {/* After the overview, so its rule stays right under Role / Team / Timeline. */}
           {project.hero && (
@@ -923,10 +1043,31 @@ export default function CaseStudy() {
                     <Fragment key={group[0].index}>{blocks}</Fragment>
                   );
                 })
-              : project.content.map((block, i) => (
-                  <Block key={i} block={block} onImageClick={openImage} zoomCursor={zoomCursor} />
-                ))}
-          </section>
+              : numberedContent.map(({ block, sectionNumber }, i) => {
+                  const rendered = (
+                    <Block
+                      key={i}
+                      block={block}
+                      sectionNumber={sectionNumber}
+                      onImageClick={openImage}
+                      zoomCursor={zoomCursor}
+                    />
+                  );
+                  // A dark page gives every visual more air above and below. The
+                  // wrapper's margin collapses with the block's own, so this is a
+                  // floor (80px), and anything already roomier keeps its space.
+                  return project.darkPage && !TEXT_TYPES.has(block.type) ? (
+                    <div key={i} className="my-20">
+                      {rendered}
+                    </div>
+                  ) : (
+                    rendered
+                  );
+                })}
+              {/* A dark page closes on Impact instead of opening with it. */}
+              {project.darkPage && impactCards}
+            </section>
+          </DarkHalf>
         </div>
 
         <footer className="border-t border-gray-200 py-16">

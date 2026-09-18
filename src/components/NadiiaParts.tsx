@@ -35,20 +35,20 @@ export function Arrow({
     return (
       <div
         aria-hidden
-        className={`relative mx-auto w-px shrink-0 bg-neutral-300 ${className}`}
+        className={`relative mx-auto w-px shrink-0 bg-[var(--nd-line,#d4d4d4)] ${className}`}
         style={{ height: length ?? 28 }}
       >
-        <span className="absolute bottom-0 left-1/2 h-0 w-0 -translate-x-1/2 border-x-[3.5px] border-t-[5px] border-x-transparent border-t-neutral-400" />
+        <span className="absolute bottom-0 left-1/2 h-0 w-0 -translate-x-1/2 border-x-[3.5px] border-t-[5px] border-x-transparent border-t-[var(--nd-line-head,#a3a3a3)]" />
       </div>
     );
   }
   return (
     <div
       aria-hidden
-      className={`relative h-px bg-neutral-300 ${className}`}
+      className={`relative h-px bg-[var(--nd-line,#d4d4d4)] ${className}`}
       style={{ width: length ?? "100%" }}
     >
-      <span className="absolute top-1/2 right-0 h-0 w-0 -translate-y-1/2 border-y-[3.5px] border-l-[5px] border-y-transparent border-l-neutral-400" />
+      <span className="absolute top-1/2 right-0 h-0 w-0 -translate-y-1/2 border-y-[3.5px] border-l-[5px] border-y-transparent border-l-[var(--nd-line-head,#a3a3a3)]" />
     </div>
   );
 }

@@ -1,11 +1,19 @@
 export type ContentBlock =
   | { type: "paragraph"; text: string }
-  | { type: "heading"; text: string }
+  | {
+      type: "heading";
+      text: string;
+      /** Geist Mono capitals in the accent orange — the surface labels on a
+       *  dark page, rather than a sentence-case subheading. */
+      mono?: boolean;
+    }
   /** Top-level narrative section (Problem framing, Solution, Final design, Results) — anchors the "On this page" TOC. */
   | { type: "section"; id: string; title: string }
   | { type: "list"; items: string[] }
   /** Editorial alternative to a bullet list — large mono numerals, matching About's Values section. */
   | { type: "numbered-list"; items: string[] }
+  /** Icon, short title and a sentence or two per column, side by side (Retool's feature-row pattern). */
+  | { type: "columns"; items: { icon: "screens" | "chart" | "conversation"; title: string; text: string }[] }
   | { type: "quote"; text: string; attribution: string }
   /**
    * `maxWidth` caps the rendered width in px and centers the image. Needed for
@@ -35,6 +43,9 @@ export type ContentBlock =
       alt: string;
       caption?: string;
       maxWidth?: number;
+      /** Caps the rendered height in px instead — for a tall screen recording
+       *  that would otherwise run past the bottom of the window. */
+      height?: number;
     }
   /** Screenshot with interactive numbered markers — see AnnotatedImage. */
   | {
@@ -63,6 +74,8 @@ export type ContentBlock =
         name: string;
         context: string;
         quote: string;
+        /** More of what they said, each shown as its own message bubble. */
+        followUps?: string[];
         takeaway: string;
       }[];
     }
@@ -112,6 +125,12 @@ export type ContentBlock =
       label: string;
       /** `figma`: each slide as a Figma section in the app's placeholder colour. Default: Nadiia frames on orange. */
       appearance?: "nadiia" | "figma";
+      /** Nadiia look: the field behind the frames — "orange" (default) or the
+       *  neutral grey the interview cards sit on. */
+      field?: "orange" | "neutral";
+      /** Nadiia look: hold one tag (the label) above the track rather than a
+       *  moving tag per slide. */
+      stickyTitle?: boolean;
       /** Figma look: `light` (pale grid, white cards) or `darkMatter` (dark dotted panel, shadow only). */
       look?: "light" | "darkMatter";
       /** Explore canvas: sections to sit side by side, left to right, as one row (by slide title). */
@@ -148,6 +167,14 @@ export type ContentBlock =
   | { type: "chips"; items: string[] }
   /** Big standalone numbers (page views, MAU, usability score…), no card/border. */
   | { type: "stat-row"; stats: { value: string; label: string }[] }
+  /** An analytics readout, rebuilt as a themed table — see DataTable. */
+  | {
+      type: "data-table";
+      title: string;
+      source?: string;
+      columns: string[];
+      rows: { label: string; qualifier?: string; cells: string[] }[];
+    }
   /** Numbered short-form callouts (frictions, concepts) — 2-4 items, gray fill. */
   | { type: "callouts"; items: { title: string; description?: string }[] };
 
@@ -208,6 +235,9 @@ export interface Project {
   featured?: Extract<ContentBlock, { type: "before-after" }>;
   /** Every visual sits on a full-bleed dark grey band, and sections are numbered — the PDF case study look. */
   darkVisuals?: boolean;
+  /** Sections are numbered ("01/"), and everything from Impact down is on
+   *  Dark Matter's charcoal — for a case study whose product is dark. */
+  darkPage?: boolean;
   content: ContentBlock[];
 }
 
@@ -219,7 +249,6 @@ export const projects: Project[] = [
     // before shipping copy, and blur it in any screenshot that displays it.
     //
     // Still outstanding:
-    //   - problem-activation-funnel.png is a placeholder for a real Amplitude export
     //   - the You page and the level system shipped after the May measurement
     //     window, so neither has per-surface cohort data yet
     //   - the progress-card iteration is argued from design reasoning; if usage
@@ -258,6 +287,7 @@ export const projects: Project[] = [
     duration: "Dec 2025 – Sep 2026 · 10 months",
     tools: ["Figma", "Claude", "Notion", "Amplitude"],
     coverVideo: "/projects/ios-app/hero-coaching.mp4",
+    darkPage: true,
     screenshots: [
       { src: "/projects/ios-app/hero-coaching.webp", alt: "Three coaching screens" },
       { src: "/projects/ios-app/3.webp", alt: "Emotional fitness app progression screen" },
@@ -285,11 +315,10 @@ export const projects: Project[] = [
     content: [
       {
         type: "video",
+        height: 600,
         src: "/projects/ios-app/hero-coaching.mp4",
         poster: "/projects/ios-app/hero-coaching.webp",
         alt: "Screen recording of the coaching flow: asking a question, logging a memory, naming which neurotransmitters it affected, and the progress sheet",
-        caption:
-          "Ask, answer, progress. The six systems sit as dots along the top and never take over the screen.",
       },
 
       { type: "section", id: "problem-framing", title: "Problem" },
@@ -302,23 +331,41 @@ export const projects: Project[] = [
         text: "The problem was how little of it survived contact with a new user. In the month before we changed anything, 39% of people who started a trial ever logged a single memory — the one action the entire product is built on. Six in ten paid for a week, did nothing, and left.",
       },
       {
-        // PLACEHOLDER — swap for the real Amplitude export at 1460×820.
-        // The figure in the caption is from the May 2026 product review.
-        type: "image",
-        src: "/projects/ios-app/problem-activation-funnel.webp",
-        alt: "Funnel showing 133 trial starts against 52 first memories created in the pre-redesign cohort",
-        caption:
-          "52 of 133 trial starters (39.1%) ever created a first memory. Everything downstream — the six systems, the levels, the weekly report — is computed from memories, so a user who never logs one never sees the product work.",
+        // Amplitude, pre-redesign trial cohort: 133 starts, 52 first memories.
+        // Rebuilt as a table rather than a screenshot so it follows the dark page.
+        type: "data-table",
+        title: "Trial activation breakdown",
+        source: "Amplitude",
+        columns: ["Metric / stage", "Users", "% of trial starters", "Status"],
+        rows: [
+          { label: "Trial starters", qualifier: "(baseline)", cells: ["133", "100.0%", "Total cohort"] },
+          { label: "Logged first memory", qualifier: "(activated)", cells: ["52", "39.1%", "Completed core action"] },
+          { label: "Dropped off", qualifier: "(never logged a memory)", cells: ["81", "60.9%", "Early drop-off bottleneck"] },
+        ],
       },
 
       { type: "heading", text: "How I tackled it" },
       {
-        type: "numbered-list",
+        // The four research steps as three columns, the way Retool lays out a
+        // feature row. Cancellation reasons and support tickets sit with the
+        // interviews: both are people describing the app in their own words.
+        type: "columns",
         items: [
-          "Ran the app as a new user and mapped every screen — what it asked of me, and whether anything on it explained why.",
-          "Pulled the activation funnel in Amplitude to find where people stopped, rather than guessing from the screens alone.",
-          "Read the cancellation reasons and support tickets, which is where people say the quiet part out loud.",
-          "Interviewed users one-on-one, build by build, to hear how they described the app in their own words.",
+          {
+            icon: "screens",
+            title: "Walked it as a new user",
+            text: "Ran the app as a new user and mapped every screen — what it asked of me, and whether anything on it explained why.",
+          },
+          {
+            icon: "chart",
+            title: "Followed the numbers",
+            text: "Pulled the activation funnel in Amplitude to find where people stopped, rather than guessing from the screens alone.",
+          },
+          {
+            icon: "conversation",
+            title: "Heard it in their words",
+            text: "Read the cancellation reasons and support tickets, which is where people say the quiet part out loud. Then interviewed users one-on-one, build by build, to hear how they described the app in their own words.",
+          },
         ],
       },
       {
@@ -334,8 +381,9 @@ export const projects: Project[] = [
             context: "London · interviewed on build 2.9.0, May 2026",
             quote:
               "There is nothing tangible, and this is like a very quite weird experience to pay for.",
+            followUps: ["If I feel that I'm getting a real transformation in my behavior, I would pay for it."],
             takeaway:
-              "She happily paid £30 for a paper journal but balked at the subscription. Understanding the science turned out to be no substitute for feeling the product work on you — “If I feel that I'm getting a real transformation in my behavior, I would pay for it.”",
+              "She paid £30 for a paper journal without blinking, but wouldn't pay for the app. Knowing the science isn't the same as feeling it work.",
           },
         ],
       },
@@ -345,7 +393,7 @@ export const projects: Project[] = [
       },
       {
         type: "paragraph",
-        text: "So what was stopping people? Not the science. Three problems with how the app was laid out.",
+        text: "What stopped people was never the science — it was the way the app was laid out. Three things got in the way.",
       },
       {
         type: "callouts",
@@ -369,7 +417,7 @@ export const projects: Project[] = [
       },
       {
         type: "paragraph",
-        text: "Here's the whole home screen at full length. Tap any marker to see what goes wrong there — and yes, the product name is blurred, not missing.",
+        text: "See for yourself below: the old home screen, at full length. Tap any marker to see what went wrong there.",
       },
       {
         // Marker positions are the real Figma layer offsets, expressed as a
@@ -379,8 +427,9 @@ export const projects: Project[] = [
         src: "/projects/ios-app/before-today.webp",
         alt: "The old home screen at full length: score ring, neurotransmitter suggestions, today's photos, an add-a-past-memory prompt, and a five-item tab bar",
         // 1170px source — keep the render at/below 585 so it stays above 2x.
-        maxWidth: 380,
-        viewportHeight: 620,
+        // Same phone width as the coaching video at the top of the page.
+        maxWidth: 277,
+        viewportHeight: 600,
         pins: [
           {
             x: 93,
@@ -413,8 +462,6 @@ export const projects: Project[] = [
             body: "Today, Stats, Memories and You each hold a fragment of the same picture.",
           },
         ],
-        caption:
-          "One screen, four calls to action, and no stated reason to perform any of them.",
       },
 
       { type: "section", id: "solution", title: "Solution" },
@@ -427,57 +474,67 @@ export const projects: Project[] = [
         text: "We ran a workshop: me, the PM, the iOS engineers, and the co-founder. We decided to make the app answer instead of display. You open it and land in a conversation. The coach asks how your day went, and your answer decides what comes next. The science arrives when it is relevant, instead of all at once on a dashboard.",
       },
       {
-        type: "image",
-        src: "/projects/ios-app/solution-exploration.webp",
-        panel: true,
-        alt: "A working canvas of chat-screen explorations in dark UI, with reference screens from other wellbeing apps along the bottom",
-        caption:
-          "The canvas partway through. Chat directions across the top, apps we looked at along the bottom. Most of this didn't survive.",
-      },
-      {
         type: "paragraph",
         text: "Each concept traces back to one of the three frictions:",
       },
       {
-        type: "list",
+        // The frictions above, each with what shipped against it: the same
+        // before/after table the ConnectIQ page uses for its decisions.
+        type: "decisions",
         items: [
-          "Chat as the home screen, answering “no primary action.” One question, one reply, one thing to do. Everything else moves behind it.",
-          "A coach that explains in context, answering “high cognitive load.” Share a memory and it tells you which systems it affects and why, in plain language, instead of the screen defining six terms up front.",
-          "Four destinations behind a drawer, answering “progress split four ways.” The five-tab bar collapses; the You page becomes the single place your progress lives.",
+          {
+            title: "Chat as the home screen",
+            before: "Four separate asks on opening, and none of them ranked.",
+            after: "One question, one reply, one thing to do. Everything else moves behind it.",
+          },
+          {
+            title: "A coach that explains in context",
+            before:
+              "Six neurotransmitters, a composite score and a memory prompt, none of them explained.",
+            after:
+              "Share a memory and it names which systems it affects, and why, in plain language.",
+          },
+          {
+            title: "Four destinations behind a drawer",
+            before: "Today, Stats, Memories and You each held a fragment of how you were doing.",
+            after:
+              "The five-tab bar collapses; the You page becomes the single place progress lives.",
+          },
         ],
       },
       {
-        type: "image",
-        src: "/projects/ios-app/solution-drawer.webp",
-        panel: true,
-        alt: "The new navigation drawer showing Coaching, You, Team and Memories, with Settings at the bottom",
-        maxWidth: 360,
-        caption:
-          "Five tabs of equal weight became one default surface plus three places to go looking. Coaching is where you land; nothing else competes for the opening move.",
-      },
-
-      { type: "heading", text: "Iterating on the progress card" },
-      {
-        type: "paragraph",
-        text: "The conversation was the easy part. The hard part was telling someone where they stand without sending them back to a dashboard. Progress had to show up inside the chat, in a card small enough not to interrupt.",
+        // The third friction drawn: four tabs you had to assemble an answer
+        // from, replaced by the one surface that answers.
+        type: "silos",
+        from: ["Today", "Stats", "Memories", "You"],
+        to: "One coach",
       },
       {
-        type: "paragraph",
-        text: "The first versions praised you. “Great job!” and “You are making huge progress!” over a percentage bar. Put side by side, the problem was obvious. A percentage of an unnamed total is the same unexplained number we had just spent months taking off the home screen. Nice to read, no help at all.",
+        // The early concepts, in the same slider the ConnectIQ wireframes use,
+        // on the neutral field rather than the orange one.
+        type: "slides",
+        label: "Some of the early versions",
+        field: "neutral",
+        stickyTitle: true,
+        slides: [
+          {
+            title: "Opening the conversation",
+            images: [
+              { src: "/projects/ios-app/concepts/concept-1.webp", alt: "Early concept: the coach opens with a greeting and one question about a good moment" },
+              { src: "/projects/ios-app/concepts/concept-2.webp", alt: "Early concept: the same opening with the greeting played down" },
+              { src: "/projects/ios-app/concepts/concept-6.webp", alt: "Early concept: the opening question with the answer already being typed" },
+            ],
+          },
+          {
+            title: "Answering back",
+            images: [
+              { src: "/projects/ios-app/concepts/concept-3.webp", alt: "Early concept: the coach's reply naming which systems the memory affected" },
+              { src: "/projects/ios-app/concepts/concept-5.webp", alt: "Early concept: the reply with the science kept short" },
+              { src: "/projects/ios-app/concepts/concept-4.webp", alt: "Early concept: the reply with follow-up cards under it" },
+            ],
+          },
+        ],
       },
-      {
-        type: "image",
-        src: "/projects/ios-app/solution-card-iterations.webp",
-        panel: true,
-        alt: "Four progress card variants — two praise-led with percentage bars, two naming the Happiness Report with a five-segment counter — next to the expanded progress sheet and its empty state",
-        caption:
-          "Top row: praise over a percentage. Bottom row: a named destination over a five-segment counter, so “3/5” tells you exactly how many memories are left. The version that shipped is the one that answers “and then what?”",
-      },
-      {
-        type: "paragraph",
-        text: "The card that shipped names what you are working toward, your weekly Happiness Report, and counts the memories left in whole numbers. Tap it and a sheet opens with the level bar and the report progress together. Same fix as the home screen, one size down: swap an unexplained number for a named next step.",
-      },
-
       {
         type: "paragraph",
         text: "I prototyped the shortlisted directions as working code rather than static frames, so I could feel an interaction before asking an engineer to build it.",
@@ -489,26 +546,35 @@ export const projects: Project[] = [
         text: "Quite a lot. Going AI-first doesn't mean making everything AI-first at once.",
       },
       {
-        type: "list",
+        // The same numbered cards the frictions use, so a cut reads as a
+        // decision rather than a footnote.
+        type: "callouts",
         items: [
-          "We didn't let the photo-suggestion card open the conversation. It shows up later instead, so it can't get in the way of the opening we'd just got working. We'll test it as a first message once we have click-through data.",
-          "The quick-access button only lives in the chat input, not all over the app. It can spread once the sheet behind it proves useful.",
-          "We dropped the neuroscience note on workouts. It reads as rigour to us and as more text to everyone else.",
-          "We lowered our own target. We wanted half of users to tap the card each session; we settled on 40%, because 50% wasn't realistic.",
+          {
+            title: "Photo suggestions, but later",
+            description:
+              "We didn't let the photo-suggestion card open the conversation. It shows up further down instead, so it can't get in the way of the opening we'd just got working. We'll test it as a first message once we have click-through data.",
+          },
+          {
+            title: "Quick access stays in the input",
+            description:
+              "The quick-access button only lives in the chat input, not all over the app. It can spread once the sheet behind it proves useful.",
+          },
+          {
+            title: "The neuroscience note on workouts",
+            description:
+              "Dropped. It reads as rigour to us and as more text to everyone else.",
+          },
         ],
       },
       {
         type: "paragraph",
-        text: "We did the same to the level system. The original framework asked for 50 memories before you cleared Level 1, thousands of sent gifts, and brain scans to reach the top levels. We cut Level 1 to 10 memories, made the scans optional, and introduced the rules one level at a time. Same science, but you can actually reach the first milestone.",
+        text: "Same with the level system. Level 1 wanted 50 memories, and the top levels wanted brain scans. Now Level 1 takes 10, the scans are optional, and each level explains itself when you reach it. Same science, a first milestone you can actually hit.",
       },
 
       { type: "section", id: "final-design", title: "Final design" },
-      {
-        type: "paragraph",
-        text: "Four surfaces. The coach and the drawer went live on 7 May 2026, and those are what the numbers above measure. The level system and the You page were designed after that window and aren't covered by it.",
-      },
 
-      { type: "heading", text: "1. What you see when you open the app" },
+      { type: "heading", mono: true, text: "Home screen" },
       {
         type: "paragraph",
         text: "Four competing asks became one question, and the screen waits for the answer.",
@@ -520,18 +586,18 @@ export const projects: Project[] = [
         //   before: iOS (Copy) KCR6CITRUDpaBFFnqgYbWG  12568:31610
         //   after:  Production 4cBNswIEFN0tLHhntFYcry  3161:12164
         type: "before-after",
+        plain: true,
         before: "/projects/ios-app/before-today.webp",
-        after: "/projects/ios-app/after-coaching.webp",
+        after: "/projects/ios-app/final-coach-tagging.webp",
         beforeAlt:
           "The old Today screen: an unexplained composite wellbeing score, neurotransmitter suggestion pills, photos from today, and an add-a-past-memory prompt",
         afterAlt:
-          "The new Coaching screen: six neurotransmitter progress dots, the coach naming which systems a logged memory affected, and two action cards offering to share it or answer a follow-up",
-        maxWidth: 360,
-        // Tall enough that the coaching screen — one phone viewport — is fully
-        // visible without scrolling. The old home screen still runs past it.
-        viewportHeight: 782,
-        caption:
-          "The same moment in the app — opening it cold. Scroll either screen inside the frame, toggle between them, or click to open one full size. The old one keeps going for a while.",
+          "The new Coaching screen: six neurotransmitter progress dots, the coach confirming a saved memory and naming which systems it affected, with Add memory and Recall memories cards underneath",
+        // Narrow enough that the coaching screen fits the window whole — it is a
+        // conversation, and scrolling it would hide the shape of the reply. The
+        // old home screen is taller, so that state scrolls.
+        maxWidth: 286,
+        viewportHeight: 620,
       },
 
       {
@@ -542,17 +608,8 @@ export const projects: Project[] = [
         type: "paragraph",
         text: "The session also ends. It has a purpose and a natural stopping point, which is unusual for a chat interface and was a deliberate call: the product is trying to send you back into your own life, not keep you in the app.",
       },
-      {
-        type: "image",
-        src: "/projects/ios-app/final-coach-tagging.webp",
-        panel: true,
-        alt: "The coach confirming a saved memory and naming which neurotransmitters it affected, with Add memory and Recall memories cards",
-        maxWidth: 380,
-        caption:
-          "The six systems didn't disappear, they moved behind the conversation. Log a memory and the coach names which systems it affected and why — in a sentence, not a lab report.",
-      },
 
-      { type: "heading", text: "2. The progress page, redesigned as one place" },
+      { type: "heading", mono: true, text: "Progress" },
       {
         type: "paragraph",
         text: "The old Stats tab opened on a chart of a composite score across the week, with a paragraph underneath explaining what you were looking at. Below that came score-versus-neurotransmitter breakdowns. The rest of your progress lived on three other tabs.",
@@ -563,6 +620,7 @@ export const projects: Project[] = [
       },
       {
         type: "before-after",
+        plain: true,
         before: "/projects/ios-app/before-you.webp",
         after: "/projects/ios-app/after-you.webp",
         beforeAlt:
@@ -570,63 +628,208 @@ export const projects: Project[] = [
         afterAlt:
           "The redesigned You page: profile, level and streaks, molecular balance across six systems, then joyalties",
         maxWidth: 360,
-        viewportHeight: 782,
-        caption:
-          "The same question — how am I doing? — answered first by a chart you have to interpret, then by a page ordered from identity to detail. Scroll inside either frame to see the full screen.",
+        viewportHeight: 620,
       },
 
-      { type: "heading", text: "3. Levels, with the science kept optional" },
+      { type: "heading", mono: true, text: "Levels" },
       {
         type: "paragraph",
-        text: "Each level names what you are training, what is left to reach the next one, and the science behind the claim: structural MRI, fNIRS imaging, standardised personality and cognitive tests. The tests are offered, never required. That keeps the progression honest about what it has actually measured and what it hasn't.",
+        text: "Each level names what you are training, what is left to reach the next one, and the science behind the claim — structural MRI, fNIRS imaging, standardised personality and cognitive tests.",
       },
       {
         type: "image",
         src: "/projects/ios-app/final-level.webp",
-        panel: true,
         viewportHeight: 620,
         alt: "Level 4 Practitioner screen showing progress toward Level 5 broken into total memories, per-neurotransmitter counts, peak memories, balanced weeks and joyalties sent",
         maxWidth: 380,
-        caption:
-          "Progress to the next level is broken into five countable things rather than one percentage — the same move as the progress card, at screen scale.",
       },
 
-      { type: "heading", text: "4. Optic, the design system" },
+      { type: "heading", mono: true, text: "New design system" },
       {
         type: "paragraph",
-        text: "None of this runs on the old design system. That one grew around the four-tab app and carried its assumptions, so rather than bend it I built a new one. Optic holds only what the chat-first product needs — about 64 primitive colours and 34 semantic aliases, nine spacing values, three radii, eight text styles — and ran alongside the old system, so nothing needed a big rewrite.",
+        text: "Optic is tokenized end to end — every colour, space, radius and text style is a named token, nothing hard-coded. Much of the implementation was going to be AI-assisted, which changed who I was designing the handoff for: not only an engineer reading a spec, but a model reading the design file. So the tokens have one rule — every name survives the trip into code unchanged. `levels/level-2` becomes `Color.level2`, `spacing/32` becomes `CGFloat.spacing32`. An agent reads a token name and already knows the constant to write, so there's no handoff doc and no naming table to keep in sync.",
       },
       {
-        type: "paragraph",
-        text: "Much of the implementation was going to be AI-assisted, which changed who I was designing the handoff for: not only an engineer reading a spec, but a model reading the design file. So Optic has one rule — every name survives the trip into code unchanged. `levels/level-2` becomes `Color.level2`, `spacing/32` becomes `CGFloat.spacing32`. An agent reads a token name and already knows the constant to write, so there's no handoff doc and no naming table to keep in sync.",
-      },
-      {
-        type: "paragraph",
-        text: "The cards use slots rather than variants. One insight card has two open regions, one above the text and one for the buttons, and whatever you drop in decides what the card is: a photo strip makes it a memory prompt, a progress meter makes it the weekly report, two image tiles make it a science tour.",
-      },
-      {
-        type: "card-carousel",
-        images: [
-          "/projects/ios-app/cards/card1.webp",
-          "/projects/ios-app/cards/card2.webp",
-          "/projects/ios-app/cards/card3.webp",
-          "/projects/ios-app/cards/card4.webp",
-          "/projects/ios-app/cards/card5.webp",
-          "/projects/ios-app/cards/card6.webp",
+        // Optic, exported from the Matter design system file at 3x (2x for the
+        // widest sets) with Figma's component-set outlines stripped. Shown in
+        // Dark Matter, Nadiia's dark sibling: Matter is a dark app, so its
+        // components sit on a dark dotted panel with only a shadow under each.
+        // Sets wider than the slider live on the explore canvas only.
+        type: "slides",
+        label: "Optic design system components",
+        appearance: "figma",
+        look: "darkMatter",
+        canvasRows: [
+          ["Selection controls", "Indicators & progress", "Neurotransmitter indicator"],
+          ["Buttons", "Pills & tags"],
+          ["Headers", "Sheets & menu", "Profile pictures"],
+          ["Chat cards", "Memory cards", "Banners & notifications"],
         ],
-        alt: "Six instances of the same insight card, each filled differently: a memory-recall prompt with a photo strip, two weekly-report states with progress meters, two report cards with photo strips, and a science tour with image tiles",
-        caption:
-          "Six cards, one component. Everything that differs is slot content, so a new kind of card costs a fill rather than a build. Hover to stop the strip.",
-      },
-      {
-        type: "image",
-        src: "/projects/ios-app/final-token-mapping.webp",
-        alt: "A zoomed section of the token sheet: each level colour listed with its hex value and the primitive alias it points at, such as levels/level-2 mapping to colors/purple/100",
-        caption:
-          "The Figma side of the mapping. Each semantic token points at a primitive, and the name it carries is the name the code uses.",
+        slides: [
+          {
+            title: "Icons",
+            gridOnly: true,
+            images: [
+              { src: "/projects/ios-app/ds-icons.webp", alt: "Optic icon set: 22 large feature icons, then 48 small line icons for navigation, sharing, people, notifications and actions", width: 1912, backed: true },
+            ],
+          },
+          {
+            title: "Selection controls",
+            images: [
+              { src: "/projects/ios-app/ds-checkbox.webp", alt: "Checkbox, checked and unchecked", width: 57, backed: true },
+              { src: "/projects/ios-app/ds-radio.webp", alt: "Radio button, selected and unselected", width: 56, backed: true },
+              { src: "/projects/ios-app/ds-toggle.webp", alt: "Toggle, on and off", width: 55, backed: true },
+              { src: "/projects/ios-app/ds-tab-item.webp", alt: "Tab item, active and inactive", width: 96, backed: true },
+            ],
+          },
+          {
+            title: "Indicators & progress",
+            images: [
+              { src: "/projects/ios-app/ds-emotion-indicator.webp", alt: "Emotion indicators: a small coloured mark for each of eighteen emotions", width: 420, backed: true },
+              { src: "/projects/ios-app/ds-progress-bars.webp", alt: "Progress bars: segmented and continuous, with labels for basics, average and in-depth", width: 322, backed: true },
+              { src: "/projects/ios-app/ds-pips.webp", alt: "Pips, filled and empty", width: 28, backed: true },
+            ],
+          },
+          {
+            title: "Neurotransmitter indicator",
+            gridOnly: true,
+            images: [
+              { src: "/projects/ios-app/ds-nt-indicator.webp", alt: "Neurotransmitter indicator: a row of dots showing progress across the six systems", width: 1056, backed: true },
+            ],
+          },
+          {
+            title: "Buttons",
+            images: [
+              { src: "/projects/ios-app/ds-icon-buttons.webp", alt: "Icon buttons: back, forward, share, people, menu, close, add, info, notifications and send, enabled and disabled", width: 665, backed: true },
+              { src: "/projects/ios-app/ds-button-group.webp", alt: "Button groups: a primary and secondary action stacked, in three configurations", width: 349, backed: true },
+            ],
+          },
+          {
+            title: "Buttons · every style",
+            gridOnly: true,
+            images: [
+              { src: "/projects/ios-app/ds-buttons.webp", alt: "Every button style in Optic: filled, outlined, text, pill and full-width, enabled and disabled", width: 2587, backed: true },
+            ],
+          },
+          {
+            title: "Pills & tags",
+            images: [
+              { src: "/projects/ios-app/ds-pills.webp", alt: "Neurotransmitter and memory pills, in every colour", width: 68, backed: true },
+              { src: "/projects/ios-app/ds-pills-small.webp", alt: "Small pills in three states", width: 79, backed: true },
+              { src: "/projects/ios-app/ds-tags.webp", alt: "Tags, selected and unselected", width: 200, backed: true },
+              { src: "/projects/ios-app/ds-count-chip.webp", alt: "Count chip, two sizes", width: 48, backed: true },
+              { src: "/projects/ios-app/ds-multiselect-pill.webp", alt: "Multiselect pills in three states", width: 82, backed: true },
+            ],
+          },
+          {
+            title: "Text inputs",
+            gridOnly: true,
+            images: [
+              { src: "/projects/ios-app/ds-inputs.webp", alt: "Text inputs in six states: empty, focused, filled, error, disabled and multiline", width: 1468 },
+            ],
+          },
+          {
+            title: "Profile pictures",
+            images: [
+              { src: "/projects/ios-app/ds-profile-pictures.webp", alt: "Profile pictures in eighteen sizes and states, with and without a status ring", width: 128, backed: true },
+            ],
+          },
+          {
+            title: "Headers",
+            images: [
+              { src: "/projects/ios-app/ds-people-header.webp", alt: "People header: team avatars with a title and action", width: 834 },
+              { src: "/projects/ios-app/ds-profile-header.webp", alt: "Profile header: picture, name, level and streak", width: 345, backed: true },
+            ],
+          },
+          {
+            title: "Screen headers & settings",
+            gridOnly: true,
+            images: [
+              { src: "/projects/ios-app/ds-headers.webp", alt: "Every screen header in Optic: title, back, close and action variants", width: 3801 },
+              { src: "/projects/ios-app/ds-settings-row.webp", alt: "Settings rows: plain, with toggle, with value, with chevron and destructive", width: 2639 },
+            ],
+          },
+          {
+            title: "Sheets & menu",
+            images: [
+              { src: "/projects/ios-app/ds-sheets.webp", alt: "Bottom sheets: the emotional fitness explainer and a sheet with two actions", width: 887 },
+              { src: "/projects/ios-app/ds-menu-item.webp", alt: "Menu item, default and destructive", width: 316 },
+            ],
+          },
+          {
+            title: "Chat cards",
+            images: [
+              { src: "/projects/ios-app/ds-chat-cards.webp", alt: "Chat action cards: add a memory, send a text, share as joyalties, recall memories, add to calendar, write an answer and see your progress", width: 686 },
+            ],
+          },
+          {
+            title: "Chat & messages",
+            gridOnly: true,
+            images: [
+              { src: "/projects/ios-app/ds-message.webp", alt: "Chat messages from the coach and the user, with and without attachments", width: 1312, backed: true },
+              { src: "/projects/ios-app/ds-chat-input.webp", alt: "Chat input: empty, typing, with a photo, with a memory and recording", width: 2061 },
+              { src: "/projects/ios-app/ds-system-message.webp", alt: "System messages: neutral, success and error", width: 1059 },
+              { src: "/projects/ios-app/ds-photo-message.webp", alt: "Photo message thumbnails in four layouts", width: 533 },
+            ],
+          },
+          {
+            title: "Memory cards",
+            // These cards are see-through by design, so their own fills were
+            // composited onto surface primary (scripts/fill-inside.cjs) — the
+            // colour sits inside the card, not on a panel behind it.
+            images: [
+              { src: "/projects/ios-app/ds-memory-card.webp", alt: "Memory card: a photo, a title and the memory's affect tags", width: 536 },
+              { src: "/projects/ios-app/ds-emotion-card.webp", alt: "Emotion card, two states", width: 348 },
+              { src: "/projects/ios-app/ds-nt-card.webp", alt: "Neurotransmitter card in three states", width: 528 },
+              { src: "/projects/ios-app/ds-places-card.webp", alt: "Places card in three states", width: 536 },
+            ],
+          },
+          {
+            title: "Banners & notifications",
+            images: [
+              { src: "/projects/ios-app/ds-banner.webp", alt: "Banner, two variants", width: 441 },
+              { src: "/projects/ios-app/ds-notification.webp", alt: "Notification, two variants", width: 345 },
+              { src: "/projects/ios-app/ds-memory-recall-banner.webp", alt: "Memory recall banner", width: 345 },
+            ],
+          },
+          {
+            title: "Media cards",
+            images: [
+              { src: "/projects/ios-app/ds-workout-card.webp", alt: "Workout cards: six exercises, each with an illustration, duration and reward", width: 260 },
+              { src: "/projects/ios-app/ds-image-stack.webp", alt: "Image stacks from one to five photos", width: 302 },
+              { src: "/projects/ios-app/ds-joyalties-cards.webp", alt: "Joyalties cards in three layouts", width: 631 },
+            ],
+          },
+          {
+            title: "Level & progress cards",
+            gridOnly: true,
+            images: [
+              { src: "/projects/ios-app/ds-level-cards.webp", alt: "Level cards for every level, each with its colour, progress and next reward", width: 2610 },
+              { src: "/projects/ios-app/ds-progress-card-sections.webp", alt: "Progress card sections: the building blocks of the weekly progress card", width: 1345, backed: true },
+            ],
+          },
+          {
+            title: "Posts",
+            gridOnly: true,
+            images: [
+              { src: "/projects/ios-app/ds-post.webp", alt: "Team feed posts: text, photo, memory and joyalty posts, with reactions", width: 2181, backed: true },
+              { src: "/projects/ios-app/ds-memory-attached.webp", alt: "A memory attached to a post, three layouts", width: 1293, backed: true },
+              { src: "/projects/ios-app/ds-photo-attached.webp", alt: "A photo attached to a post, two layouts", width: 843 },
+            ],
+          },
+          {
+            title: "Comments",
+            gridOnly: true,
+            images: [
+              { src: "/projects/ios-app/ds-comment.webp", alt: "Comments: single, threaded and with reactions", width: 1185, backed: true },
+              { src: "/projects/ios-app/ds-comment-input.webp", alt: "Comment input in five states", width: 1985 },
+              { src: "/projects/ios-app/ds-comment-attachment.webp", alt: "Comment attachments: photo, memory and link", width: 1099, backed: true },
+            ],
+          },
+        ],
       },
 
-      { type: "heading", text: "Also shipped: the store listing and the icon set" },
+      { type: "heading", mono: true, text: "Store listing" },
       {
         type: "paragraph",
         text: "I designed the App Store screenshot set: the pitch, the brain visualisation, the social proof. The same science, rewritten as three screens someone scrolls past in five seconds.",
@@ -634,12 +837,10 @@ export const projects: Project[] = [
       {
         type: "image",
         src: "/projects/ios-app/5.webp",
-        panel: true,
         alt: "App Store marketing screenshots for the wellness app",
-        caption:
-          "Three screens to carry the same six-system science past someone who is scrolling.",
       },
 
+      { type: "heading", mono: true, text: "Icons" },
       {
         type: "paragraph",
         text: "Each neurotransmitter system also needed an icon that reads at nav-bar size next to five siblings: endurance, flexibility, strength, coordination, speed, balance. The fitness analogy does the explaining the old screen never did. You already know what training flexibility means.",
@@ -648,8 +849,6 @@ export const projects: Project[] = [
         type: "image",
         src: "/projects/ios-app/final-training-cards.webp",
         alt: "Six training-dimension cards — endurance, flexibility, strength, coordination, speed, balance — with their icon set",
-        caption:
-          "Each neurotransmitter system got a physical-fitness analogy people already understand, and an icon distinct enough to read at a glance in the nav bar.",
       },
 
       { type: "section", id: "results", title: "Results" },
@@ -689,7 +888,7 @@ export const projects: Project[] = [
             context: "Canada · interviewed on build 3.0.9, June 2026",
             quote: "There's somebody waiting for me.",
             takeaway:
-              "A returning lapsed user on why she came back — that, and “there's a plan when I get there.” It had changed how she used her camera, too: she photographed a hole in the wall her husband had fixed, because “that is love.” The app stopped being a tracker and became a reason to notice things.",
+              "A lapsed user on why she came back. She photographed a hole in the wall her husband had fixed, because “that is love” — the app had stopped being a tracker.",
           },
         ],
       },
@@ -757,7 +956,7 @@ export const projects: Project[] = [
     lastUpdated: "2025–2026",
     // Home page: the jobs board, animated, in place of the static cover above.
     coverAnimation: "connectiq-kanban",
-    cardMeta: "Dashboard",
+    cardMeta: "Dashboard · 2024",
     hero: {
       src: "/projects/connectiq/partner-jobs-board.webp",
       alt: "Partner-facing jobs board, columns for Unassigned, To do, In progress, and Done, with a job card mid-drag showing avatars and job details",
@@ -1417,7 +1616,7 @@ export const projects: Project[] = [
     duration: "2.5 months",
     tools: ["Figma"],
     screenshots: [{ src: "/projects/hirement.png", alt: "Hirement interview flow builder" }],
-    lastUpdated: "2026",
+    lastUpdated: "2023",
     content: [
       { type: "section", id: "problem", title: "Problem" },
       {

@@ -152,7 +152,7 @@ export function FlowCanvas({
             d={d}
             fill="none"
             strokeWidth={1}
-            className="stroke-neutral-300"
+            className="stroke-[var(--nd-line,#d4d4d4)]"
             markerEnd={`url(#${markerId})`}
           />
         ))}
@@ -217,8 +217,8 @@ export function FlowNode({
   // wider up, the measured curves in `FlowCanvas` do this properly.
   const inflow = start
     ? ""
-    : "before:absolute before:-top-7 before:left-1/2 before:h-7 before:w-px before:-translate-x-1/2 before:bg-neutral-300 before:content-[''] md:before:hidden " +
-      "after:absolute after:-top-[7px] after:left-1/2 after:h-0 after:w-0 after:-translate-x-1/2 after:border-x-[3.5px] after:border-t-[5px] after:border-x-transparent after:border-t-neutral-400 after:content-[''] md:after:hidden";
+    : "before:absolute before:-top-7 before:left-1/2 before:h-7 before:w-px before:-translate-x-1/2 before:bg-[var(--nd-line,#d4d4d4)] before:content-[''] md:before:hidden " +
+      "after:absolute after:-top-[7px] after:left-1/2 after:h-0 after:w-0 after:-translate-x-1/2 after:border-x-[3.5px] after:border-t-[5px] after:border-x-transparent after:border-t-[var(--nd-line-head,#a3a3a3)] after:content-[''] md:after:hidden";
   return (
     <div
       data-flow={id}

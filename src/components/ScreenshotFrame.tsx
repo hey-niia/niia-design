@@ -4,6 +4,8 @@
  * what "there's more below" looks like.
  */
 
+import { CANVAS_HINT_PILL } from "./nadiia";
+
 /** One radius for every screenshot frame. Mixing them reads as a mistake. */
 export const FRAME_RADIUS = "rounded-2xl";
 
@@ -23,9 +25,7 @@ export function ScrollHint({ show }: { show: boolean }) {
         background: "linear-gradient(to top, rgba(0,0,0,0.8), rgba(0,0,0,0))",
       }}
     >
-      <span className="rounded-full bg-white/95 px-3 py-1 font-mono text-[10px] tracking-wider text-black uppercase shadow-sm">
-        Scroll to see more ↓
-      </span>
+      <span className={`${CANVAS_HINT_PILL} shadow-sm`}>Scroll to see more ↓</span>
     </div>
   );
 }

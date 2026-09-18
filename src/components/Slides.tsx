@@ -10,6 +10,7 @@ import {
 } from "react";
 import {
   CANVAS_BUTTON_SHADOW,
+  CANVAS_HINT_PILL,
   DARK_MATTER_AREA,
   DARK_MATTER_CHIP,
   DARK_MATTER_SECTION,
@@ -50,7 +51,7 @@ const INTERVAL_MS = 5000;
 const SWIPE_PX = 40;
 
 const ARROW =
-  "absolute top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full bg-white font-mono text-sm text-neutral-700 shadow-[0_1px_2px_rgba(0,0,0,0.05),0_6px_20px_rgba(0,0,0,0.07)] ring-1 ring-black/5 transition-colors hover:text-[#d9723f] focus-visible:ring-2 focus-visible:ring-[#d9723f] focus-visible:outline-none";
+  "absolute top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full bg-[var(--nd-button,#fff)] font-mono text-sm text-[var(--nd-button-ink,#404040)] shadow-[0_1px_2px_rgba(0,0,0,0.05),0_6px_20px_rgba(0,0,0,0.07)] ring-1 ring-[var(--nd-box-ring,rgba(0,0,0,0.05))] transition-colors hover:text-[#d9723f] focus-visible:ring-2 focus-visible:ring-[#d9723f] focus-visible:outline-none";
 
 const CHIP = "rounded-md text-[13px] font-medium text-neutral-800 ring-1 ring-black/10";
 
@@ -106,6 +107,8 @@ export default function Slides({
   slides,
   label,
   appearance = "nadiia",
+  field = "orange",
+  stickyTitle = false,
   onImageClick,
   zoomCursor,
   look = "light",
@@ -115,6 +118,12 @@ export default function Slides({
   /** What the slideshow is, for screen readers. */
   label: string;
   appearance?: "nadiia" | "figma";
+  /** Nadiia look: the field behind the frames — orange, or the neutral grey
+   *  the interview cards use (which a dark page repaints for itself). */
+  field?: "orange" | "neutral";
+  /** Nadiia look: one tag above the track (the slider's own label) that stays
+   *  put as slides change, instead of a tag per slide that moves with them. */
+  stickyTitle?: boolean;
   /**
    * Figma look only. `light`: Figma's pale section grid, a white card and soft
    * shadow behind each component. `darkMatter`: the dark dotted panel, no card,
@@ -141,6 +150,9 @@ export default function Slides({
   // each mouse move as well as on resize, so a narrowed desktop window gets it right.
   const tapQuery = "(max-width: 63.99rem), (hover: none)";
   const [touch, setTouch] = useState(false);
+  // The pinch hint on the canvas: shown while exploring on a touch screen,
+  // and dismissed for good the first time two fingers actually zoom.
+  const [pinchHint, setPinchHint] = useState(true);
   useEffect(() => {
     const mq = window.matchMedia(tapQuery);
     const sync = () => setTouch(mq.matches);
@@ -285,6 +297,7 @@ export default function Slides({
       pointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
     }
     if (pointers.current.size === 2 && pinchFrom.current) {
+      setPinchHint(false);
       const [a, b] = [...pointers.current.values()];
       const dist = Math.hypot(a.x - b.x, a.y - b.y);
       const r = e.currentTarget.getBoundingClientRect();
@@ -373,36 +386,64 @@ export default function Slides({
       </div>
     ) : null;
 
+  const fieldClass = `rounded-2xl px-3 py-6 ring-1 sm:px-6 sm:py-8 ${
+    field === "neutral" ? "ring-[var(--nd-box-ring,rgba(0,0,0,0.05))]" : "ring-[#d9723f]/15"
+  }`;
+  // The neutral field has its own grey and dots, so a dark page can match it to
+  // the explore canvas while cards elsewhere stay flat.
+  const fieldStyle =
+    field === "neutral"
+      ? {
+          backgroundColor: "var(--nd-slider, #f4f4f3)",
+          backgroundImage:
+            "radial-gradient(circle, var(--nd-slider-dot, rgba(0,0,0,0.09)) 1px, transparent 1.2px)",
+          backgroundSize: "14px 14px",
+        }
+      : NADIIA_AREA.orange;
+  // With a sticky label the field becomes an inner box, so the label can sit
+  // above it on the page — the same arrangement as the Figma slider's header.
+  const boxed = !figma && stickyTitle;
+
   return (
     <div
       role="region"
       aria-roledescription="carousel"
       aria-label={label}
-      className={
-        figma
-          ? "my-10"
-          : "my-10 rounded-2xl px-3 py-6 ring-1 ring-[#d9723f]/15 sm:px-6 sm:py-8"
-      }
-      style={figma ? undefined : NADIIA_AREA.orange}
+      className={figma || boxed ? "my-10" : `my-10 ${fieldClass}`}
+      style={figma || boxed ? undefined : fieldStyle}
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
       onFocus={() => setPaused(true)}
       onBlur={onBlur}
     >
+      {boxed && (
+        // The Dark Matter chip, exactly as the Figma slider's section label.
+        <p
+          className={`mb-2 w-fit ${
+            field === "neutral"
+              ? `${DARK_MATTER_CHIP} px-2.5 py-1 tracking-wide uppercase`
+              : `${CHIP} px-2.5 py-1 tracking-wide uppercase`
+          }`}
+        >
+          {label}
+        </p>
+      )}
+      <div className={boxed ? fieldClass : "contents"} style={boxed ? fieldStyle : undefined}>
+
       {/* Figma's section label, plus its Dev Mode "Ready for dev" status chip.
           Outside the track, so it holds still while the slides move under it and
           only the section's name changes. */}
       {figma && (
         <div className="mb-2 flex shrink-0 flex-wrap items-center gap-2">
           <p
-            className={`${CHIP} px-2.5 py-1 tracking-wide uppercase`}
-            style={{ backgroundColor: FIGMA_SECTION_BG }}
+            className={`${dark ? DARK_MATTER_CHIP : CHIP} px-2.5 py-1 tracking-wide uppercase`}
+            style={dark ? undefined : { backgroundColor: FIGMA_SECTION_BG }}
           >
             {explore ? "All components" : (shown[index]?.title ?? "")}
           </p>
           <p
-            className={`${CHIP} flex items-center gap-1.5 py-1 pr-2 pl-1`}
-            style={{ backgroundColor: FIGMA_SECTION_BG }}
+            className={`${dark ? DARK_MATTER_CHIP : CHIP} flex items-center gap-1.5 py-1 pr-2 pl-1`}
+            style={dark ? undefined : { backgroundColor: FIGMA_SECTION_BG }}
           >
             <span
               aria-hidden
@@ -509,6 +550,39 @@ export default function Slides({
             <span className={touch ? "" : "lg:hidden"}>Tap to exit</span>
             <span className={touch ? "hidden" : "max-lg:hidden"}>Press Esc to exit</span>
           </button>
+
+          {/* The same hint as a long screenshot's "Scroll to see more", for the
+              gesture this view relies on. Phones and touch screens only. */}
+          <div
+            aria-hidden
+            className={`${touch ? "" : "lg:hidden"} pointer-events-none absolute inset-x-0 bottom-3 flex justify-center transition-opacity duration-300 ${
+              pinchHint ? "opacity-100" : "opacity-0"
+            }`}
+          >
+            <span
+              className={`${CANVAS_HINT_PILL} ${CANVAS_BUTTON_SHADOW}`}
+            >
+              Pinch to zoom
+              {/* The conventional pinch glyph (Material's "pinch"): a hand with
+                  two fingers out, and arrows showing the pinch either way. */}
+              <svg aria-hidden width="13" height="13" viewBox="0 0 24 24" fill="none">
+                <path
+                  d="M9 11V5.5a1.5 1.5 0 0 1 3 0V10"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <path
+                  d="M12 10V9a1.5 1.5 0 0 1 3 0v1.5m0-.5a1.5 1.5 0 0 1 3 0V15a5 5 0 0 1-5 5h-1.6a4 4 0 0 1-2.9-1.24l-3.2-3.36a1.5 1.5 0 0 1 2.1-2.14L9 14.5"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </span>
+          </div>
         </div>
       ) : (
       <div className="relative">
@@ -623,23 +697,42 @@ export default function Slides({
                     </>
                   ) : (
                     <>
-                      <Tag tone="onOrange" className="mb-4 shrink-0">
-                        {slide.title}
-                      </Tag>
-                      <div
-                        className={`${NADIIA_SHAPE} ${NADIIA_SURFACE.white} min-h-0 overflow-hidden ${
-                          slide.scroll ? "w-full max-w-[40rem] flex-1" : "max-w-full"
-                        }`}
-                      >
-                        <div className={slide.scroll ? "h-full overflow-y-auto overscroll-contain" : ""}>
-                          {imgs[0] &&
-                            image(
-                              imgs[0],
-                              i === 0,
-                              slide.scroll ? "w-full" : "max-h-[460px] w-auto max-w-full sm:max-h-[540px]",
-                            )}
+                      {!stickyTitle && (
+                        <Tag tone="onOrange" className="mb-4 shrink-0">
+                          {slide.title}
+                        </Tag>
+                      )}
+                      {imgs.length > 1 ? (
+                        // Several screens on one slide: each keeps its shape and
+                        // shrinks to the slide's height, so a set reads side by side.
+                        <div className="flex min-h-0 w-full flex-1 items-center justify-center gap-3 sm:gap-5">
+                          {imgs.map((img, k) => (
+                            // Each screen is a column of the row and keeps its own shape:
+                            // the image fills the column's width, the frame takes its height.
+                            <div
+                              key={img.src}
+                              className={`${NADIIA_SHAPE} ${NADIIA_SURFACE.white} min-w-0 flex-1 overflow-hidden`}
+                            >
+                              {image(img, i === 0 && k === 0, "block h-auto w-full")}
+                            </div>
+                          ))}
                         </div>
-                      </div>
+                      ) : (
+                        <div
+                          className={`${NADIIA_SHAPE} ${NADIIA_SURFACE.white} min-h-0 overflow-hidden ${
+                            slide.scroll ? "w-full max-w-[40rem] flex-1" : "max-w-full"
+                          }`}
+                        >
+                          <div className={slide.scroll ? "h-full overflow-y-auto overscroll-contain" : ""}>
+                            {imgs[0] &&
+                              image(
+                                imgs[0],
+                                i === 0,
+                                slide.scroll ? "w-full" : "max-h-[460px] w-auto max-w-full sm:max-h-[540px]",
+                              )}
+                          </div>
+                        </div>
+                      )}
                     </>
                   )}
                 </div>
@@ -673,7 +766,7 @@ export default function Slides({
       )}
 
       {!figma && dots}
-
+      </div>
     </div>
   );
 }

@@ -83,9 +83,14 @@ export default function BeforeAfter({
   useEffect(readRatios, [readRatios]);
 
   const shortestRatio = Math.min(...ratios);
-  const frameStyle: React.CSSProperties = Number.isFinite(shortestRatio)
-    ? { maxWidth, aspectRatio: 1 / shortestRatio, maxHeight: viewportHeight }
-    : { maxWidth, height: viewportHeight };
+  // A screenshot shorter than the window sets the frame's shape, so there's no
+  // empty band under it. A taller one keeps the full width and scrolls inside
+  // the window — shrinking the frame to fit would show the screen in miniature.
+  const shortestHeight = shortestRatio * maxWidth;
+  const frameStyle: React.CSSProperties =
+    Number.isFinite(shortestRatio) && shortestHeight < viewportHeight
+      ? { maxWidth, aspectRatio: 1 / shortestRatio }
+      : { maxWidth, height: viewportHeight };
 
   // Panes are read off the container at call time rather than held in refs, so
   // there's no stale closure to get wrong.
@@ -188,7 +193,7 @@ export default function BeforeAfter({
             type="button"
             onClick={() => setShowAfter(false)}
             className={`text-sm font-medium transition-colors ${
-              showAfter ? "text-gray-400" : dark ? "text-white" : "text-black"
+              showAfter ? "text-gray-400" : dark ? "text-white" : "text-[var(--nd-ink-strong,#000)]"
             }`}
           >
             {beforeLabel}
@@ -219,7 +224,7 @@ export default function BeforeAfter({
             type="button"
             onClick={() => setShowAfter(true)}
             className={`text-sm font-medium transition-colors ${
-              showAfter ? (dark ? "text-white" : "text-black") : "text-gray-400"
+              showAfter ? (dark ? "text-white" : "text-[var(--nd-ink-strong,#000)]") : "text-gray-400"
             }`}
           >
             {afterLabel}

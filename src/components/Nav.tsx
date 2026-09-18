@@ -68,7 +68,9 @@ export default function Nav() {
           <Link to="/" className="font-medium text-black">
             Niia Bieliavtseva
           </Link>
-          <span className="text-gray-400">Product Designer + Engineer</span>
+          <Link to="/" className="text-gray-400">
+            Product Designer + Engineer
+          </Link>
         </p>
 
         {fitsInline ? (

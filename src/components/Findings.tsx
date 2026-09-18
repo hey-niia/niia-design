@@ -19,7 +19,7 @@ export default function Findings({ tested, findings }: { tested: string[]; findi
           We tested
         </Tag>
         <div className={`${NADIIA_SHAPE} ${NADIIA_SURFACE.white} flex flex-1 flex-col px-5 py-4`}>
-          <ul className={`${NADIIA_SMALL} flex flex-1 flex-col justify-around gap-2.5 text-neutral-800`}>
+          <ul className={`${NADIIA_SMALL} flex flex-1 flex-col justify-around gap-2.5 text-[var(--nd-ink,#262626)]`}>
             {tested.map((item) => (
               <li key={item} className="flex gap-2.5">
                 <span
@@ -59,7 +59,7 @@ export default function Findings({ tested, findings }: { tested: string[]; findi
               >
                 {String(i + 1).padStart(2, "0")}
               </span>
-              <span className={`${NADIIA_SMALL} text-neutral-800`}>{finding}</span>
+              <span className={`${NADIIA_SMALL} text-[var(--nd-ink,#262626)]`}>{finding}</span>
             </li>
           ))}
         </ol>

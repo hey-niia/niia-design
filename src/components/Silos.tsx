@@ -11,7 +11,7 @@ import { Arrow } from "./NadiiaParts";
 export default function Silos({ from, to }: { from: string[]; to: string }) {
   const halfColumn = `${50 / from.length}%`;
   return (
-    <div className="my-10 max-w-[46rem]">
+    <div className="mx-auto my-24 max-w-[46rem]">
       <div
         className="grid"
         style={{ gridTemplateColumns: `repeat(${from.length}, minmax(0, 1fr))` }}
@@ -19,17 +19,17 @@ export default function Silos({ from, to }: { from: string[]; to: string }) {
         {from.map((silo) => (
           <div key={silo} className="flex flex-col items-center px-1.5 sm:px-2">
             <p
-              className={`${NADIIA_SHAPE} ${NADIIA_SURFACE.white} flex h-12 w-full items-center justify-center px-1 text-center font-mono text-[10px] tracking-wider text-neutral-800 uppercase sm:h-14 sm:text-xs`}
+              className={`${NADIIA_SHAPE} ${NADIIA_SURFACE.white} flex h-12 w-full items-center justify-center px-1 text-center font-mono text-[10px] tracking-wider text-[var(--nd-ink,#262626)] uppercase sm:h-14 sm:text-xs`}
             >
               {silo}
             </p>
-            <span aria-hidden className="h-6 w-px bg-neutral-300" />
+            <span aria-hidden className="h-6 w-px bg-[var(--nd-line,#d4d4d4)]" />
           </div>
         ))}
       </div>
       <div
         aria-hidden
-        className="h-px bg-neutral-300"
+        className="h-px bg-[var(--nd-line,#d4d4d4)]"
         style={{ marginLeft: halfColumn, marginRight: halfColumn }}
       />
       <Arrow direction="down" length={32} />

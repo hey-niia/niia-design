@@ -140,6 +140,11 @@ sets, with the component-set outline stripped). `bare`: the export brings its ow
   ctrl-scroll to zoom between 30% and 300%.
 - Sections appear one per row in slide order; `canvasRows` puts named sections side by side,
   placed where the first of them would be. `gridOnly` slides appear here but not in the slider.
+- Gesture hint: on phones and touch screens the canvas shows a **"Pinch to zoom"** pill at the
+  bottom, in `CANVAS_HINT_PILL` + `CANVAS_BUTTON_SHADOW` with the conventional pinch-hand icon.
+  It fades away for good the first time two fingers zoom. It is the same pill as a long
+  screenshot's "Scroll to see more", so every gesture hint on the site looks the same — reuse
+  the token rather than restyling it per page.
 
 # Design System — niia.design (v6, historical — see v7 above for the current direction)
 

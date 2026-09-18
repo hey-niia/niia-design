@@ -187,3 +187,86 @@
     transform: translateX(-50%);
   }
 }
+
+/* "Dark Matter" page theme — used from the Impact cards down on the Matter
+   case study, whose app is dark. It repaints the shared Nadiia variables
+   (see nadiia.ts) so every diagram, card and quote inside follows, and sets
+   the reading colours for the text blocks around them. */
+.dark-matter {
+  /* Contrast system for the dark half, after Niia's old presentation.
+     Surfaces step up in small, even amounts — page, card, card hover — so
+     depth comes from the hairline and shadow. Text uses four clear levels:
+       headings  #f0efeb   ~15:1
+       body      #c2c1bc   ~9:1
+       card text #a9a8a3   ~6.5:1 on a card
+       quiet     (labels, numbers) stay grey-400
+     Everything is neutral, not warm, so the accents carry the colour. */
+  --nd-black: #242525;
+  --nd-page: var(--nd-black);
+  --nd-box: #2c2d2d;
+  --nd-area: #2c2d2d;
+  --nd-area-dot: transparent;
+  --nd-box-ring: #3f4040;
+  --nd-shadow: 0 1px 2px rgba(0, 0, 0, 0.35), 0 8px 20px rgba(0, 0, 0, 0.28);
+  --nd-ink-strong: #f0efeb;
+  --nd-ink: #e6e5e1;
+  --nd-body: #a9a8a3;
+  /* The orange note beside a quote: brighter than the accent so it holds up
+     as body-size text, on a rule of the same hue. */
+  --nd-note: #ec8550;
+  --nd-note-bg: var(--nd-orange);
+  --nd-note-dot: transparent;
+  --nd-note-rule: rgba(236, 133, 80, 0.5);
+  /* The early-versions slider: the explore canvas grey, with its dots. */
+  --nd-slider: #17191a;
+  --nd-slider-dot: rgba(255, 255, 255, 0.07);
+  /* Connectors and arrowheads: visible grey, never the light page's near-white. */
+  --nd-line: #4a4c4b;
+  --nd-line-head: #6b6d6c;
+  /* A round control on a dark panel is dark, not white. */
+  --nd-button: #1b1c1c;
+  --nd-button-ink: #e6e5e1;
+  /* Token names inline in the text: the Nadiia tag chip, dark. */
+  --nd-chip: #1d211e;
+  --nd-chip-ink: #9fc9ad;
+  --nd-chip-ring: rgba(159, 201, 173, 0.25);
+  /* The presentation's accent cards: a real green or brown fill with a
+     lighter hairline of the same hue. Hover lifts both a step. */
+  --nd-green: #2f4238;
+  --nd-green-hover: #354a3f;
+  --nd-green-ink: #a9d0b7;
+  --nd-green-ring: #758f7e;
+  --nd-green-ring-hover: #8aa593;
+  --nd-orange: #37251c;
+  --nd-orange-hover: #3f2b21;
+  --nd-orange-ink: #e4a57c;
+  --nd-orange-ring: #9c6848;
+  --nd-orange-ring-hover: #b27a56;
+  /* Text on those filled cards, both tones alike. */
+  --nd-tint-text: #b9b8b3;
+  /* A table's header row: a shade under the card. */
+  --nd-table-head: rgba(0, 0, 0, 0.18);
+  background-color: var(--nd-black);
+  color: #c2c1bc;
+}
+
+.dark-matter h1,
+.dark-matter h2,
+.dark-matter h3:not(.font-mono),
+.dark-matter strong {
+  color: var(--nd-ink-strong);
+}
+
+/* Card hover on the dark page, from the same presentation: the fill steps up
+   to a mid grey and the hairline brightens. !important because some cards set
+   their fill inline (the dotted-field style object). */
+.dark-matter .nd-card {
+  transition:
+    background-color 200ms ease,
+    box-shadow 200ms ease;
+}
+
+.dark-matter .nd-card:hover {
+  background-color: #373838 !important;
+  --nd-box-ring: #6f7170;
+}

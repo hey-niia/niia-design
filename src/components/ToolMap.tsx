@@ -129,7 +129,7 @@ export default function ToolMap({ items }: { items: ToolMapItem[] }) {
               ))}
             </div>
             <ul className={`${NADIIA_SMALL} flex flex-col gap-2`}>
-              <li className="flex gap-2 text-neutral-800">
+              <li className="flex gap-2 text-[var(--nd-ink,#262626)]">
                 <span className="sr-only">Strength: </span>
                 <span aria-hidden style={{ color: NADIIA_ACCENT.green }}>
                   +
@@ -171,7 +171,7 @@ export default function ToolMap({ items }: { items: ToolMapItem[] }) {
             d={connector.d}
             fill="none"
             strokeWidth={1}
-            className="stroke-neutral-300"
+            className="stroke-[var(--nd-line,#d4d4d4)]"
             markerEnd={connector.arrow ? `url(#${markerId})` : undefined}
           />
         ))}
