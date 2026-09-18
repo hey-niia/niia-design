@@ -68,8 +68,10 @@ function QuoteCard({
 
       {/* Everything they said in one bubble, in the card style: fill, hairline
           and soft shadow, with the corner by the avatar tucked in. */}
-      <blockquote className="flex min-w-0">
-        <p className={`w-full rounded-tl-md px-5 py-4 text-sm text-[var(--nd-ink-strong,#262626)] ${NADIIA_CARD_SHELL}`}>
+      {/* The bubble hugs what they said, like a real message, rather than
+          stretching to the note beside it. */}
+      <blockquote className="flex min-w-0 items-start">
+        <p className={`w-fit rounded-tl-md px-5 py-4 text-sm text-[var(--nd-ink-strong,#262626)] ${NADIIA_CARD_SHELL}`}>
           {[item.quote, ...(item.followUps ?? [])].join(" ")}
         </p>
       </blockquote>

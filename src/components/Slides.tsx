@@ -150,8 +150,8 @@ export default function Slides({
   // each mouse move as well as on resize, so a narrowed desktop window gets it right.
   const tapQuery = "(max-width: 63.99rem), (hover: none)";
   const [touch, setTouch] = useState(false);
-  // The pinch hint on the canvas: shown while exploring on a touch screen,
-  // and dismissed for good the first time two fingers actually zoom.
+  // The pinch hint on the canvas: shown each time the canvas opens, and gone
+  // for that visit the first time someone actually zooms.
   const [pinchHint, setPinchHint] = useState(true);
   useEffect(() => {
     const mq = window.matchMedia(tapQuery);
@@ -267,7 +267,11 @@ export default function Slides({
       e.preventDefault();
       const r = el.getBoundingClientRect();
       openFrom.current = null;
-      if (e.ctrlKey) zoomAt(e.clientX - r.left, e.clientY - r.top, Math.exp(-e.deltaY / 100));
+      if (e.ctrlKey) {
+        // A trackpad pinch: the hint has done its job.
+        setPinchHint(false);
+        zoomAt(e.clientX - r.left, e.clientY - r.top, Math.exp(-e.deltaY / 100));
+      }
       else setView((v) => ({ ...v, x: v.x - e.deltaX, y: v.y - e.deltaY }));
     };
     el.addEventListener("wheel", onWheel, { passive: false });
@@ -345,6 +349,7 @@ export default function Slides({
               // The image goes away on this click, so its own mouseleave never fires.
               zoomCursor?.onMouseLeave();
               setView({ x: 0, y: 0, z: exploreZoom() });
+              setPinchHint(true);
               setExplore(true);
             }
           : onImageClick
@@ -385,6 +390,23 @@ export default function Slides({
         ))}
       </div>
     ) : null;
+
+  // Every slide is a row of several screens: on a phone the slider hugs them,
+  // and swiping (plus the dots) replaces the arrows so the screens get the width.
+  const screenRows = !figma && slides.every((slide) => slideImages(slide).length > 1);
+
+  // Rows of several screens: each screen's width ÷ height, summed per row. The
+  // widest-summing row fills the slide; the rest shrink to the same height.
+  const widthSum = (imgs: SlideImage[]) =>
+    imgs.reduce((sum, img) => sum + (img.ratio ? 1 / img.ratio : 1), 0);
+  const widestRow = Math.max(
+    1,
+    ...slides.map((slide) => slideImages(slide)).filter((imgs) => imgs.length > 1).map(widthSum),
+  );
+  const rowWidth = (imgs: SlideImage[]) => {
+    const gaps = `${imgs.length - 1} * var(--g)`;
+    return `calc((100% - ${gaps}) * ${widthSum(imgs) / widestRow} + ${gaps})`;
+  };
 
   const fieldClass = `rounded-2xl px-3 py-6 ring-1 sm:px-6 sm:py-8 ${
     field === "neutral" ? "ring-[var(--nd-box-ring,rgba(0,0,0,0.05))]" : "ring-[#d9723f]/15"
@@ -552,10 +574,11 @@ export default function Slides({
           </button>
 
           {/* The same hint as a long screenshot's "Scroll to see more", for the
-              gesture this view relies on. Phones and touch screens only. */}
+              gesture this view relies on — on every screen: a trackpad pinches
+              too, and a mouse user learns the canvas zooms at all. */}
           <div
             aria-hidden
-            className={`${touch ? "" : "lg:hidden"} pointer-events-none absolute inset-x-0 bottom-3 flex justify-center transition-opacity duration-300 ${
+            className={`pointer-events-none absolute inset-x-0 bottom-3 flex justify-center transition-opacity duration-300 ${
               pinchHint ? "opacity-100" : "opacity-0"
             }`}
           >
@@ -592,6 +615,7 @@ export default function Slides({
             onClick={() => {
               zoomCursor?.onMouseLeave();
               setView({ x: 0, y: 0, z: exploreZoom() });
+              setPinchHint(true);
               setExplore(true);
             }}
             className={`${
@@ -627,12 +651,16 @@ export default function Slides({
                   inert={!current}
                   // Figma slides run edge to edge (as wide as the wireframe box) with the
                   // arrows floating inside; Nadiia slides leave side gutters for them.
-                  className={`flex h-[520px] w-full shrink-0 flex-col sm:h-[600px] ${
+                  className={`flex w-full shrink-0 flex-col sm:h-[600px] ${
+                    // Rows of screens hug their height on a phone instead of floating
+                    // in a tall fixed slide, and take the arrows' gutters back.
+                    screenRows ? "" : "h-[520px]"
+                  } ${
                     figma
                       ? "items-stretch"
                       : // Centred in the frame: a wireframe narrower or shorter than the
                         // slide would otherwise sit at the top with dead space under it.
-                        "items-center justify-center px-12 sm:px-16"
+                        `items-center justify-center sm:px-16 ${screenRows ? "" : "px-12"}`
                   }`}
                 >
                   {figma ? (
@@ -705,13 +733,20 @@ export default function Slides({
                       {imgs.length > 1 ? (
                         // Several screens on one slide: each keeps its shape and
                         // shrinks to the slide's height, so a set reads side by side.
-                        <div className="flex min-h-0 w-full flex-1 items-center justify-center gap-3 sm:gap-5">
+                        <div
+                          className="mx-auto flex min-h-0 flex-1 items-center justify-center gap-[var(--g)] [--g:12px] sm:[--g:20px]"
+                          // Every row is narrowed to the height of the tallest set, so the
+                          // screens are one size across slides as well as within one.
+                          style={{ width: rowWidth(imgs) }}
+                        >
                           {imgs.map((img, k) => (
-                            // Each screen is a column of the row and keeps its own shape:
-                            // the image fills the column's width, the frame takes its height.
+                            // Each screen grows in proportion to its width ÷ height, so every
+                            // one comes out the same height even when they were exported from
+                            // different phones. Known up front, so it holds before images load.
                             <div
                               key={img.src}
-                              className={`${NADIIA_SHAPE} ${NADIIA_SURFACE.white} min-w-0 flex-1 overflow-hidden`}
+                              className={`${NADIIA_SHAPE} ${NADIIA_SURFACE.white} min-w-0 overflow-hidden`}
+                              style={{ flex: `${img.ratio ? 1 / img.ratio : 1} 1 0%` }}
                             >
                               {image(img, i === 0 && k === 0, "block h-auto w-full")}
                             </div>
@@ -747,7 +782,7 @@ export default function Slides({
               type="button"
               onClick={() => go(index - 1)}
               aria-label="Previous"
-              className={`${ARROW} ${figma ? "left-3 mt-5" : "left-0"}`}
+              className={`${ARROW} ${figma ? "left-3 mt-5" : "left-0"} ${screenRows ? "max-sm:hidden" : ""}`}
             >
               ←
             </button>
@@ -755,7 +790,7 @@ export default function Slides({
               type="button"
               onClick={() => go(index + 1)}
               aria-label="Next"
-              className={`${ARROW} ${figma ? "right-3 mt-5" : "right-0"}`}
+              className={`${ARROW} ${figma ? "right-3 mt-5" : "right-0"} ${screenRows ? "max-sm:hidden" : ""}`}
             >
               →
             </button>

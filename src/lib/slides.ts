@@ -20,6 +20,12 @@ export interface SlideImage {
    * so it doesn't dissolve into the grid. Solid cards float without one.
    */
   backed?: boolean;
+  /**
+   * Height ÷ width of the image. In a row of several screens (Nadiia look) it
+   * sizes each one in proportion to its shape, so screens exported from
+   * different devices come out the same height.
+   */
+  ratio?: number;
 }
 
 export interface Slide {

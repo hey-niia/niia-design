@@ -380,6 +380,24 @@ const VISUAL_TYPES = new Set<ContentBlock["type"]>([
   "gallery",
 ]);
 
+/** "39% → 60%": the result after the arrow in the brightest ink, so the change reads first. */
+function StatValue({ value }: { value: string }) {
+  const [before, after] = value.split("→").map((part) => part.trim());
+  if (!after) return <>{value}</>;
+  return (
+    <span className="inline-flex items-center gap-3">
+      {before}
+      {/* The page's own connector arrow — a hairline with a small head — rather
+          than the heavy glyph, so the numbers carry the weight. */}
+      <svg aria-label="to" width="36" height="10" viewBox="0 0 36 10" fill="none" className="shrink-0">
+        <path d="M0 5h33" stroke="var(--nd-line-head, #a3a3a3)" strokeWidth="1" />
+        <path d="M30 2.5L35 5l-5 2.5z" fill="var(--nd-line-head, #a3a3a3)" />
+      </svg>
+      <span className="text-[var(--nd-ink-strong,#000)]">{after}</span>
+    </span>
+  );
+}
+
 // Blocks that are reading text rather than a visual.
 const TEXT_TYPES = new Set<ContentBlock["type"]>(["paragraph", "heading", "section", "list", "quote"]);
 
@@ -552,7 +570,9 @@ function Block({
         >
           {block.stats.map((stat, i) => (
             <div key={i} className={NADIIA_CARD} style={NADIIA_AREA.neutral}>
-              <p className="text-4xl font-medium tracking-tight">{stat.value}</p>
+              <p className="text-4xl font-medium tracking-tight">
+                <StatValue value={stat.value} />
+              </p>
               <p className={`mt-2 ${NADIIA_CARD_TEXT}`}>{stat.label}</p>
             </div>
           ))}
@@ -884,7 +904,13 @@ export default function CaseStudy() {
     // on a dark page the field and the card repaint themselves (see index.css).
     // Body text matches Role and Team above (14px).
     <div className={project.darkPage ? "my-20" : "mt-12"}>
-      <p className="mb-4 text-sm tracking-wide text-gray-400 uppercase">Impact</p>
+      <p
+        className={`mb-4 text-sm tracking-wide uppercase ${
+          project.darkPage ? "text-[#e65f2e]" : "text-gray-400"
+        }`}
+      >
+        Impact
+      </p>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         {project.impact.map((stat) => (
           <div key={stat.metric} className={NADIIA_CARD} style={NADIIA_AREA.neutral}>
@@ -959,9 +985,17 @@ export default function CaseStudy() {
 
           <header className="border-b border-gray-200 pb-8">
             <p className="mb-4 font-mono text-xs tracking-widest text-gray-400 uppercase">
-              {project.hideClientInHeader
-                ? project.name
-                : `${project.name} · ${project.client}`}
+              {project.eyebrow
+                ? // The line is all caps, except "iOS", which keeps its brand casing.
+                  project.eyebrow.split("iOS").map((part, i) => (
+                    <Fragment key={i}>
+                      {i > 0 && <span className="normal-case">iOS</span>}
+                      {part}
+                    </Fragment>
+                  ))
+                : project.hideClientInHeader
+                  ? project.name
+                  : `${project.name} · ${project.client}`}
             </p>
             <h1 className="mb-4 text-3xl font-medium lg:text-5xl">{project.title}</h1>
             {project.summary && <p className="mt-4 max-w-2xl">{project.summary}</p>}

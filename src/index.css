@@ -270,3 +270,10 @@
   background-color: #373838 !important;
   --nd-box-ring: #6f7170;
 }
+
+/* iOS shows a big play button over an autoplay video it won't start (Low Power
+   Mode). These videos are silent loops, so let the poster read as a still. */
+video::-webkit-media-controls-start-playback-button {
+  display: none !important;
+  -webkit-appearance: none;
+}

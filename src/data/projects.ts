@@ -140,7 +140,7 @@ export type ContentBlock =
         src?: string;
         alt?: string;
         /** Several related components on one screen (figma look). */
-        images?: { src: string; alt: string; width?: number; bare?: boolean; backed?: boolean }[];
+        images?: { src: string; alt: string; width?: number; bare?: boolean; backed?: boolean; ratio?: number }[];
         columns?: number;
         scroll?: boolean;
         /** Too big to read in the slider: shown only on the explore canvas. */
@@ -211,6 +211,8 @@ export interface Project {
   client: string;
   /** Show only `name` in the small line above the case study title, without "· client". */
   hideClientInHeader?: boolean;
+  /** Replaces the small line above a case study's title. */
+  eyebrow?: string;
   role: string;
   /** Who else was involved, by function — omit if solo or not documented. */
   team?: string;
@@ -269,7 +271,9 @@ export const projects: Project[] = [
     slug: "ios-app",
     category: "iOS App",
     name: "Neuroscience App's AI Pivot",
-    title: "Turning six neuroscience systems into one AI coaching experience",
+    title: "Neuroscience App's AI Pivot",
+    // The small line above the title, since the title is now the project name.
+    eyebrow: "iOS App · Client (NDA)",
     summary:
       "Redesigned an Apple App of the Day: a neuroscience-backed wellness app, taken from a complex multi-feature product to a single guided AI coach. First-memory activation went from 39% to 60%.",
     client: "Client (NDA)",
@@ -289,7 +293,9 @@ export const projects: Project[] = [
     coverVideo: "/projects/ios-app/hero-coaching.mp4",
     darkPage: true,
     screenshots: [
-      { src: "/projects/ios-app/hero-coaching.webp", alt: "Three coaching screens" },
+      // The video's own first frame: shown before it plays, and instead of it
+      // when a phone won't autoplay (Low Power Mode).
+      { src: "/projects/ios-app/coaching-poster.webp", alt: "The coaching screen: the coach's reply after a full session, with Continue and Your progress cards" },
       { src: "/projects/ios-app/3.webp", alt: "Emotional fitness app progression screen" },
     ],
     lastUpdated: "2026",
@@ -317,7 +323,7 @@ export const projects: Project[] = [
         type: "video",
         height: 600,
         src: "/projects/ios-app/hero-coaching.mp4",
-        poster: "/projects/ios-app/hero-coaching.webp",
+        poster: "/projects/ios-app/coaching-poster.webp",
         alt: "Screen recording of the coaching flow: asking a question, logging a memory, naming which neurotransmitters it affected, and the progress sheet",
       },
 
@@ -520,17 +526,17 @@ export const projects: Project[] = [
           {
             title: "Opening the conversation",
             images: [
-              { src: "/projects/ios-app/concepts/concept-1.webp", alt: "Early concept: the coach opens with a greeting and one question about a good moment" },
-              { src: "/projects/ios-app/concepts/concept-2.webp", alt: "Early concept: the same opening with the greeting played down" },
-              { src: "/projects/ios-app/concepts/concept-6.webp", alt: "Early concept: the opening question with the answer already being typed" },
+              { src: "/projects/ios-app/concepts/concept-1.webp", ratio: 2.268, alt: "Early concept: the coach opens with a greeting and one question about a good moment" },
+              { src: "/projects/ios-app/concepts/concept-2.webp", ratio: 2.266, alt: "Early concept: the same opening with the greeting played down" },
+              { src: "/projects/ios-app/concepts/concept-6.webp", ratio: 2.168, alt: "Early concept: the opening question with the answer already being typed" },
             ],
           },
           {
             title: "Answering back",
             images: [
-              { src: "/projects/ios-app/concepts/concept-3.webp", alt: "Early concept: the coach's reply naming which systems the memory affected" },
-              { src: "/projects/ios-app/concepts/concept-5.webp", alt: "Early concept: the reply with the science kept short" },
-              { src: "/projects/ios-app/concepts/concept-4.webp", alt: "Early concept: the reply with follow-up cards under it" },
+              { src: "/projects/ios-app/concepts/concept-3.webp", ratio: 2.168, alt: "Early concept: the coach's reply naming which systems the memory affected" },
+              { src: "/projects/ios-app/concepts/concept-5.webp", ratio: 2.168, alt: "Early concept: the reply with the science kept short" },
+              { src: "/projects/ios-app/concepts/concept-4.webp", ratio: 2.168, alt: "Early concept: the reply with follow-up cards under it" },
             ],
           },
         ],
@@ -622,7 +628,7 @@ export const projects: Project[] = [
         type: "before-after",
         plain: true,
         before: "/projects/ios-app/before-you.webp",
-        after: "/projects/ios-app/after-you.webp",
+        after: "/projects/ios-app/you-page.webp",
         beforeAlt:
           "The old Stats tab: a composite score chart across a week, with a paragraph explaining the chart underneath it",
         afterAlt:
