@@ -2,7 +2,7 @@ export interface Experiment {
   name: string;
   description: string;
   stack: string;
-  platform: "MacOS" | "WEB APP" | "PROTOTYPE";
+  platform: "MacOS" | "WEB APP" | "BROWSER EXTENSION";
   link?: string;
   image?: string;
 }
@@ -12,8 +12,8 @@ export const experiments: Experiment[] = [
     name: "Skin",
     description:
       "Like Winamp skins, but for Claude and ChatGPT — a private, local-first board where every chat lives in a paper folder you style yourself.",
-    stack: "HTML, CSS, JavaScript — no server, everything stays on your device",
-    platform: "PROTOTYPE",
+    stack: "JavaScript browser extension — no servers, no accounts, everything stays in your browser",
+    platform: "BROWSER EXTENSION",
     link: "/skin",
     image: "/experiments/skin-cover.webp",
   },

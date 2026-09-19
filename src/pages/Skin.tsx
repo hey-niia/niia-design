@@ -47,8 +47,8 @@ export default function Skin() {
 
           <h1 className="mb-4 text-3xl font-medium lg:text-5xl">Skin</h1>
           <p className="max-w-2xl text-gray-500 italic">
-            A private, local-first skin for your LLM — like Winamp skins, but
-            for Claude and ChatGPT.
+            A private skin for your LLM. Think Winamp skins, but for Claude and
+            ChatGPT.
           </p>
         </header>
 
@@ -68,30 +68,54 @@ export default function Skin() {
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 border border-black px-6 py-3 font-mono text-sm tracking-widest uppercase transition-colors hover:bg-black hover:text-white"
             >
-              Download for Mac <span aria-hidden>→</span>
+              Download extension <span aria-hidden>→</span>
             </a>
           </div>
 
           <h3 className={heading}>The idea</h3>
           <p className={paragraph}>
-            Instead of the default chat UI, you see your own board: every
-            conversation sorted into folders, and every folder is a tile you
-            style yourself — color, image, label, or no label at all.
+            Instead of the default chat UI, you see your own board. Every
+            conversation is sorted into a folder, and every folder is a sheet of
+            paper you style yourself: color, image, label, or no label at all.
+          </p>
+          <p className={paragraph}>
+            <strong>Browser-only:</strong> no servers, no accounts, no API calls.
           </p>
 
-          <h3 className={heading}>Principles</h3>
+          <h3 className={heading}>What it does</h3>
           <ul className="my-4 max-w-[46rem] list-outside list-disc space-y-2 pl-5 text-[1.125rem] leading-[1.8]">
             <li className="pl-1">
-              <strong>Local-first.</strong> No Skin server. Chats, folders and
-              settings live on your device.
+              <strong>Folders</strong> — your chats, sorted onto sheets of paper
             </li>
             <li className="pl-1">
-              <strong>Hide what you want.</strong> Turn off a folder's name and
-              keep just a color. You know what pink means.
+              <strong>Auto-sort</strong> — by words, learns from your moves
             </li>
             <li className="pl-1">
-              <strong>Open source</strong>, so anyone can verify where the data
-              goes.
+              <strong>Private</strong> — hide names, blur titles, seal in
+              envelopes
+            </li>
+            <li className="pl-1">
+              <strong>Chat</strong> — write, attach photos, read and reply on
+              paper
+            </li>
+            <li className="pl-1">
+              <strong>Switch</strong> — chat ⇄ Claude Code, one small skin tab
+            </li>
+          </ul>
+
+          <h3 className={heading}>Privacy</h3>
+          <ul className="my-4 max-w-[46rem] list-outside list-disc space-y-2 pl-5 text-[1.125rem] leading-[1.8]">
+            <li className="pl-1">
+              Reads <strong>only chat links already visible on the page</strong>{" "}
+              (the sidebar, the Recents page). It does not call Claude's or
+              ChatGPT's API, and it makes <strong>no network requests</strong> of
+              its own.
+            </li>
+            <li className="pl-1">
+              Stores chat titles, links and settings only in this browser.
+            </li>
+            <li className="pl-1">
+              Runs only on claude.ai and chatgpt.com.
             </li>
           </ul>
 
@@ -117,7 +141,9 @@ export default function Skin() {
 
           <h3 className={heading}>Status</h3>
           <p className={paragraph}>
-            Early concept — a paper prototype of the board.
+            Out now as a browser extension for Chrome, Arc, Edge and Brave.
+            Download the zip, unzip it, and load it on{" "}
+            <code>chrome://extensions</code> with Developer mode on.
           </p>
 
           <figure className="mt-12">
@@ -143,7 +169,7 @@ export default function Skin() {
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2"
             >
-              <WiggleText>Download for Mac</WiggleText> <span aria-hidden>→</span>
+              <WiggleText>Download extension</WiggleText> <span aria-hidden>→</span>
             </a>
           </div>
         </footer>
