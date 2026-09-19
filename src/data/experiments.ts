@@ -47,7 +47,7 @@ export const experiments: Experiment[] = [
   {
     name: "08",
     description:
-      "Named after my cat, she pops into the corner of your screen on your schedule for a small, guilt-free pause, then wanders off.",
+      "A little Mac app named after my cat. Every now and then she walks onto your screen, sits down, and reminds you to step away from the computer and enjoy life for a bit.",
     stack: "Electron, TypeScript",
     platform: "MacOS",
     link: "/08",
