@@ -1,6 +1,5 @@
 import { Link } from "react-router-dom";
 import ExperimentCard from "../components/ExperimentCard";
-import GitHubIcon from "../components/GitHubIcon";
 import Nav from "../components/Nav";
 import WiggleText from "../components/WiggleText";
 import Zoomable from "../components/Zoomable";
@@ -64,7 +63,7 @@ export default function Skin() {
 
           <div className="flex justify-center">
             <a
-              href="https://github.com/hey-niia/skin"
+              href="https://github.com/hey-niia/skin-extension/releases/latest"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 border border-black px-6 py-3 font-mono text-sm tracking-widest uppercase transition-colors hover:bg-black hover:text-white"
@@ -139,13 +138,12 @@ export default function Skin() {
         <footer className="border-t border-gray-200 py-16">
           <div className="flex items-center justify-center">
             <a
-              href="https://github.com/hey-niia/skin"
+              href="https://github.com/hey-niia/skin-extension/releases/latest"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2"
             >
-              <GitHubIcon className="h-4 w-4" />
-              <WiggleText>View on GitHub</WiggleText>
+              <WiggleText>Download for Mac</WiggleText> <span aria-hidden>→</span>
             </a>
           </div>
         </footer>
