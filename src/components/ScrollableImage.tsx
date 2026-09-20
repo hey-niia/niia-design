@@ -18,6 +18,7 @@ export default function ScrollableImage({
   alt,
   maxWidth,
   viewportHeight,
+  viewportAspect,
   onImageClick,
   zoomCursor,
 }: {
@@ -25,9 +26,12 @@ export default function ScrollableImage({
   alt: string;
   maxWidth?: number;
   viewportHeight?: number;
+  /** Size the scroll window by aspect ratio instead, e.g. "16 / 10". */
+  viewportAspect?: string;
   onImageClick?: (src: string) => void;
   zoomCursor?: ZoomCursorHandlers;
 }) {
+  const scrolls = Boolean(viewportHeight || viewportAspect);
   const [hasMore, setHasMore] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -50,15 +54,19 @@ export default function ScrollableImage({
   return (
     <div
       className={`relative mx-auto overflow-hidden ${FRAME_RADIUS} ${
-        viewportHeight ? "ring-1 ring-black/10" : ""
+        scrolls ? "ring-1 ring-black/10" : ""
       }`}
       style={maxWidth ? { maxWidth } : undefined}
     >
       <div
         ref={scrollRef}
         onScroll={measure}
-        className={viewportHeight ? "overflow-y-auto overscroll-contain" : ""}
-        style={{ height: viewportHeight }}
+        // Aspect-sized windows let the wheel hand off to the page at either
+        // end, so the visual never traps someone mid-page.
+        className={
+          viewportHeight ? "overflow-y-auto overscroll-contain" : scrolls ? "overflow-y-auto" : ""
+        }
+        style={{ height: viewportHeight, aspectRatio: viewportHeight ? undefined : viewportAspect }}
       >
         <img
           src={src}
@@ -69,6 +77,7 @@ export default function ScrollableImage({
           onMouseLeave={zoomCursor?.onMouseLeave}
         />
       </div>
+      {/* Aspect-sized windows say "scroll" on the cursor label instead. */}
       {viewportHeight && <ScrollHint show={hasMore} />}
     </div>
   );

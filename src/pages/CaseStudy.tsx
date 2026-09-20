@@ -315,8 +315,12 @@ function Lightbox({
   );
 }
 
+const ZOOM_LABEL = "Click to zoom";
+const SCROLL_LABEL = "Scroll to see more";
+
 interface ZoomCursorHandlers {
-  onMouseMove: (e: MouseEvent) => void;
+  /** `text` swaps the floating label, e.g. for a visual that scrolls in place. */
+  onMouseMove: (e: MouseEvent, text?: string) => void;
   onMouseLeave: () => void;
 }
 
@@ -441,8 +445,13 @@ function Block({
             alt={block.alt}
             maxWidth={block.maxWidth}
             viewportHeight={block.viewportHeight}
+            viewportAspect={block.viewportAspect}
             onImageClick={onImageClick}
-            zoomCursor={zoomCursor}
+            zoomCursor={
+              block.viewportAspect
+                ? { ...zoomCursor, onMouseMove: (e) => zoomCursor.onMouseMove(e, SCROLL_LABEL) }
+                : zoomCursor
+            }
           />
           {block.caption && (
             <p
@@ -567,10 +576,16 @@ export default function CaseStudy() {
     }
     return list;
   }, [project]);
-  const [cursorLabel, setCursorLabel] = useState({ x: 0, y: 0, visible: false });
+  const [cursorLabel, setCursorLabel] = useState({
+    x: 0,
+    y: 0,
+    visible: false,
+    text: ZOOM_LABEL,
+  });
 
   const zoomCursor: ZoomCursorHandlers = {
-    onMouseMove: (e) => setCursorLabel({ x: e.clientX, y: e.clientY, visible: true }),
+    onMouseMove: (e, text = ZOOM_LABEL) =>
+      setCursorLabel({ x: e.clientX, y: e.clientY, visible: true, text }),
     onMouseLeave: () => setCursorLabel((c) => ({ ...c, visible: false })),
   };
 
@@ -683,15 +698,27 @@ export default function CaseStudy() {
             </aside>
           )}
 
-          <header className="border-b border-gray-200 pb-8">
+          <header className={project.showcase ? "" : "border-b border-gray-200 pb-5"}>
             <p className="mb-4 font-mono text-xs tracking-widest text-gray-400 uppercase">
               {project.name} · {project.client}
             </p>
             <h1 className="mb-4 text-3xl font-medium lg:text-5xl">{project.title}</h1>
-            {project.summary && <p className="mt-4 max-w-2xl">{project.summary}</p>}
+            {project.summary &&
+              (project.showcase ? (
+                <div className="mt-6 border-t border-gray-200 pt-6">
+                  <p className="max-w-2xl">{project.summary}</p>
+                </div>
+              ) : (
+                <p className="mt-8 max-w-2xl">{project.summary}</p>
+              ))}
           </header>
 
-          <section id="overview" className="scroll-mt-8 border-b border-gray-200 py-8">
+          <section
+            id="overview"
+            className={`scroll-mt-8 ${
+              project.showcase ? "pt-6 pb-2" : "border-b border-gray-200 pt-5 pb-8"
+            }`}
+          >
             <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
               <div>
                 <p className="mb-1 font-mono text-xs tracking-widest text-gray-400 uppercase">
@@ -746,7 +773,7 @@ export default function CaseStudy() {
             )}
           </section>
 
-          <section className="py-8">
+          <section className={project.showcase ? "pt-2 pb-8" : "py-8"}>
             {project.content.map((block, i) => (
               <Block
                 key={i}
@@ -800,8 +827,8 @@ export default function CaseStudy() {
         }`}
         style={{ left: cursorLabel.x, top: cursorLabel.y }}
       >
-        <span className="text-base leading-none">+</span>
-        Click to zoom
+        <span className="text-base leading-none">{cursorLabel.text === ZOOM_LABEL ? "+" : "↓"}</span>
+        {cursorLabel.text}
       </span>
 
       {lightboxIndex !== null && (

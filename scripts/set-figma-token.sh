@@ -30,13 +30,25 @@ if [[ ${#TOKEN} -ne 45 || $TOKEN != figd_* ]]; then
 fi
 
 echo -n "Checking with Figma… "
-BODY="$(curl -fsS -H "X-Figma-Token: $TOKEN" https://api.figma.com/v1/me 2>/dev/null || true)"
-if [[ -z $BODY || $BODY != *'"email"'* ]]; then
+# No -f: when Figma says no, show why instead of an empty "no response".
+RESP="$(curl -sS -w $'\n%{http_code}' -H "X-Figma-Token: $TOKEN" https://api.figma.com/v1/me 2>&1 || true)"
+CODE="${RESP##*$'\n'}"
+BODY="${RESP%$'\n'*}"
+if [[ $CODE == 200 ]]; then
+  echo "✓ $(printf '%s' "$BODY" | sed -n 's/.*"email":"\([^"]*\)".*/\1/p')"
+elif [[ $CODE == 000 || -z $CODE ]]; then
   echo "✗"
-  echo "  Figma rejected it: ${BODY:-no response}"
+  echo "  Couldn't reach Figma (network): $BODY"
   exit 1
+elif [[ $BODY == *xpired* || $BODY == *"Invalid token"* ]]; then
+  echo "✗"
+  echo "  Figma rejected it ($CODE): $BODY"
+  exit 1
+else
+  # A token made with only "File content: Read" can export files but isn't
+  # allowed to read /v1/me, so Figma answers 403 here — that's still fine.
+  echo "✓ (can't read your profile with this token's scopes, which is fine for exports: $CODE)"
 fi
-echo "✓ $(printf '%s' "$BODY" | sed -n 's/.*"email":"\([^"]*\)".*/\1/p')"
 
 for f in "${CONFIGS[@]}"; do
   [[ -f $f ]] || { echo "– skipped (not found): $f"; continue; }

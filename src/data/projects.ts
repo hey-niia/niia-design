@@ -23,6 +23,8 @@ export type ContentBlock =
       panel?: boolean | "dark";
       /** Scroll the image inside a fixed-height window instead of running full height. */
       viewportHeight?: number;
+      /** Like `viewportHeight`, but the window keeps a CSS aspect ratio (e.g. "16 / 10", a Mac screen). */
+      viewportAspect?: string;
     }
   /** Silent, autoplaying, looping screen capture — no controls, no lightbox. */
   | {
@@ -133,6 +135,9 @@ export interface Project {
   lastUpdated: string;
   /** Impact Overview: 2-3 stat cards surfaced at the top of the case study. */
   impact?: ImpactStat[];
+  /** Single-visual page (no write-up): dividers wrap the summary, details and
+   *  visual as one unit, and the spacing between them tightens. */
+  showcase?: boolean;
   content: ContentBlock[];
 }
 
@@ -1003,77 +1008,33 @@ export const projects: Project[] = [
     ],
   },
   {
-    // Rewritten against case-study.md. Source material here is much thinner than
-    // ios-app/enterprise-dashboard: no documented research process, named frictions,
-    // launch metrics, or client quote — only the two original descriptive paragraphs.
-    // The section structure below is applied honestly on top of that; nothing beyond
-    // what was already written is invented. See TODO near Results.
     slug: "other-projects",
     category: "Landing pages, Web apps",
     name: "Other Projects",
-    title: "Corporate website for a digital signage company",
-    summary:
-      "A collection of smaller landing pages and web apps — shorter engagements that didn't need a full case study of their own.",
+    title: "A collection of smaller landing pages and web apps",
+    summary: "Corporate website for a digital signage company",
     client: "Landing pages, Web apps",
     role: "UI/UX design, information architecture, visual identity",
     team: "Founder, Operations team",
     duration: "1 month",
     tools: ["Figma"],
+    showcase: true,
     screenshots: [
       { src: "/projects/digitalscreen.png", alt: "Digital signage company website" },
       {
-        src: "/projects/digitalscreen/1.png",
+        src: "/projects/other-projects/digitalscreen-full.jpg",
         alt: "Digital signage company website, full page",
         tall: true,
       },
     ],
     lastUpdated: "2023–2026",
     content: [
-      { type: "section", id: "problem", title: "Problem" },
-      {
-        type: "paragraph",
-        text: "The client needed a site that could explain digital signage technology to potential customers, alongside its services and team. There was nothing to build on: no site, no visual identity yet.",
-      },
-      {
-        type: "paragraph",
-        text: "The brief was mostly about credibility: make it read as a real company, not a spec sheet.",
-      },
-
-      { type: "section", id: "solution", title: "Solution" },
-      {
-        type: "paragraph",
-        text: "Starting from zero, I built the information architecture, layout system, and visual identity together, then worked with the founder and operations team to refine the messaging and user flow.",
-      },
-      {
-        type: "list",
-        items: [
-          "Information architecture and layout system built to hold both marketing and technical content.",
-          "A visual identity designed to read as modern and credible without going generic.",
-          "Modular, responsive components so desktop and mobile stayed consistent instead of diverging.",
-        ],
-      },
-
-      { type: "section", id: "final-design", title: "Final design" },
-      { type: "heading", text: "One narrative site, from hero to team" },
-      {
-        type: "paragraph",
-        text: "The site walks a visitor from what the product does, through services, to the team behind it — a single narrative page rather than a stack of disconnected sections.",
-      },
       {
         type: "image",
-        src: "/projects/digitalscreen/1.png",
+        src: "/projects/other-projects/digitalscreen-full.jpg",
         alt: "Digital signage company website, full page",
-        caption: "One scrolling narrative, not a set of disconnected marketing sections.",
+        viewportAspect: "16 / 10",
       },
-
-      { type: "section", id: "results", title: "Results" },
-      {
-        type: "paragraph",
-        text: "A month of solo work took the client from no web presence to a full, responsive site that explains digital signage in plain language.",
-      },
-      // TODO: no launch metrics (traffic, lead volume) or client quote are documented
-      // for this project — add them here if/when available, per case-study.md's
-      // Results section. Don't invent numbers to fill the gap.
     ],
   },
 ];
