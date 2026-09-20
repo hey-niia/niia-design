@@ -2,7 +2,7 @@
 
 > Senior Product Designer, AI Design Engineer. Designs interfaces and builds them into working
 > products with AI — from narrative websites to data-rich dashboards, closing the gap between
-> idea and shipped. Co-founder of Overspace, a product design studio for startups.
+> idea and shipped.
 
 - [Home](https://niia.design/)
 - [Wellness AI Companion — iOS App](https://niia.design/work/ios-app)
@@ -10,5 +10,4 @@
 - [Digital Screen Co.](https://niia.design/work/other-projects)
 - [Hirement](https://niia.design/work/hirement)
 - [AI Playground](https://niia.design/ai-playground)
-- [Overspace](https://overspace.co)
 - [Leap](https://superleap.com.ua/)

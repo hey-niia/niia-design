@@ -217,7 +217,7 @@ const ANSWERS: CannedAnswer[] = [
     keywords: ["hire", "available", "availability", "rate", "cost", "price", "budget", "contract", "freelance"],
     answer: `I'm glad you're interested!
 - The best way to reach me is via LinkedIn or ${CONTACT_EMAIL} — I read everything myself.
-- Right now I split my time between freelance product design (AI-first apps, dashboards, web platforms) and co-running Overspace, a small design studio.
+- Right now my time goes to freelance product design — AI-first apps, dashboards, web platforms.
 - If I'm not the right fit, I'm happy to refer someone else or explore a short collaboration to see if it's a good match.`,
   },
   {
@@ -236,14 +236,9 @@ const ANSWERS: CannedAnswer[] = [
       "Leap was Niia's first company (2016–2021) — she started as a founder, not a designer. Packaging, distribution, the Instagram page, working with other designers, all of it, because there was no one else to hand it to. Design was just the tool she reached for most.",
   },
   {
-    keywords: ["overspace", "studio", "co-found", "cofound"],
-    answer:
-      "Overspace is the product design studio Niia co-founded in 2021 — a small team doing the unglamorous parts of product design that make the flashy parts possible: research nobody sees, systems nobody notices until they're missing.",
-  },
-  {
     keywords: ["experience", "background", "career", "who are you", "who is niia"],
     answer:
-      "Senior Product Designer and AI Design Engineer, freelance since 2022 — current work spans an AI-first iOS wellness app, enterprise dashboards, and web platforms. Before that: co-founder of Overspace (2021–present) and founder of Leap (2016–2021). She started as a founder first, designer second.",
+      "Senior Product Designer and AI Design Engineer, freelance since 2022 — current work spans an AI-first iOS wellness app, enterprise dashboards, and web platforms. Before that she founded Leap (2016–2021). She started as a founder first, designer second.",
   },
   {
     keywords: ["resume", "résumé", "cv", "portfolio pdf"],
@@ -327,7 +322,6 @@ export const FOLLOW_UP_QUESTIONS: FollowUpQuestion[] = [
   { text: "How did you build this portfolio?", category: "professional" },
   { text: "Do you design and build, or just design?", category: "professional" },
   { text: "Do you have generalist experience beyond design?", category: "professional" },
-  { text: "Tell me about Overspace", category: "professional" },
   { text: "Tell me about Leap", category: "professional" },
   { text: "Can I see your résumé?", category: "professional" },
   { text: "What tools are in your stack?", category: "professional" },

@@ -41,8 +41,8 @@ export default function Home() {
         <div className="flex flex-col gap-4">
           <p className="text-3xl">I help companies design ambitious products people actually use.</p>
           <p className="text-3xl">
-            I've founded two companies and that's shaped how I think about product and business
-            together. Now I'm building with AI.
+            As a founder of a company, I think about product and business together. Now I'm
+            building with AI.
           </p>
         </div>
         <ExperienceTimeline />

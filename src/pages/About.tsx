@@ -23,10 +23,9 @@ export default function About() {
                 hand it to. Design was just the tool I reached for most.
               </p>
               <p className="mb-4">
-                Overspace is where that turned into a craft instead of a habit — a small studio
-                built with people I trust, doing the unglamorous parts of product design that make
-                the flashy parts possible: research nobody sees, systems nobody notices until
-                they're missing.
+                Over the years that turned into a craft instead of a habit — the unglamorous parts
+                of product design that make the flashy parts possible: research nobody sees,
+                systems nobody notices until they're missing.
               </p>
               <p className="mb-6">
                 These days I split my time between client work and building things myself, mostly
