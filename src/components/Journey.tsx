@@ -20,6 +20,18 @@ const MILESTONES: Milestone[] = [
     ],
   },
   {
+    years: "2021–Present",
+    role: "Co-founder",
+    org: "Overspace",
+    description:
+      "Built a studio around the parts of design that don't fit in a portfolio shot — the research, the systems work, the unglamorous groundwork that makes the flashy parts possible.",
+    bullets: [
+      "Research, strategy, and systems work for startups and scale-ups",
+      "Partnered with a small team instead of scaling headcount, so every client still works directly with the people doing the thinking",
+      "[Notable client outcome — TK]",
+    ],
+  },
+  {
     years: "2022–Present",
     role: "Senior Product Designer, AI Design Engineer",
     org: "Freelance",
