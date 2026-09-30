@@ -47,6 +47,8 @@ export type ContentBlock =
        *  that would otherwise run past the bottom of the window. */
       height?: number;
     }
+  /** Phone walkthrough played from static Figma frames — see FlowAnimation. */
+  | { type: "flow-animation"; alt: string; caption?: string; maxWidth?: number }
   /** Screenshot with interactive numbered markers — see AnnotatedImage. */
   | {
       type: "annotated-image";
@@ -613,6 +615,21 @@ export const projects: Project[] = [
       {
         type: "paragraph",
         text: "The session also ends. It has a purpose and a natural stopping point, which is unusual for a chat interface and was a deliberate call: the product is trying to send you back into your own life, not keep you in the app.",
+      },
+
+      { type: "heading", mono: true, text: "Logging a memory" },
+      {
+        type: "paragraph",
+        text: "The loop the whole coach is built around. It offers photos from your week, you say what made the moment good, it tells you which systems that trained, and sharing it with your team is one tap from the reply.",
+      },
+      {
+        // Frames from the "animation" section of M 2026 — Production UI
+        // (Ro11e0WuyM842RJuTXUyst, node 13481:14461), exported at 2x into
+        // public/projects/ios-app/flow/. Step order, timing and tap points
+        // live in MEMORY_FLOW in FlowAnimation.tsx. 286px wide, like the
+        // Home screen toggle above, so both phones sit at 620px tall.
+        type: "flow-animation",
+        alt: "Animated walkthrough of logging a memory: the coach suggests recent photos, you pick one and write a sentence about it, the coach names which neurotransmitters it affected, and you share it to your team feed",
       },
 
       { type: "heading", mono: true, text: "Progress" },

@@ -13,6 +13,7 @@ import { getProject, projects, type ContentBlock, type Credit } from "../data/pr
 import AnnotatedImage from "../components/AnnotatedImage";
 import BeforeAfter from "../components/BeforeAfter";
 import CardCarousel from "../components/CardCarousel";
+import FlowAnimation from "../components/FlowAnimation";
 import ClickThrough from "../components/ClickThrough";
 import ConnectIQUserFlow from "../components/ConnectIQUserFlow";
 import { Band } from "../components/DarkVisuals";
@@ -669,6 +670,8 @@ function Block({
           {block.caption && <p className="mt-2 text-sm italic text-gray-400">{block.caption}</p>}
         </div>
       );
+    case "flow-animation":
+      return <FlowAnimation alt={block.alt} caption={block.caption} maxWidth={block.maxWidth} />;
     case "annotated-image":
       return (
         // Straight on the white page, no grey field; the notes live on the markers
