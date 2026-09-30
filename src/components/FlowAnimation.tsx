@@ -146,10 +146,14 @@ export default function FlowAnimation({
   alt,
   maxWidth = 286,
   caption,
+  compact = false,
 }: {
   alt: string;
   maxWidth?: number;
   caption?: string;
+  /** Just the phone: no step labels, pause button or caption — for the home
+   *  page card, which is one big link. */
+  compact?: boolean;
 }) {
   const root = useRef<HTMLDivElement>(null);
   const scenes = useRef<Record<string, HTMLDivElement | null>>({});
@@ -509,7 +513,7 @@ export default function FlowAnimation({
   return (
     // Plain, like the before/after toggles further down: the phone sits
     // straight on the page with a hairline and a soft shadow, no panel.
-    <figure className="my-8">
+    <figure className={compact ? "w-full" : "my-8"}>
       <div className="mx-auto" style={{ maxWidth }}>
         <div
           ref={root}
@@ -601,45 +605,49 @@ export default function FlowAnimation({
         </div>
       </div>
 
-      {/* Same label treatment as the before/after toggles on this page. */}
-      <div className="mx-auto mt-5 flex flex-wrap items-center justify-center gap-x-3 gap-y-2 sm:gap-x-4">
-        {CHAPTERS.map((label, i) => (
-          <button
-            key={label}
-            type="button"
-            onClick={() => jumpTo(i)}
-            aria-current={i === activeChapter ? "step" : undefined}
-            className={`text-xs font-medium transition-colors hover:text-[#e65f2e] sm:text-sm ${
-              i === activeChapter ? "text-[var(--nd-ink-strong,#000)]" : "text-gray-400"
-            }`}
-          >
-            {label}
-          </button>
-        ))}
-        {!reducedMotion && (
-          <button
-            type="button"
-            onClick={() => setPaused((p) => !p)}
-            aria-label={paused ? "Play animation" : "Pause animation"}
-            className="flex h-6 w-6 items-center justify-center rounded-full text-gray-400 transition-colors hover:text-[#e65f2e]"
-          >
-            {paused ? (
-              <svg viewBox="0 0 12 12" className="h-3 w-3" fill="currentColor" aria-hidden>
-                <path d="M3 1.5v9l7.5-4.5z" />
-              </svg>
-            ) : (
-              <svg viewBox="0 0 12 12" className="h-3 w-3" fill="currentColor" aria-hidden>
-                <rect x="2.5" y="1.5" width="2.5" height="9" rx="0.5" />
-                <rect x="7" y="1.5" width="2.5" height="9" rx="0.5" />
-              </svg>
+      {!compact && (
+        <>
+          {/* Same label treatment as the before/after toggles on this page. */}
+          <div className="mx-auto mt-5 flex flex-wrap items-center justify-center gap-x-3 gap-y-2 sm:gap-x-4">
+            {CHAPTERS.map((label, i) => (
+              <button
+                key={label}
+                type="button"
+                onClick={() => jumpTo(i)}
+                aria-current={i === activeChapter ? "step" : undefined}
+                className={`text-xs font-medium transition-colors hover:text-[#e65f2e] sm:text-sm ${
+                  i === activeChapter ? "text-[var(--nd-ink-strong,#000)]" : "text-gray-400"
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+            {!reducedMotion && (
+              <button
+                type="button"
+                onClick={() => setPaused((p) => !p)}
+                aria-label={paused ? "Play animation" : "Pause animation"}
+                className="flex h-6 w-6 items-center justify-center rounded-full text-gray-400 transition-colors hover:text-[#e65f2e]"
+              >
+                {paused ? (
+                  <svg viewBox="0 0 12 12" className="h-3 w-3" fill="currentColor" aria-hidden>
+                    <path d="M3 1.5v9l7.5-4.5z" />
+                  </svg>
+                ) : (
+                  <svg viewBox="0 0 12 12" className="h-3 w-3" fill="currentColor" aria-hidden>
+                    <rect x="2.5" y="1.5" width="2.5" height="9" rx="0.5" />
+                    <rect x="7" y="1.5" width="2.5" height="9" rx="0.5" />
+                  </svg>
+                )}
+              </button>
             )}
-          </button>
-        )}
-      </div>
-      {caption && (
-        <figcaption className="mx-auto mt-5 max-w-[30rem] text-center text-sm italic text-gray-400">
-          {caption}
-        </figcaption>
+          </div>
+          {caption && (
+            <figcaption className="mx-auto mt-5 max-w-[30rem] text-center text-sm italic text-gray-400">
+              {caption}
+            </figcaption>
+          )}
+        </>
       )}
     </figure>
   );

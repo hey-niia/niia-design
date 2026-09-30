@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import type { Project } from "../data/projects";
 import { FRAME_RADIUS } from "./ScreenshotFrame";
 import { useAutoplayInView } from "../lib/useAutoplayInView";
+import FlowAnimation from "./FlowAnimation";
 import KanbanDragCover from "./KanbanDragCover";
 
 // The meta line is all-caps (via the parent's `uppercase` class) except "iOS",
@@ -43,6 +44,9 @@ export default function WorkGridCard({
       <div className={slug === "ios-app" ? "flex justify-center bg-[#36383b] p-10" : undefined}>
         {coverAnimation === "connectiq-kanban" ? (
           <KanbanDragCover label={cover.alt} />
+        ) : coverAnimation === "matter-flow" ? (
+          // Same width the screen recording had.
+          <FlowAnimation alt={cover.alt} maxWidth={200} compact />
         ) : coverVideo ? (
           <video
             ref={videoRef}

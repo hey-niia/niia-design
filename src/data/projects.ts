@@ -229,7 +229,7 @@ export interface Project {
   /** Replaces the whole meta line under the home-page card, e.g. just "Dashboard". */
   cardMeta?: string;
   /** A coded animation that replaces the cover image on the home page. */
-  coverAnimation?: "connectiq-kanban";
+  coverAnimation?: "connectiq-kanban" | "matter-flow";
   lastUpdated: string;
   /** Impact Overview: 2-3 stat cards surfaced at the top of the case study. */
   impact?: ImpactStat[];
@@ -292,7 +292,8 @@ export const projects: Project[] = [
     ],
     duration: "Dec 2025 – Sep 2026 · 10 months",
     tools: ["Figma", "Claude", "Notion", "Amplitude"],
-    coverVideo: "/projects/ios-app/hero-coaching.mp4",
+    // Home page: the same memory flow the case study opens with.
+    coverAnimation: "matter-flow",
     darkPage: true,
     screenshots: [
       // The video's own first frame: shown before it plays, and instead of it
