@@ -10,7 +10,7 @@ import { FRAME_RADIUS } from "./ScreenshotFrame";
  * sharper than a screen recording, and it stays editable: re-export a frame
  * and the animation updates with it.
  *
- * Frames are 393×852pt screens exported at 2x; tap/swipe coordinates are in
+ * Frames are 393×852pt screens exported at 2x; tap coordinates are in
  * those points (straight off the Figma canvas).
  */
 
@@ -18,8 +18,6 @@ const W = 393;
 const H = 852;
 /** Top of an iOS sheet: the status bar area the sheet leaves uncovered. */
 const SHEET_TOP = 44;
-/** Bottom edge of the Team header — the scroll happens underneath it. */
-const HEADER_BOTTOM = 100;
 
 // iOS-style curves: sheets and modals decelerate hard, fades stay neutral.
 const EASE_SHEET = "cubic-bezier(0.32, 0.72, 0, 1)";
@@ -31,6 +29,8 @@ type Enter =
   /** Drawer slides away to the left and the scrim clears. */
   | "drawer-close"
   | "fade"
+  /** Near-instant swap to a pressed state, while the finger is still down. */
+  | "press"
   /** Next frame rises as a sheet over a dimmed screen. */
   | "sheet-up"
   /** Current sheet drops away, revealing the next frame beneath. */
@@ -40,17 +40,13 @@ type Enter =
   /** Full-screen modal slides up. */
   | "modal-up"
   /** Modal slides down, revealing the next frame beneath. */
-  | "modal-down"
-  /** Content scrolls up under a fixed header. */
-  | "scroll";
+  | "modal-down";
 
 type Step = {
   frame: string;
   enter: Enter;
   /** Where the tap that triggers this step lands, in pt. */
   tap?: [number, number];
-  /** Swipe that triggers this step: from → to, in pt. */
-  swipe?: [[number, number], [number, number]];
   /** How long the frame rests before the next step, in ms. */
   hold: number;
   chapter: number;
@@ -68,28 +64,28 @@ const MEMORY_FLOW: { chapters: FlowChapter[]; steps: Step[] } = {
     { label: "Coach reply" },
     { label: "Share" },
   ],
+  // Taps land on the centre of the real layer, read off the Figma frame.
   steps: [
     { frame: "coaching", enter: "drawer-open", hold: 1400, chapter: 0 },
-    { frame: "coaching", enter: "drawer-close", tap: [100, 161], hold: 1900, chapter: 0 },
-    { frame: "moment-ideas", enter: "sheet-up", tap: [121, 438], hold: 1500, chapter: 1 },
+    // "Coaching" menu row (20,136 · 301×48)
+    { frame: "coaching", enter: "drawer-close", tap: [100, 160], hold: 1900, chapter: 0 },
+    // "See moment ideas" button (25,418 · 192×42)
+    { frame: "moment-ideas", enter: "sheet-up", tap: [121, 439], hold: 1500, chapter: 1 },
+    // Third suggested photo (256,138 · 112×114) — the one that gets attached
     { frame: "photo-loading", enter: "sheet-down", tap: [312, 195], hold: 800, chapter: 1 },
-    { frame: "photo-attached", enter: "wipe-up", tap: [110, 759], hold: 900, chapter: 2 },
+    // "Message..." field (20,740 · 353×36), which brings up the keyboard
+    { frame: "photo-attached", enter: "wipe-up", tap: [100, 758], hold: 900, chapter: 2 },
     { frame: "typing", enter: "fade", hold: 1100, chapter: 2 },
     { frame: "typing-long", enter: "fade", hold: 1300, chapter: 2 },
-    { frame: "sent", enter: "fade", tap: [351, 457], hold: 3400, chapter: 3 },
-    { frame: "new-post", enter: "modal-up", tap: [310, 700], hold: 1300, chapter: 4 },
-    { frame: "new-post-score", enter: "fade", tap: [88, 657], hold: 1000, chapter: 4 },
-    { frame: "posted", enter: "modal-down", tap: [340, 70], hold: 1500, chapter: 4 },
-    {
-      frame: "posted-scrolled",
-      enter: "scroll",
-      swipe: [
-        [200, 700],
-        [200, 330],
-      ],
-      hold: 2200,
-      chapter: 4,
-    },
+    // Send button (333,440 · 36×36)
+    { frame: "sent", enter: "fade", tap: [351, 458], hold: 3400, chapter: 3 },
+    // "Share into team feed" card (226,588 · 194×136, runs off the right edge)
+    { frame: "new-post", enter: "modal-up", tap: [310, 690], hold: 1300, chapter: 4 },
+    // "Matter score" pill (24,637 · 128×40): pressed, then on
+    { frame: "new-post-press", enter: "press", tap: [88, 657], hold: 260, chapter: 4 },
+    { frame: "new-post-score", enter: "fade", hold: 1100, chapter: 4 },
+    // "POST" button (311,54 · 58×32)
+    { frame: "posted", enter: "modal-down", tap: [340, 70], hold: 2400, chapter: 4 },
   ],
 };
 
@@ -186,22 +182,6 @@ export default function FlowAnimation({
     ).finished;
   }, []);
 
-  const swipe = useCallback(async ([from, to]: [[number, number], [number, number]]) => {
-    const f = finger.current;
-    if (!f) return;
-    f.style.left = pct(from[0], W);
-    const t = (scale: number) => `translate(-50%, -50%) scale(${scale})`;
-    await f.animate(
-      [
-        { opacity: 0, top: pct(from[1], H), transform: t(1.3) },
-        { opacity: 1, top: pct(from[1], H), transform: t(1), offset: 0.2 },
-        { opacity: 1, top: pct(to[1], H), transform: t(1), offset: 0.8 },
-        { opacity: 0, top: pct(to[1], H), transform: t(1) },
-      ],
-      { duration: 900, easing: EASE_OUT, fill: "forwards" },
-    ).finished;
-  }, []);
-
   /** Animate from the current step into step `i`. */
   const transition = useCallback(
     async (i: number, gen: number) => {
@@ -216,9 +196,8 @@ export default function FlowAnimation({
 
       // A manual jump cancels these mid-flight, which rejects `.finished`.
       if (step.tap) pressAt(...step.tap).catch(() => {});
-      if (step.swipe) swipe(step.swipe).catch(() => {});
       // Let the finger land before the screen reacts.
-      if (step.tap) await sleep(300);
+      if (step.tap) await sleep(step.enter === "press" ? 180 : 300);
       if (stale()) return;
 
       const layer = (el: HTMLElement, z: number) => (el.style.zIndex = String(z));
@@ -248,6 +227,12 @@ export default function FlowAnimation({
           layer(next, 2);
           next.style.opacity = "1";
           go(next, [{ opacity: 0 }, { opacity: 1 }], 280, "ease-in-out");
+          break;
+        case "press":
+          layer(prev, 1);
+          layer(next, 2);
+          next.style.opacity = "1";
+          go(next, [{ opacity: 0 }, { opacity: 1 }], 80, "linear");
           break;
         case "sheet-up":
           layer(prev, 1);
@@ -299,28 +284,6 @@ export default function FlowAnimation({
           next.style.opacity = "1";
           go(prev, [{ transform: "translateY(0)" }, { transform: "translateY(100%)" }], 480, EASE_SHEET);
           break;
-        case "scroll": {
-          // Move the content up while growing the clip by the same amount, so
-          // it slides *under* a header that stays put.
-          await sleep(160);
-          if (stale()) return;
-          const shift = 0.3 * H;
-          const clip = (d: number) => `inset(${pct(HEADER_BOTTOM + d, H)} 0 0 0)`;
-          const ty = (d: number) => `translateY(${pct(-d, H)})`;
-          layer(prev, 2);
-          layer(next, 1);
-          next.style.opacity = "1";
-          go(
-            prev,
-            [
-              { transform: ty(0), clipPath: clip(0), opacity: 1 },
-              { transform: ty(shift), clipPath: clip(shift), opacity: 0 },
-            ],
-            620,
-            "cubic-bezier(0.25, 0.1, 0.25, 1)",
-          );
-          break;
-        }
       }
 
       await Promise.all(runs);
@@ -347,7 +310,7 @@ export default function FlowAnimation({
       indexRef.current = i;
       setIndex(i);
     },
-    [steps, pressAt, swipe],
+    [steps, pressAt],
   );
 
   const playing = inView && !paused && !reducedMotion;
