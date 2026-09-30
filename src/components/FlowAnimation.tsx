@@ -28,8 +28,22 @@ const H = 852;
 const SHEET_TOP = 44;
 /** Where the chat scrolls under the Coaching header. */
 const CHAT_TOP = 180;
-/** The coach's reply: first line's top, line height, and left/right edges. */
-const REPLY = { top: 391, line: 24, lines: 8, left: 24, right: 372 };
+/** Coach text that streams in a line at a time, as [top, right edge] in pt.
+ *  Every line is 24pt tall and starts at x 24. */
+const LINE = 24;
+const TEXT_LEFT = 24;
+const STREAMS: Record<"coaching" | "sent", [number, number][]> = {
+  // "Hey Niia, happy Tuesday.", then the four-line nudge under it
+  coaching: [
+    [180, 204],
+    [216, 339],
+    [240, 342],
+    [264, 353],
+    [288, 319],
+  ],
+  // The reply to your memory: eight lines, the last one short
+  sent: [0, 1, 2, 3, 4, 5, 6, 7].map((n) => [391 + n * LINE, n === 7 ? 165 : 372]),
+};
 /** How far the chat scrolls once the cards arrive, so they clear the composer. */
 const CHAT_SCROLL = 64;
 /** The upload spinner on the attached photo (63,657 · 36×36). */
@@ -111,7 +125,6 @@ const STEPS: Step[] = [
 
 /** Plain screens: one image each. Layered scenes are listed in the JSX. */
 const SIMPLE = [
-  "coaching",
   "moment-ideas",
   "photo-uploaded",
   ...[0, 1, 2, 3, 4, 5, 6, 7].map((n) => `type-${n}`),
@@ -123,12 +136,9 @@ const SIMPLE = [
 const src = (name: string) => `/projects/ios-app/flow/${name}.webp`;
 const pct = (v: number, of: number) => `${(v / of) * 100}%`;
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
-/** clip-path for one line of the reply, revealed up to `x` pt. */
-const lineClip = (i: number, x: number) =>
-  `inset(${pct(REPLY.top + i * REPLY.line, H)} ${pct(W - x, W)} ${pct(
-    H - REPLY.top - (i + 1) * REPLY.line,
-    H,
-  )} 0)`;
+/** clip-path for one streamed line starting at `top`, revealed up to `x` pt. */
+const lineClip = (top: number, x: number) =>
+  `inset(${pct(top, H)} ${pct(W - x, W)} ${pct(H - top - LINE, H)} 0)`;
 
 function Layer({ name, className = "" }: { name: string; className?: string }) {
   return (
@@ -140,6 +150,21 @@ function Layer({ name, className = "" }: { name: string; className?: string }) {
       className={`absolute inset-0 h-full w-full select-none ${className}`}
     />
   );
+}
+
+/** One copy of a text layer per line, each clipped to its own line so the
+ *  lines can be revealed one after another. */
+function StreamLines({ scene, layer }: { scene: keyof typeof STREAMS; layer: string }) {
+  return STREAMS[scene].map((_, n) => (
+    <img
+      key={n}
+      data-stream-line={n}
+      src={src(layer)}
+      alt=""
+      draggable={false}
+      className="absolute inset-0 h-full w-full select-none"
+    />
+  ));
 }
 
 export default function FlowAnimation({
@@ -195,14 +220,26 @@ export default function FlowAnimation({
 
   const layerEl = (scene: string, name: string) =>
     scenes.current[scene]?.querySelector<HTMLElement>(`[data-layer="${name}"]`) ?? null;
-  const replyLines = () =>
-    Array.from(scenes.current.sent?.querySelectorAll<HTMLElement>("[data-reply-line]") ?? []);
+  const streamLines = useCallback(
+    (scene: keyof typeof STREAMS) =>
+      Array.from(scenes.current[scene]?.querySelectorAll<HTMLElement>("[data-stream-line]") ?? []),
+    [],
+  );
+  /** Show a scene's streamed text in full, or hide it all. */
+  const setStream = useCallback(
+    (scene: keyof typeof STREAMS, shown: boolean) =>
+      streamLines(scene).forEach((el, n) => {
+        const [top, end] = STREAMS[scene][n];
+        el.style.clipPath = lineClip(top, shown ? end : TEXT_LEFT);
+      }),
+    [streamLines],
+  );
 
   /** Every element that ever animates, so a settle or a jump can reset them all. */
   const animated = () => [
     ...Object.values(scenes.current),
     ...Object.values(scenes.current).flatMap((s) =>
-      Array.from(s?.querySelectorAll<HTMLElement>("[data-layer], [data-reply-line]") ?? []),
+      Array.from(s?.querySelectorAll<HTMLElement>("[data-layer], [data-stream-line]") ?? []),
     ),
     drawer.current,
     scrim.current,
@@ -224,7 +261,14 @@ export default function FlowAnimation({
       const el = layerEl("sent", name);
       if (el) el.style.opacity = "1";
     }
-    replyLines().forEach((el, n) => (el.style.clipPath = lineClip(n, REPLY.right)));
+    setStream("sent", true);
+    // At the very start the coach hasn't said anything yet.
+    const greeted = step.enter !== "drawer-open";
+    setStream("coaching", greeted);
+    for (const name of ["coach-card", "coach-reactions"]) {
+      const el = layerEl("coaching", name);
+      if (el) el.style.opacity = greeted ? "1" : "0";
+    }
     const chat = layerEl("sent", "sent-chat");
     if (chat) chat.style.transform = `translateY(-${pct(CHAT_SCROLL, H)})`;
     const rest = layerEl("posted", "posted-rest");
@@ -239,7 +283,7 @@ export default function FlowAnimation({
     if (finger.current) finger.current.style.opacity = "0";
     indexRef.current = i;
     setIndex(i);
-  }, []);
+  }, [setStream]);
 
   const pressAt = useCallback(async (x: number, y: number) => {
     const f = finger.current;
@@ -288,6 +332,36 @@ export default function FlowAnimation({
 
       const sheetClip = `inset(${pct(SHEET_TOP, H)} 0 0 0 round 20px 20px 0 0)`;
 
+      /** Type the coach's text out a line at a time; false if interrupted. */
+      const stream = async (scene: keyof typeof STREAMS) => {
+        for (const [n, el] of streamLines(scene).entries()) {
+          const [top, end] = STREAMS[scene][n];
+          await play(
+            el,
+            [{ clipPath: lineClip(top, TEXT_LEFT) }, { clipPath: lineClip(top, end) }],
+            // Same pace on every line, so a short one finishes sooner.
+            Math.max(90, ((end - TEXT_LEFT) / 348) * 240),
+            "linear",
+          );
+          if (stale()) return false;
+        }
+        return true;
+      };
+      /** Cards under a message float up one after another. */
+      const rise = (els: (HTMLElement | null)[], delay = 200) =>
+        els.forEach((el, n) =>
+          go(
+            el,
+            [
+              { opacity: 0, transform: `translateY(${pct(14, H)})` },
+              { opacity: 1, transform: "translateY(0)" },
+            ],
+            460,
+            EASE_OUT,
+            delay + n * 140,
+          ),
+        );
+
       switch (step.enter) {
         case "drawer-open":
           // Loop restart: fade the opening state back in over the last screen.
@@ -302,6 +376,13 @@ export default function FlowAnimation({
         case "drawer-close":
           go(drawer.current!, [{ transform: "none" }, { transform: "translateX(-100%)" }], 460, EASE_SHEET);
           go(scrim.current!, [{ opacity: 1 }, { opacity: 0 }], 460);
+          await Promise.all(runs);
+          if (stale()) return;
+          runs.length = 0;
+          // The coach greets you: words first, then its card.
+          await sleep(300);
+          if (stale() || !(await stream("coaching"))) return;
+          rise(["coach-card", "coach-reactions"].map((n) => layerEl("coaching", n)));
           break;
         case "type":
           show(next, prev);
@@ -361,7 +442,7 @@ export default function FlowAnimation({
           for (const el of [user, ...cards]) if (el) el.style.opacity = "0";
           const chat = layerEl("sent", "sent-chat");
           if (chat) chat.style.transform = "none";
-          replyLines().forEach((el, n) => (el.style.clipPath = lineClip(n, REPLY.left)));
+          setStream("sent", false);
           z(next, 1);
           z(prev, 3);
           next.style.opacity = "1";
@@ -396,31 +477,9 @@ export default function FlowAnimation({
           // The coach takes a beat, then streams its reply a line at a time.
           await sleep(650);
           if (stale()) return;
-          const lines = replyLines();
-          for (const [n, el] of lines.entries()) {
-            // The last line is short; the rest run the full measure.
-            const end = n === lines.length - 1 ? 165 : REPLY.right;
-            await play(
-              el,
-              [{ clipPath: lineClip(n, REPLY.left) }, { clipPath: lineClip(n, end) }],
-              n === lines.length - 1 ? 130 : 230,
-              "linear",
-            );
-            if (stale()) return;
-          }
-          // Then its suggestions, one after another.
-          cards.forEach((el, n) =>
-            go(
-              el,
-              [
-                { opacity: 0, transform: `translateY(${pct(14, H)})` },
-                { opacity: 1, transform: "translateY(0)" },
-              ],
-              460,
-              EASE_OUT,
-              200 + n * 140,
-            ),
-          );
+          if (!(await stream("sent"))) return;
+          // Then its suggestions, one after another…
+          rise(cards);
           // …and the chat scrolls up so they sit clear of the composer.
           go(
             chat,
@@ -470,7 +529,7 @@ export default function FlowAnimation({
       if (stale()) return;
       settle(i);
     },
-    [pressAt, settle],
+    [pressAt, settle, setStream, streamLines],
   );
 
   const playing = inView && !paused && !reducedMotion;
@@ -528,6 +587,14 @@ export default function FlowAnimation({
             </div>
           ))}
 
+          {/* Coaching, empty until the coach greets you. */}
+          <div ref={sceneRef("coaching")} className={sceneClass} style={{ opacity: 0 }}>
+            <Layer name="coach-base" />
+            <StreamLines scene="coaching" layer="coach-text" />
+            <Layer name="coach-card" />
+            <Layer name="coach-reactions" />
+          </div>
+
           {/* Photo uploading: the spinner turns while the frame holds. */}
           <div ref={sceneRef("photo-loading")} className={sceneClass} style={{ opacity: 0 }}>
             <Layer name="photo-loading" />
@@ -559,16 +626,7 @@ export default function FlowAnimation({
             >
               <div data-layer="sent-chat" className="absolute inset-x-0" style={{ top: `-${(CHAT_TOP / (H - CHAT_TOP)) * 100}%`, height: `${(H / (H - CHAT_TOP)) * 100}%` }}>
                 <Layer name="sent-user" />
-                {Array.from({ length: REPLY.lines }, (_, n) => (
-                  <img
-                    key={n}
-                    data-reply-line={n}
-                    src={src("sent-reply")}
-                    alt=""
-                    draggable={false}
-                    className="absolute inset-0 h-full w-full select-none"
-                  />
-                ))}
+                <StreamLines scene="sent" layer="sent-reply" />
                 <Layer name="sent-card1" />
                 <Layer name="sent-card2" />
                 <Layer name="sent-reactions" />
