@@ -30,6 +30,10 @@ const SHEET_TOP = 44;
 const CHAT_TOP = 180;
 /** The coach's reply: first line's top, line height, and left/right edges. */
 const REPLY = { top: 391, line: 24, lines: 8, left: 24, right: 372 };
+/** How far the chat scrolls once the cards arrive, so they clear the composer. */
+const CHAT_SCROLL = 64;
+/** The upload spinner on the attached photo (63,657 · 36×36). */
+const SPINNER = { x: 63, y: 657, size: 36 };
 /** Height of a photo post in the feed — how far older posts get pushed. */
 const POST_HEIGHT = 621;
 
@@ -87,14 +91,15 @@ const STEPS: Step[] = [
   // "See moment ideas" button (25,418 · 192×42)
   { scene: "moment-ideas", enter: "sheet-up", tap: [121, 439], hold: 1500, chapter: 1 },
   // Third suggested photo (256,138 · 112×114) — the one that gets attached
-  { scene: "photo-loading", enter: "sheet-down", tap: [312, 195], hold: 800, chapter: 1 },
+  { scene: "photo-loading", enter: "sheet-down", tap: [312, 195], hold: 1300, chapter: 1 },
   // "Message..." field (20,740 · 353×36), which brings up the keyboard
   { scene: "type-0", enter: "wipe-up", tap: [100, 758], hold: 700, chapter: 2 },
   ...TYPING,
   // Send button (333,439 · 36×36)
   { scene: "sent", enter: "send", tap: [351, 457], hold: 2600, chapter: 3 },
-  // "Share into team feed" card (226,588 · 194×136, runs off the right edge)
-  { scene: "post", enter: "modal-up", tap: [310, 690], hold: 1300, chapter: 4 },
+  // "Share into team feed" card (226,588 · 194×136, runs off the right
+  // edge), 64pt higher once the chat has scrolled
+  { scene: "post", enter: "modal-up", tap: [310, 626], hold: 1300, chapter: 4 },
   // "Matter score" pill (24,637 · 128×40): pressed, then on
   { scene: "post-press", enter: "press", tap: [88, 657], hold: 260, chapter: 4 },
   { scene: "post-score", enter: "fade", hold: 1100, chapter: 4 },
@@ -106,7 +111,6 @@ const STEPS: Step[] = [
 const SIMPLE = [
   "coaching",
   "moment-ideas",
-  "photo-loading",
   ...[0, 1, 2, 3, 4, 5, 6, 7].map((n) => `type-${n}`),
   "post",
   "post-press",
@@ -214,6 +218,8 @@ export default function FlowAnimation({
       if (el) el.style.opacity = "1";
     }
     replyLines().forEach((el, n) => (el.style.clipPath = lineClip(n, REPLY.right)));
+    const chat = layerEl("sent", "sent-chat");
+    if (chat) chat.style.transform = `translateY(-${pct(CHAT_SCROLL, H)})`;
     const rest = layerEl("posted", "posted-rest");
     if (rest) rest.style.transform = `translateY(${pct(POST_HEIGHT, H)})`;
     const fresh = layerEl("posted", "posted-new");
@@ -346,6 +352,8 @@ export default function FlowAnimation({
           const user = layerEl("sent", "sent-user");
           const cards = ["sent-card1", "sent-card2", "sent-reactions"].map((n) => layerEl("sent", n));
           for (const el of [user, ...cards]) if (el) el.style.opacity = "0";
+          const chat = layerEl("sent", "sent-chat");
+          if (chat) chat.style.transform = "none";
           replyLines().forEach((el, n) => (el.style.clipPath = lineClip(n, REPLY.left)));
           z(next, 1);
           z(prev, 3);
@@ -405,6 +413,14 @@ export default function FlowAnimation({
               EASE_OUT,
               200 + n * 140,
             ),
+          );
+          // …and the chat scrolls up so they sit clear of the composer.
+          go(
+            chat,
+            [{ transform: "translateY(0)" }, { transform: `translateY(-${pct(CHAT_SCROLL, H)})` }],
+            700,
+            EASE_SHEET,
+            260,
           );
           break;
         }
@@ -505,6 +521,22 @@ export default function FlowAnimation({
             </div>
           ))}
 
+          {/* Photo uploading: the spinner turns while the frame holds. */}
+          <div ref={sceneRef("photo-loading")} className={sceneClass} style={{ opacity: 0 }}>
+            <Layer name="photo-loading" />
+            <img
+              src={src("spinner")}
+              alt=""
+              draggable={false}
+              className="absolute animate-spin select-none [animation-duration:900ms] motion-reduce:animate-none"
+              style={{
+                left: pct(SPINNER.x, W),
+                top: pct(SPINNER.y, H),
+                width: pct(SPINNER.size, W),
+              }}
+            />
+          </div>
+
           {/* Coach reply, built up in layers. The chat scrolls under the
               header, so its layers sit in a window that starts below it. */}
           <div ref={sceneRef("sent")} className={sceneClass} style={{ opacity: 0 }}>
@@ -518,7 +550,7 @@ export default function FlowAnimation({
                 WebkitMaskImage: "linear-gradient(to bottom, transparent, black 4%)",
               }}
             >
-              <div className="absolute inset-x-0" style={{ top: `-${(CHAT_TOP / (H - CHAT_TOP)) * 100}%`, height: `${(H / (H - CHAT_TOP)) * 100}%` }}>
+              <div data-layer="sent-chat" className="absolute inset-x-0" style={{ top: `-${(CHAT_TOP / (H - CHAT_TOP)) * 100}%`, height: `${(H / (H - CHAT_TOP)) * 100}%` }}>
                 <Layer name="sent-user" />
                 {Array.from({ length: REPLY.lines }, (_, n) => (
                   <img
