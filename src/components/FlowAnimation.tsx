@@ -2,22 +2,36 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { FRAME_RADIUS } from "./ScreenshotFrame";
 
 /**
- * A phone-sized walkthrough of one flow, played from static Figma frames.
+ * A phone-sized walkthrough of logging a memory, played from Figma exports.
  *
- * Each step swaps to the next frame with the transition iOS would actually
- * use there — a sheet rising, the keyboard pushing the composer up, a modal
- * dropping away — and a tap marker shows where the finger went. Cheaper and
- * sharper than a screen recording, and it stays editable: re-export a frame
- * and the animation updates with it.
+ * Most steps are whole screens swapped with the transition iOS would use
+ * there — a sheet rising, the keyboard pushing the composer up, a modal
+ * dropping away — with a tap marker where the finger lands. Two moments are
+ * built from layers instead, so they can move the way the app does:
  *
- * Frames are 393×852pt screens exported at 2x; tap coordinates are in
- * those points (straight off the Figma canvas).
+ * - Sending: the keyboard drops, your message rises into the chat, the
+ *   coach's reply streams in line by line, then its cards arrive.
+ * - Posting: the composer drops away and your post slides into the top of
+ *   the team feed, pushing the older posts down.
+ *
+ * Every asset is a full 393×852pt screen exported at 2x (layers on a
+ * transparent background), so they stack without any offsets. Tap points are
+ * in those points, at the centre of the Figma layer they hit.
+ *
+ * Source: M 2026 — Production UI, "animation" section (node 13481:14461),
+ * with copy made consistent across screens before export.
  */
 
 const W = 393;
 const H = 852;
 /** Top of an iOS sheet: the status bar area the sheet leaves uncovered. */
 const SHEET_TOP = 44;
+/** Where the chat scrolls under the Coaching header. */
+const CHAT_TOP = 180;
+/** The coach's reply: first line's top, line height, and left/right edges. */
+const REPLY = { top: 391, line: 24, lines: 8, left: 24, right: 372 };
+/** Height of a photo post in the feed — how far older posts get pushed. */
+const POST_HEIGHT = 621;
 
 // iOS-style curves: sheets and modals decelerate hard, fades stay neutral.
 const EASE_SHEET = "cubic-bezier(0.32, 0.72, 0, 1)";
@@ -29,6 +43,8 @@ type Enter =
   /** Drawer slides away to the left and the scrim clears. */
   | "drawer-close"
   | "fade"
+  /** A keystroke: the next frame replaces this one outright. */
+  | "type"
   /** Near-instant swap to a pressed state, while the finger is still down. */
   | "press"
   /** Next frame rises as a sheet over a dimmed screen. */
@@ -39,60 +55,85 @@ type Enter =
   | "wipe-up"
   /** Full-screen modal slides up. */
   | "modal-up"
-  /** Modal slides down, revealing the next frame beneath. */
-  | "modal-down";
+  /** Keyboard drops, message rises, the coach replies. */
+  | "send"
+  /** Modal drops, the new post slides into the feed. */
+  | "publish";
 
 type Step = {
-  frame: string;
+  scene: string;
   enter: Enter;
   /** Where the tap that triggers this step lands, in pt. */
   tap?: [number, number];
-  /** How long the frame rests before the next step, in ms. */
+  /** How long the screen rests before the next step, in ms. */
   hold: number;
   chapter: number;
 };
 
-export type FlowChapter = { label: string };
+const CHAPTERS = ["Open", "Pick a photo", "Write", "Coach reply", "Share"];
 
-const src = (frame: string) => `/projects/ios-app/flow/${frame}.webp`;
+/** "Had the coziest cinema evening with Maria yesterday — just what I needed.", a few words at a time. */
+const TYPING = [1, 2, 3, 4, 5, 6, 7].map((n) => ({
+  scene: `type-${n}`,
+  enter: "type" as const,
+  hold: n === 7 ? 900 : 340,
+  chapter: 2,
+}));
 
-const MEMORY_FLOW: { chapters: FlowChapter[]; steps: Step[] } = {
-  chapters: [
-    { label: "Open" },
-    { label: "Pick a photo" },
-    { label: "Write" },
-    { label: "Coach reply" },
-    { label: "Share" },
-  ],
-  // Taps land on the centre of the real layer, read off the Figma frame.
-  steps: [
-    { frame: "coaching", enter: "drawer-open", hold: 1400, chapter: 0 },
-    // "Coaching" menu row (20,136 · 301×48)
-    { frame: "coaching", enter: "drawer-close", tap: [100, 160], hold: 1900, chapter: 0 },
-    // "See moment ideas" button (25,418 · 192×42)
-    { frame: "moment-ideas", enter: "sheet-up", tap: [121, 439], hold: 1500, chapter: 1 },
-    // Third suggested photo (256,138 · 112×114) — the one that gets attached
-    { frame: "photo-loading", enter: "sheet-down", tap: [312, 195], hold: 800, chapter: 1 },
-    // "Message..." field (20,740 · 353×36), which brings up the keyboard
-    { frame: "photo-attached", enter: "wipe-up", tap: [100, 758], hold: 900, chapter: 2 },
-    { frame: "typing", enter: "fade", hold: 1100, chapter: 2 },
-    { frame: "typing-long", enter: "fade", hold: 1300, chapter: 2 },
-    // Send button (333,440 · 36×36)
-    { frame: "sent", enter: "fade", tap: [351, 458], hold: 3400, chapter: 3 },
-    // "Share into team feed" card (226,588 · 194×136, runs off the right edge)
-    { frame: "new-post", enter: "modal-up", tap: [310, 690], hold: 1300, chapter: 4 },
-    // "Matter score" pill (24,637 · 128×40): pressed, then on
-    { frame: "new-post-press", enter: "press", tap: [88, 657], hold: 260, chapter: 4 },
-    { frame: "new-post-score", enter: "fade", hold: 1100, chapter: 4 },
-    // "POST" button (311,54 · 58×32)
-    { frame: "posted", enter: "modal-down", tap: [340, 70], hold: 2400, chapter: 4 },
-  ],
-};
+const STEPS: Step[] = [
+  { scene: "coaching", enter: "drawer-open", hold: 1400, chapter: 0 },
+  // "Coaching" menu row (20,136 · 301×48)
+  { scene: "coaching", enter: "drawer-close", tap: [100, 160], hold: 1900, chapter: 0 },
+  // "See moment ideas" button (25,418 · 192×42)
+  { scene: "moment-ideas", enter: "sheet-up", tap: [121, 439], hold: 1500, chapter: 1 },
+  // Third suggested photo (256,138 · 112×114) — the one that gets attached
+  { scene: "photo-loading", enter: "sheet-down", tap: [312, 195], hold: 800, chapter: 1 },
+  // "Message..." field (20,740 · 353×36), which brings up the keyboard
+  { scene: "type-0", enter: "wipe-up", tap: [100, 758], hold: 700, chapter: 2 },
+  ...TYPING,
+  // Send button (333,439 · 36×36)
+  { scene: "sent", enter: "send", tap: [351, 457], hold: 2600, chapter: 3 },
+  // "Share into team feed" card (226,588 · 194×136, runs off the right edge)
+  { scene: "post", enter: "modal-up", tap: [310, 690], hold: 1300, chapter: 4 },
+  // "Matter score" pill (24,637 · 128×40): pressed, then on
+  { scene: "post-press", enter: "press", tap: [88, 657], hold: 260, chapter: 4 },
+  { scene: "post-score", enter: "fade", hold: 1100, chapter: 4 },
+  // "POST" button (311,54 · 58×32)
+  { scene: "posted", enter: "publish", tap: [340, 70], hold: 2800, chapter: 4 },
+];
 
-const FRAMES = [...new Set(MEMORY_FLOW.steps.map((s) => s.frame))];
+/** Plain screens: one image each. Layered scenes are listed in the JSX. */
+const SIMPLE = [
+  "coaching",
+  "moment-ideas",
+  "photo-loading",
+  ...[0, 1, 2, 3, 4, 5, 6, 7].map((n) => `type-${n}`),
+  "post",
+  "post-press",
+  "post-score",
+];
 
+const src = (name: string) => `/projects/ios-app/flow/${name}.webp`;
 const pct = (v: number, of: number) => `${(v / of) * 100}%`;
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+/** clip-path for one line of the reply, revealed up to `x` pt. */
+const lineClip = (i: number, x: number) =>
+  `inset(${pct(REPLY.top + i * REPLY.line, H)} ${pct(W - x, W)} ${pct(
+    H - REPLY.top - (i + 1) * REPLY.line,
+    H,
+  )} 0)`;
+
+function Layer({ name, className = "" }: { name: string; className?: string }) {
+  return (
+    <img
+      data-layer={name}
+      src={src(name)}
+      alt=""
+      draggable={false}
+      className={`absolute inset-0 h-full w-full select-none ${className}`}
+    />
+  );
+}
 
 export default function FlowAnimation({
   alt,
@@ -103,9 +144,8 @@ export default function FlowAnimation({
   maxWidth?: number;
   caption?: string;
 }) {
-  const { steps, chapters } = MEMORY_FLOW;
   const root = useRef<HTMLDivElement>(null);
-  const frames = useRef<Record<string, HTMLImageElement | null>>({});
+  const scenes = useRef<Record<string, HTMLDivElement | null>>({});
   const dim = useRef<HTMLDivElement>(null);
   const scrim = useRef<HTMLDivElement>(null);
   const drawer = useRef<HTMLImageElement>(null);
@@ -142,29 +182,51 @@ export default function FlowAnimation({
     return () => io.disconnect();
   }, []);
 
-  /** Snap straight to a step's resting state — no animation. */
-  const show = useCallback(
-    (i: number) => {
-      const step = steps[i];
-      for (const [name, img] of Object.entries(frames.current)) {
-        if (!img) continue;
-        img.getAnimations().forEach((a) => a.cancel());
-        img.style.opacity = name === step.frame ? "1" : "0";
-        img.style.zIndex = "1";
-      }
-      const drawerOpen = step.enter === "drawer-open";
-      for (const el of [drawer.current, scrim.current, dim.current, finger.current]) {
-        el?.getAnimations().forEach((a) => a.cancel());
-      }
-      if (drawer.current) drawer.current.style.transform = drawerOpen ? "none" : "translateX(-100%)";
-      if (scrim.current) scrim.current.style.opacity = drawerOpen ? "1" : "0";
-      if (dim.current) dim.current.style.opacity = "0";
-      if (finger.current) finger.current.style.opacity = "0";
-      indexRef.current = i;
-      setIndex(i);
-    },
-    [steps],
-  );
+  const layerEl = (scene: string, name: string) =>
+    scenes.current[scene]?.querySelector<HTMLElement>(`[data-layer="${name}"]`) ?? null;
+  const replyLines = () =>
+    Array.from(scenes.current.sent?.querySelectorAll<HTMLElement>("[data-reply-line]") ?? []);
+
+  /** Every element that ever animates, so a settle or a jump can reset them all. */
+  const animated = () => [
+    ...Object.values(scenes.current),
+    ...Object.values(scenes.current).flatMap((s) =>
+      Array.from(s?.querySelectorAll<HTMLElement>("[data-layer], [data-reply-line]") ?? []),
+    ),
+    drawer.current,
+    scrim.current,
+    dim.current,
+    finger.current,
+  ];
+
+  /** Put every scene and layer in the resting state of step `i`. */
+  const settle = useCallback((i: number) => {
+    const step = STEPS[i];
+    for (const el of animated()) el?.getAnimations().forEach((a) => a.cancel());
+    for (const [name, el] of Object.entries(scenes.current)) {
+      if (!el) continue;
+      el.style.opacity = name === step.scene ? "1" : "0";
+      el.style.zIndex = "1";
+    }
+    // Layered scenes rest fully built.
+    for (const name of ["sent-user", "sent-card1", "sent-card2", "sent-reactions"]) {
+      const el = layerEl("sent", name);
+      if (el) el.style.opacity = "1";
+    }
+    replyLines().forEach((el, n) => (el.style.clipPath = lineClip(n, REPLY.right)));
+    const rest = layerEl("posted", "posted-rest");
+    if (rest) rest.style.transform = `translateY(${pct(POST_HEIGHT, H)})`;
+    const fresh = layerEl("posted", "posted-new");
+    if (fresh) fresh.style.opacity = "1";
+
+    const drawerOpen = step.enter === "drawer-open";
+    if (drawer.current) drawer.current.style.transform = drawerOpen ? "none" : "translateX(-100%)";
+    if (scrim.current) scrim.current.style.opacity = drawerOpen ? "1" : "0";
+    if (dim.current) dim.current.style.opacity = "0";
+    if (finger.current) finger.current.style.opacity = "0";
+    indexRef.current = i;
+    setIndex(i);
+  }, []);
 
   const pressAt = useCallback(async (x: number, y: number) => {
     const f = finger.current;
@@ -186,10 +248,10 @@ export default function FlowAnimation({
   const transition = useCallback(
     async (i: number, gen: number) => {
       const stale = () => gen !== generation.current;
-      const step = steps[i];
-      const prevStep = steps[indexRef.current];
-      const next = frames.current[step.frame];
-      const prev = frames.current[prevStep.frame];
+      const step = STEPS[i];
+      const prevStep = STEPS[indexRef.current];
+      const next = scenes.current[step.scene];
+      const prev = scenes.current[prevStep.scene];
       if (!next || !prev) return;
       // Move the step label with the tap, not after the screen settles.
       setIndex(i);
@@ -200,44 +262,48 @@ export default function FlowAnimation({
       if (step.tap) await sleep(step.enter === "press" ? 180 : 300);
       if (stale()) return;
 
-      const layer = (el: HTMLElement, z: number) => (el.style.zIndex = String(z));
-      const runs: Promise<unknown>[] = [];
-      const go = (el: Element, k: Keyframe[], ms: number, easing = EASE_OUT) =>
-        runs.push(el.animate(k, { duration: ms, easing, fill: "forwards" }).finished);
+      const z = (el: HTMLElement, v: number) => (el.style.zIndex = String(v));
+      const play = (el: Element | null, k: Keyframe[], ms: number, easing = EASE_OUT, delay = 0) =>
+        el?.animate(k, { duration: ms, easing, delay, fill: "both" }).finished;
+      const runs: (Promise<unknown> | undefined)[] = [];
+      const go = (...args: Parameters<typeof play>) => runs.push(play(...args));
+      const show = (el: HTMLElement, below: HTMLElement) => {
+        z(below, 1);
+        z(el, 2);
+        el.style.opacity = "1";
+      };
 
       const sheetClip = `inset(${pct(SHEET_TOP, H)} 0 0 0 round 20px 20px 0 0)`;
 
       switch (step.enter) {
         case "drawer-open":
-          // Loop restart: fade the opening state back in over the last frame.
-          layer(prev, 1);
-          layer(next, 2);
-          next.style.opacity = "1";
-          drawer.current!.style.transform = "none";
-          go(next, [{ opacity: 0 }, { opacity: 1 }], 600);
-          go(drawer.current!, [{ opacity: 0 }, { opacity: 1 }], 600);
-          go(scrim.current!, [{ opacity: 0 }, { opacity: 1 }], 600);
+          // Loop restart: fade the opening state back in over the last screen.
+          settle(0);
+          prev.style.opacity = "1";
+          z(prev, 1);
+          z(next, 2);
+          for (const el of [next, drawer.current!, scrim.current!]) {
+            go(el, [{ opacity: 0 }, { opacity: 1 }], 600);
+          }
           break;
         case "drawer-close":
           go(drawer.current!, [{ transform: "none" }, { transform: "translateX(-100%)" }], 460, EASE_SHEET);
           go(scrim.current!, [{ opacity: 1 }, { opacity: 0 }], 460);
           break;
+        case "type":
+          show(next, prev);
+          break;
         case "fade":
-          layer(prev, 1);
-          layer(next, 2);
-          next.style.opacity = "1";
+          show(next, prev);
           go(next, [{ opacity: 0 }, { opacity: 1 }], 280, "ease-in-out");
           break;
         case "press":
-          layer(prev, 1);
-          layer(next, 2);
-          next.style.opacity = "1";
+          show(next, prev);
           go(next, [{ opacity: 0 }, { opacity: 1 }], 80, "linear");
           break;
         case "sheet-up":
-          layer(prev, 1);
-          layer(next, 3);
-          next.style.opacity = "1";
+          show(next, prev);
+          z(next, 3);
           go(dim.current!, [{ opacity: 0 }, { opacity: 1 }], 420);
           go(
             next,
@@ -250,8 +316,8 @@ export default function FlowAnimation({
           );
           break;
         case "sheet-down":
-          layer(next, 1);
-          layer(prev, 3);
+          z(next, 1);
+          z(prev, 3);
           next.style.opacity = "1";
           go(dim.current!, [{ opacity: 1 }, { opacity: 0 }], 420);
           go(
@@ -267,50 +333,121 @@ export default function FlowAnimation({
         case "wipe-up":
           // Header is identical on both frames, so revealing bottom-up reads
           // as the keyboard pushing the composer into place.
-          layer(prev, 1);
-          layer(next, 2);
-          next.style.opacity = "1";
+          show(next, prev);
           go(next, [{ clipPath: "inset(100% 0 0 0)" }, { clipPath: "inset(0% 0 0 0)" }], 420, EASE_SHEET);
           break;
         case "modal-up":
-          layer(prev, 1);
-          layer(next, 3);
-          next.style.opacity = "1";
+          show(next, prev);
+          z(next, 3);
           go(next, [{ transform: "translateY(100%)" }, { transform: "translateY(0)" }], 560, EASE_SHEET);
           break;
-        case "modal-down":
-          layer(next, 1);
-          layer(prev, 3);
+        case "send": {
+          // The sent screen starts empty: just the header and the composer.
+          const user = layerEl("sent", "sent-user");
+          const cards = ["sent-card1", "sent-card2", "sent-reactions"].map((n) => layerEl("sent", n));
+          for (const el of [user, ...cards]) if (el) el.style.opacity = "0";
+          replyLines().forEach((el, n) => (el.style.clipPath = lineClip(n, REPLY.left)));
+          z(next, 1);
+          z(prev, 3);
           next.style.opacity = "1";
-          go(prev, [{ transform: "translateY(0)" }, { transform: "translateY(100%)" }], 480, EASE_SHEET);
+
+          // Keyboard and composer drop away below the header.
+          const below = `inset(${pct(CHAT_TOP, H)} 0 0 0)`;
+          go(
+            prev,
+            [
+              { transform: "translateY(0)", clipPath: below, opacity: 1 },
+              { transform: "translateY(55%)", clipPath: below, opacity: 1, offset: 0.85 },
+              { transform: "translateY(65%)", clipPath: below, opacity: 0 },
+            ],
+            420,
+            EASE_SHEET,
+          );
+          // Your message rises into the chat.
+          go(
+            user,
+            [
+              { opacity: 0, transform: `translateY(${pct(40, H)})` },
+              { opacity: 1, transform: "translateY(0)" },
+            ],
+            420,
+            EASE_SHEET,
+            160,
+          );
+          await Promise.all(runs);
+          if (stale()) return;
+          runs.length = 0;
+
+          // The coach takes a beat, then streams its reply a line at a time.
+          await sleep(650);
+          if (stale()) return;
+          const lines = replyLines();
+          for (const [n, el] of lines.entries()) {
+            // The last line is short; the rest run the full measure.
+            const end = n === lines.length - 1 ? 165 : REPLY.right;
+            await play(
+              el,
+              [{ clipPath: lineClip(n, REPLY.left) }, { clipPath: lineClip(n, end) }],
+              n === lines.length - 1 ? 130 : 230,
+              "linear",
+            );
+            if (stale()) return;
+          }
+          // Then its suggestions, one after another.
+          cards.forEach((el, n) =>
+            go(
+              el,
+              [
+                { opacity: 0, transform: `translateY(${pct(14, H)})` },
+                { opacity: 1, transform: "translateY(0)" },
+              ],
+              460,
+              EASE_OUT,
+              200 + n * 140,
+            ),
+          );
           break;
+        }
+        case "publish": {
+          const rest = layerEl("posted", "posted-rest");
+          const fresh = layerEl("posted", "posted-new");
+          if (rest) rest.style.transform = "none";
+          if (fresh) fresh.style.opacity = "0";
+          z(next, 1);
+          z(prev, 3);
+          next.style.opacity = "1";
+          // The composer drops away, showing the feed as it was.
+          go(prev, [{ transform: "translateY(0)" }, { transform: "translateY(100%)" }], 480, EASE_SHEET);
+          await Promise.all(runs);
+          if (stale()) return;
+          runs.length = 0;
+          // Then your post takes the top slot and pushes the rest down.
+          go(
+            rest,
+            [{ transform: "translateY(0)" }, { transform: `translateY(${pct(POST_HEIGHT, H)})` }],
+            640,
+            EASE_SHEET,
+            150,
+          );
+          go(
+            fresh,
+            [
+              { opacity: 0, transform: "scale(0.96)", transformOrigin: "50% 18%" },
+              { opacity: 1, transform: "scale(1)", transformOrigin: "50% 18%" },
+            ],
+            520,
+            EASE_OUT,
+            330,
+          );
+          break;
+        }
       }
 
       await Promise.all(runs);
       if (stale()) return;
-      // Settle: bake the end state into inline styles and drop the animations.
-      for (const [name, img] of Object.entries(frames.current)) {
-        if (!img) continue;
-        img.getAnimations().forEach((a) => a.cancel());
-        img.style.opacity = name === step.frame ? "1" : "0";
-        img.style.zIndex = "1";
-      }
-      dim.current?.getAnimations().forEach((a) => a.cancel());
-      if (step.enter === "drawer-close") {
-        drawer.current!.getAnimations().forEach((a) => a.cancel());
-        drawer.current!.style.transform = "translateX(-100%)";
-        scrim.current!.getAnimations().forEach((a) => a.cancel());
-        scrim.current!.style.opacity = "0";
-      }
-      if (step.enter === "drawer-open") {
-        drawer.current!.getAnimations().forEach((a) => a.cancel());
-        scrim.current!.getAnimations().forEach((a) => a.cancel());
-        scrim.current!.style.opacity = "1";
-      }
-      indexRef.current = i;
-      setIndex(i);
+      settle(i);
     },
-    [steps, pressAt],
+    [pressAt, settle],
   );
 
   const playing = inView && !paused && !reducedMotion;
@@ -321,33 +458,37 @@ export default function FlowAnimation({
     (async () => {
       try {
         while (gen === generation.current) {
-          await sleep(steps[indexRef.current].hold);
+          await sleep(STEPS[indexRef.current].hold);
           if (gen !== generation.current) return;
-          await transition((indexRef.current + 1) % steps.length, gen);
+          await transition((indexRef.current + 1) % STEPS.length, gen);
         }
       } catch {
         // Animation cancelled by a jump — the next run picks up from there.
       }
     })();
     return cancelPlayback;
-  }, [playing, runKey, steps, transition, cancelPlayback]);
+  }, [playing, runKey, transition, cancelPlayback]);
 
   // Initial state before anything plays.
-  useEffect(() => show(0), [show]);
+  useEffect(() => settle(0), [settle]);
 
   const jumpTo = (chapter: number) => {
     cancelPlayback();
-    const first = steps.findIndex((s) => s.chapter === chapter);
+    const first = STEPS.findIndex((s) => s.chapter === chapter);
     // Land on the chapter's first *resting* frame; for chapter 0 that's the
     // coach with the drawer already closed.
-    show(chapter === 0 ? 1 : first);
+    settle(chapter === 0 ? 1 : first);
     setRunKey((k) => k + 1);
   };
 
-  const activeChapter = steps[index].chapter;
+  const activeChapter = STEPS[index].chapter;
+  const sceneRef = (name: string) => (el: HTMLDivElement | null) => {
+    scenes.current[name] = el;
+  };
+  const sceneClass = "absolute inset-0";
 
   return (
-    // Plain, like the Home screen before/after above it: the phone sits
+    // Plain, like the before/after toggles further down: the phone sits
     // straight on the page with a hairline and a soft shadow, no panel.
     <figure className="my-8">
       <div className="mx-auto" style={{ maxWidth }}>
@@ -358,19 +499,53 @@ export default function FlowAnimation({
           className={`relative w-full overflow-hidden ${FRAME_RADIUS} bg-[#121518] shadow-[0_2px_4px_rgba(0,0,0,0.04),0_12px_32px_rgba(0,0,0,0.08)] ring-1 ring-white/10`}
           style={{ aspectRatio: `${W} / ${H}` }}
         >
-          {FRAMES.map((name) => (
-            <img
-              key={name}
-              ref={(el) => {
-                frames.current[name] = el;
-              }}
-              src={src(name)}
-              alt=""
-              draggable={false}
-              className="absolute inset-0 h-full w-full select-none"
-              style={{ opacity: 0 }}
-            />
+          {SIMPLE.map((name) => (
+            <div key={name} ref={sceneRef(name)} className={sceneClass} style={{ opacity: 0 }}>
+              <Layer name={name} />
+            </div>
           ))}
+
+          {/* Coach reply, built up in layers. The chat scrolls under the
+              header, so its layers sit in a window that starts below it. */}
+          <div ref={sceneRef("sent")} className={sceneClass} style={{ opacity: 0 }}>
+            <Layer name="sent-base" />
+            <div
+              className="absolute inset-x-0 bottom-0 overflow-hidden"
+              style={{
+                top: pct(CHAT_TOP, H),
+                // Content fades out under the header rather than being cut.
+                maskImage: "linear-gradient(to bottom, transparent, black 4%)",
+                WebkitMaskImage: "linear-gradient(to bottom, transparent, black 4%)",
+              }}
+            >
+              <div className="absolute inset-x-0" style={{ top: `-${(CHAT_TOP / (H - CHAT_TOP)) * 100}%`, height: `${(H / (H - CHAT_TOP)) * 100}%` }}>
+                <Layer name="sent-user" />
+                {Array.from({ length: REPLY.lines }, (_, n) => (
+                  <img
+                    key={n}
+                    data-reply-line={n}
+                    src={src("sent-reply")}
+                    alt=""
+                    draggable={false}
+                    className="absolute inset-0 h-full w-full select-none"
+                  />
+                ))}
+                <Layer name="sent-card1" />
+                <Layer name="sent-card2" />
+                <Layer name="sent-reactions" />
+              </div>
+            </div>
+            <Layer name="sent-composer" />
+          </div>
+
+          {/* Team feed: your post drops in on top of the older ones. */}
+          <div ref={sceneRef("posted")} className={sceneClass} style={{ opacity: 0 }}>
+            <Layer name="posted-base" />
+            <Layer name="posted-rest" />
+            <Layer name="posted-new" />
+            <Layer name="posted-button" />
+          </div>
+
           {/* Sheet backdrop: dims whatever sits under a rising sheet. */}
           <div ref={dim} className="pointer-events-none absolute inset-0 z-[2] bg-black/60" style={{ opacity: 0 }} />
           <div ref={scrim} className="pointer-events-none absolute inset-0 z-[4] bg-black/50" style={{ opacity: 0 }} />
@@ -393,9 +568,9 @@ export default function FlowAnimation({
 
       {/* Same label treatment as the before/after toggles on this page. */}
       <div className="mx-auto mt-5 flex flex-wrap items-center justify-center gap-x-3 gap-y-2 sm:gap-x-4">
-        {chapters.map((c, i) => (
+        {CHAPTERS.map((label, i) => (
           <button
-            key={c.label}
+            key={label}
             type="button"
             onClick={() => jumpTo(i)}
             aria-current={i === activeChapter ? "step" : undefined}
@@ -403,7 +578,7 @@ export default function FlowAnimation({
               i === activeChapter ? "text-[var(--nd-ink-strong,#000)]" : "text-gray-400"
             }`}
           >
-            {c.label}
+            {label}
           </button>
         ))}
         {!reducedMotion && (

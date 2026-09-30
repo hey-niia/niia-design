@@ -322,11 +322,15 @@ export const projects: Project[] = [
     ],
     content: [
       {
-        type: "video",
-        height: 600,
-        src: "/projects/ios-app/hero-coaching.mp4",
-        poster: "/projects/ios-app/coaching-poster.webp",
-        alt: "Screen recording of the coaching flow: asking a question, logging a memory, naming which neurotransmitters it affected, and the progress sheet",
+        // Replaces the old hero-coaching.mp4 screen recording. Built from the
+        // "animation" section of M 2026 — Production UI (Ro11e0WuyM842RJuTXUyst,
+        // node 13481:14461), with the copy made consistent across screens,
+        // exported at 2x into public/projects/ios-app/flow/. Step order, timing
+        // and tap points live in FlowAnimation.tsx. 277px wide = 600px tall,
+        // the height the video had.
+        type: "flow-animation",
+        maxWidth: 277,
+        alt: "Animated walkthrough of logging a memory: the coach suggests recent photos, you pick one and write what made it good, the coach replies with which neurotransmitters it affected, and you share it to your team feed",
       },
 
       { type: "section", id: "problem-framing", title: "Problem" },
@@ -615,21 +619,6 @@ export const projects: Project[] = [
       {
         type: "paragraph",
         text: "The session also ends. It has a purpose and a natural stopping point, which is unusual for a chat interface and was a deliberate call: the product is trying to send you back into your own life, not keep you in the app.",
-      },
-
-      { type: "heading", mono: true, text: "Logging a memory" },
-      {
-        type: "paragraph",
-        text: "The loop the whole coach is built around. It offers photos from your week, you say what made the moment good, it tells you which systems that trained, and sharing it with your team is one tap from the reply.",
-      },
-      {
-        // Frames from the "animation" section of M 2026 — Production UI
-        // (Ro11e0WuyM842RJuTXUyst, node 13481:14461), exported at 2x into
-        // public/projects/ios-app/flow/. Step order, timing and tap points
-        // live in MEMORY_FLOW in FlowAnimation.tsx. 286px wide, like the
-        // Home screen toggle above, so both phones sit at 620px tall.
-        type: "flow-animation",
-        alt: "Animated walkthrough of logging a memory: the coach suggests recent photos, you pick one and write a sentence about it, the coach names which neurotransmitters it affected, and you share it to your team feed",
       },
 
       { type: "heading", mono: true, text: "Progress" },
