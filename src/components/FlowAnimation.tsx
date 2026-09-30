@@ -91,7 +91,9 @@ const STEPS: Step[] = [
   // "See moment ideas" button (25,418 · 192×42)
   { scene: "moment-ideas", enter: "sheet-up", tap: [121, 439], hold: 1500, chapter: 1 },
   // Third suggested photo (256,138 · 112×114) — the one that gets attached
-  { scene: "photo-loading", enter: "sheet-down", tap: [312, 195], hold: 1300, chapter: 1 },
+  { scene: "photo-loading", enter: "sheet-down", tap: [312, 195], hold: 650, chapter: 1 },
+  // Upload finishes: the spinner goes and the photo's dimming clears
+  { scene: "photo-uploaded", enter: "fade", hold: 700, chapter: 1 },
   // "Message..." field (20,740 · 353×36), which brings up the keyboard
   { scene: "type-0", enter: "wipe-up", tap: [100, 758], hold: 700, chapter: 2 },
   ...TYPING,
@@ -111,6 +113,7 @@ const STEPS: Step[] = [
 const SIMPLE = [
   "coaching",
   "moment-ideas",
+  "photo-uploaded",
   ...[0, 1, 2, 3, 4, 5, 6, 7].map((n) => `type-${n}`),
   "post",
   "post-press",
