@@ -5,133 +5,169 @@ type Point = { x: number; y: number };
 type Brush = {
   id: string;
   label: string;
-  maxWidth: number;
-  taperLength: number;
+  width: number;
   opacity: number;
   dotSize: number;
+  erase?: boolean;
 };
 
 type Stroke = {
   points: Point[];
-  maxWidth: number;
-  taperLength: number;
+  width: number;
   opacity: number;
+  erase?: boolean;
 };
 
-const STROKE_COLOR = "#000000";
+type SendState = "closed" | "open" | "sending" | "sent" | "error";
+
+const PAINT_COLOR = "#000000";
 const BACKGROUND_COLOR = "#f07c57";
-// Widths/taper lengths are in CSS px; scaled by devicePixelRatio at draw time.
-// The "Pen" preset matches the ink used on floraghnassia.com's "Now your
-// turn" drawing pad — a constant-width trail that tapers to a point over its
-// last 100px, so the tip you're actively drawing stays thin while everything
-// behind it settles to full weight.
+// Paint is rendered on a coarse pixel grid, like an old game screen: each
+// "pixel" is PIXEL_SIZE CSS px, with a PIXEL_GAP-px gap between pixels where
+// the background shows through. The bare canvas stays one flat colour.
+const PIXEL_SIZE = 5;
+const PIXEL_GAP = 1;
+const MAX_WORDS_LENGTH = 80;
+
+// Where finished drawings get POSTed as multipart form data
+// (fields: `message`, `image`). Set VITE_DRAWING_ENDPOINT to a form service
+// that accepts file uploads. Without it the send flow runs in preview mode.
+const DRAWING_ENDPOINT = import.meta.env.VITE_DRAWING_ENDPOINT as string | undefined;
+
+// Widths are in CSS px. Strokes keep their full width end to end (no taper).
 const BRUSHES: Brush[] = [
-  { id: "fine", label: "Fine", maxWidth: 3, taperLength: 20, opacity: 1, dotSize: 8 },
-  { id: "pen", label: "Pen", maxWidth: 10, taperLength: 100, opacity: 1, dotSize: 12 },
-  { id: "marker", label: "Marker", maxWidth: 18, taperLength: 40, opacity: 1, dotSize: 16 },
-  { id: "brush", label: "Brush", maxWidth: 26, taperLength: 180, opacity: 1, dotSize: 20 },
-  { id: "highlighter", label: "Highlighter", maxWidth: 34, taperLength: 0, opacity: 0.35, dotSize: 24 },
+  { id: "fine", label: "Fine", width: 5, opacity: 1, dotSize: 8 },
+  { id: "pen", label: "Pen", width: 12, opacity: 1, dotSize: 12 },
+  { id: "marker", label: "Marker", width: 20, opacity: 1, dotSize: 16 },
+  { id: "brush", label: "Brush", width: 30, opacity: 1, dotSize: 20 },
+  { id: "highlighter", label: "Highlighter", width: 38, opacity: 0.4, dotSize: 24 },
+  { id: "eraser", label: "Eraser", width: 34, opacity: 1, dotSize: 20, erase: true },
 ];
 
-function distance(a: Point, b: Point) {
-  return Math.hypot(b.x - a.x, b.y - a.y);
-}
+// 4x4 ordered-dither (Bayer) thresholds: partial coverage — the highlighter,
+// soft stroke edges — turns into a checkerboard of whole pixels, the way old
+// games faked transparency, instead of grey.
+const BAYER_4 = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5].map((v) => (v + 0.5) / 16);
 
-function widthAtDistanceFromTip(distFromTip: number, taperWindow: number, maxWidth: number) {
-  if (taperWindow <= 0 || distFromTip >= taperWindow) return maxWidth;
-  const g = 1 - distFromTip / taperWindow;
-  return maxWidth * (1 - Math.pow(g, 1.5));
-}
-
-// Renders one stroke's points (already in device-pixel canvas coordinates)
-// with the tapered tip. Re-running this from scratch on every redraw (rather
-// than caching pixels) keeps it resize-safe and gives a still-finished
-// stroke the exact same pointed tip it ended with.
-function renderTaperedStroke(
-  ctx: CanvasRenderingContext2D,
-  points: Point[],
-  maxWidth: number,
-  taperLength: number,
-  opacity: number,
-) {
-  if (points.length < 2) return;
-
-  const segmentLengths: number[] = [];
-  let total = 0;
-  for (let i = 0; i < points.length - 1; i++) {
-    const len = distance(points[i], points[i + 1]);
-    segmentLengths.push(len);
-    total += len;
-  }
-
-  const taperWindow = Math.min(taperLength, total);
-  ctx.strokeStyle = STROKE_COLOR;
+function renderStroke(ctx: CanvasRenderingContext2D, points: Point[], width: number, opacity: number) {
+  if (points.length === 0) return;
+  ctx.strokeStyle = PAINT_COLOR;
+  ctx.fillStyle = PAINT_COLOR;
+  ctx.globalAlpha = opacity;
   ctx.lineCap = "round";
   ctx.lineJoin = "round";
-  ctx.globalAlpha = opacity;
-
-  let travelled = 0;
-  for (let i = 0; i < points.length - 1; i++) {
-    const segLen = segmentLengths[i];
-    const distFromTipStart = total - travelled;
-    const distFromTipEnd = total - (travelled + segLen);
-    const widthStart = widthAtDistanceFromTip(distFromTipStart, taperWindow, maxWidth);
-    const widthEnd = widthAtDistanceFromTip(Math.max(distFromTipEnd, 0), taperWindow, maxWidth);
-
-    ctx.lineWidth = (widthStart + widthEnd) / 2;
+  ctx.lineWidth = width;
+  if (points.length === 1) {
     ctx.beginPath();
-    ctx.moveTo(points[i].x, points[i].y);
-    ctx.lineTo(points[i + 1].x, points[i + 1].y);
+    ctx.arc(points[0].x, points[0].y, width / 2, 0, Math.PI * 2);
+    ctx.fill();
+  } else {
+    // One path per stroke so overlapping segments don't build up opacity.
+    ctx.beginPath();
+    ctx.moveTo(points[0].x, points[0].y);
+    for (let i = 1; i < points.length; i++) ctx.lineTo(points[i].x, points[i].y);
     ctx.stroke();
-
-    travelled += segLen;
   }
-
   ctx.globalAlpha = 1;
+}
+
+// Snap every low-res pixel to fully painted or fully empty.
+function ditherToPixels(ctx: CanvasRenderingContext2D, w: number, h: number) {
+  if (w === 0 || h === 0) return;
+  const img = ctx.getImageData(0, 0, w, h);
+  const d = img.data;
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w; x++) {
+      const i = (y * w + x) * 4;
+      const coverage = d[i + 3] / 255;
+      d[i + 3] = coverage > BAYER_4[(y % 4) * 4 + (x % 4)] ? 255 : 0;
+    }
+  }
+  ctx.putImageData(img, 0, 0);
+}
+
+function makeGapTile(cellPx: number, gapPx: number) {
+  const tile = document.createElement("canvas");
+  tile.width = cellPx;
+  tile.height = cellPx;
+  const tctx = tile.getContext("2d");
+  if (tctx) {
+    tctx.fillStyle = "#fff";
+    tctx.fillRect(cellPx - gapPx, 0, gapPx, cellPx);
+    tctx.fillRect(0, cellPx - gapPx, cellPx, gapPx);
+  }
+  return tile;
 }
 
 export default function DrawingPad() {
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  // Low-res layer: one canvas pixel per on-screen "game pixel".
+  const pixelLayerRef = useRef<HTMLCanvasElement | null>(null);
+  // Full-res layer the pixels are scaled up into before the gaps are cut.
+  const paintLayerRef = useRef<HTMLCanvasElement | null>(null);
+  const gapTileRef = useRef<HTMLCanvasElement | null>(null);
   const strokesRef = useRef<Stroke[]>([]);
   const currentStrokeRef = useRef<Stroke | null>(null);
   const dprRef = useRef(1);
   const [hasStarted, setHasStarted] = useState(false);
+  const [hasStrokes, setHasStrokes] = useState(false);
   const [brush, setBrush] = useState<Brush>(BRUSHES[1]);
   const brushRef = useRef(brush);
   brushRef.current = brush;
 
-  const toPixels = (points: Point[], canvas: HTMLCanvasElement) =>
-    points.map((p) => ({ x: p.x * canvas.width, y: p.y * canvas.height }));
+  const [sendState, setSendState] = useState<SendState>("closed");
+  const [words, setWords] = useState("");
+  // Hidden from people, filled in by spam bots — the mailbox drops those.
+  const honeypotRef = useRef<HTMLInputElement>(null);
+  const [preview, setPreview] = useState<string | null>(null);
 
   const redrawAll = () => {
     const canvas = canvasRef.current;
     const ctx = canvas?.getContext("2d");
-    if (!canvas || !ctx) return;
+    const pixels = pixelLayerRef.current;
+    const lctx = pixels?.getContext("2d", { willReadFrequently: true });
+    const paint = paintLayerRef.current;
+    const pctx = paint?.getContext("2d");
+    if (!canvas || !ctx || !pixels || !lctx || !paint || !pctx) return;
 
     ctx.fillStyle = BACKGROUND_COLOR;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    const dpr = dprRef.current;
-    for (const stroke of strokesRef.current) {
-      renderTaperedStroke(
-        ctx,
-        toPixels(stroke.points, canvas),
-        stroke.maxWidth * dpr,
-        stroke.taperLength * dpr,
-        stroke.opacity,
-      );
+    // 1. Paint every stroke at "game" resolution and snap it to whole pixels.
+    lctx.clearRect(0, 0, pixels.width, pixels.height);
+    const cssWidth = canvas.width / dprRef.current;
+    const cssHeight = canvas.height / dprRef.current;
+    const all = currentStrokeRef.current
+      ? [...strokesRef.current, currentStrokeRef.current]
+      : strokesRef.current;
+    for (const stroke of all) {
+      const pts = stroke.points.map((p) => ({
+        x: (p.x * cssWidth) / PIXEL_SIZE,
+        y: (p.y * cssHeight) / PIXEL_SIZE,
+      }));
+      // The eraser is just a stroke that removes paint instead of adding it.
+      lctx.globalCompositeOperation = stroke.erase ? "destination-out" : "source-over";
+      renderStroke(lctx, pts, Math.max(1, stroke.width / PIXEL_SIZE), stroke.opacity);
+      lctx.globalCompositeOperation = "source-over";
     }
-    if (currentStrokeRef.current) {
-      const stroke = currentStrokeRef.current;
-      renderTaperedStroke(
-        ctx,
-        toPixels(stroke.points, canvas),
-        stroke.maxWidth * dpr,
-        stroke.taperLength * dpr,
-        stroke.opacity,
-      );
+    ditherToPixels(lctx, pixels.width, pixels.height);
+
+    // 2. Blow the pixels up with no smoothing, then cut the grid gaps.
+    const cellPx = PIXEL_SIZE * dprRef.current;
+    pctx.globalCompositeOperation = "source-over";
+    pctx.clearRect(0, 0, paint.width, paint.height);
+    pctx.imageSmoothingEnabled = false;
+    pctx.drawImage(pixels, 0, 0, pixels.width * cellPx, pixels.height * cellPx);
+    const gaps = gapTileRef.current ? pctx.createPattern(gapTileRef.current, "repeat") : null;
+    if (gaps) {
+      pctx.globalCompositeOperation = "destination-out";
+      pctx.fillStyle = gaps;
+      pctx.fillRect(0, 0, paint.width, paint.height);
+      pctx.globalCompositeOperation = "source-over";
     }
+
+    ctx.drawImage(paint, 0, 0);
   };
 
   useEffect(() => {
@@ -145,6 +181,14 @@ export default function DrawingPad() {
       const rect = container.getBoundingClientRect();
       canvas.width = rect.width * dpr;
       canvas.height = rect.height * dpr;
+
+      gapTileRef.current = makeGapTile(PIXEL_SIZE * dpr, Math.max(1, Math.round(PIXEL_GAP * dpr)));
+      if (!pixelLayerRef.current) pixelLayerRef.current = document.createElement("canvas");
+      pixelLayerRef.current.width = Math.ceil(rect.width / PIXEL_SIZE);
+      pixelLayerRef.current.height = Math.ceil(rect.height / PIXEL_SIZE);
+      if (!paintLayerRef.current) paintLayerRef.current = document.createElement("canvas");
+      paintLayerRef.current.width = canvas.width;
+      paintLayerRef.current.height = canvas.height;
       redrawAll();
     };
 
@@ -163,13 +207,14 @@ export default function DrawingPad() {
   };
 
   const handlePointerDown = (e: React.PointerEvent<HTMLCanvasElement>) => {
+    if (sendState !== "closed") return;
     canvasRef.current?.setPointerCapture(e.pointerId);
     const activeBrush = brushRef.current;
     currentStrokeRef.current = {
       points: [pointFromEvent(e)],
-      maxWidth: activeBrush.maxWidth,
-      taperLength: activeBrush.taperLength,
+      width: activeBrush.width,
       opacity: activeBrush.opacity,
+      erase: activeBrush.erase,
     };
   };
 
@@ -180,8 +225,9 @@ export default function DrawingPad() {
   };
 
   const handlePointerUp = () => {
-    if (currentStrokeRef.current && currentStrokeRef.current.points.length > 1) {
+    if (currentStrokeRef.current) {
       strokesRef.current.push(currentStrokeRef.current);
+      setHasStrokes(true);
     }
     currentStrokeRef.current = null;
   };
@@ -189,6 +235,7 @@ export default function DrawingPad() {
   const handleClear = () => {
     strokesRef.current = [];
     currentStrokeRef.current = null;
+    setHasStrokes(false);
     redrawAll();
   };
 
@@ -204,6 +251,51 @@ export default function DrawingPad() {
       link.click();
       URL.revokeObjectURL(url);
     }, "image/png");
+  };
+
+  const openSend = () => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    setPreview(canvas.toDataURL("image/png"));
+    setSendState("open");
+  };
+
+  const closeSend = () => {
+    setSendState("closed");
+    setPreview(null);
+    if (sendState === "sent") {
+      setWords("");
+      handleClear();
+    }
+  };
+
+  const handleSend = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    setSendState("sending");
+    try {
+      const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/png"));
+      if (!blob) throw new Error("Could not export drawing");
+      if (DRAWING_ENDPOINT) {
+        const body = new FormData();
+        body.append("message", words.trim());
+        body.append("image", blob, "drawing.png");
+        body.append("website", honeypotRef.current?.value ?? "");
+        const res = await fetch(DRAWING_ENDPOINT, {
+          method: "POST",
+          body,
+          headers: { Accept: "application/json" },
+        });
+        if (!res.ok) throw new Error(`Send failed: ${res.status}`);
+      } else {
+        // Preview mode: no endpoint configured yet, so nothing leaves the page.
+        await new Promise((r) => setTimeout(r, 700));
+      }
+      setSendState("sent");
+    } catch {
+      setSendState("error");
+    }
   };
 
   return (
@@ -222,43 +314,119 @@ export default function DrawingPad() {
         />
 
         {hasStarted && (
-          <div className="pointer-events-none absolute top-4 right-4 flex gap-x-6 md:top-6 md:right-6">
-            <button
-              type="button"
-              onClick={handleClear}
-              className="pointer-events-auto font-mono text-xs tracking-widest text-black/60 uppercase transition-colors duration-150 hover:text-black"
-            >
+          <div className="pointer-events-none absolute top-4 right-4 flex gap-x-[var(--pad-gap)] md:top-6 md:right-6">
+            <button type="button" onClick={handleClear} className="soft-raised pointer-events-auto soft-pill">
               Clear
             </button>
-            <button
-              type="button"
-              onClick={handleDownload}
-              className="pointer-events-auto font-mono text-xs tracking-widest text-black/60 uppercase transition-colors duration-150 hover:text-black"
-            >
+            <button type="button" onClick={handleDownload} className="soft-raised pointer-events-auto soft-pill">
               Download
             </button>
           </div>
         )}
 
         {hasStarted && (
-          <div className="pointer-events-none absolute bottom-20 left-1/2 flex -translate-x-1/2 items-center gap-x-3 md:bottom-24 md:gap-x-4">
-            {BRUSHES.map((b) => (
+          <div className="pointer-events-none absolute inset-x-0 bottom-6 flex items-center justify-center gap-x-[calc(var(--pad-gap)*1.6)] whitespace-nowrap md:bottom-10">
+            <div className="flex items-center gap-x-[var(--pad-gap)]">
+              {BRUSHES.map((b) => (
+                <button
+                  key={b.id}
+                  type="button"
+                  aria-label={b.label}
+                  aria-pressed={brush.id === b.id}
+                  onClick={() => setBrush(b)}
+                  className="soft-raised pointer-events-auto flex h-[var(--pad-size)] w-[var(--pad-size)] items-center justify-center"
+                >
+                  {b.erase ? (
+                    <svg aria-hidden width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="2" strokeLinejoin="round">
+                      <path d="M4 15.5 13.5 6l5 5-9.5 9.5H6.5L4 18z" />
+                      <path d="m9 10.5 5 5" />
+                      <path d="M10 20.5h10" strokeLinecap="round" />
+                    </svg>
+                  ) : (
+                    <span
+                      className="rounded-full bg-black"
+                      style={{ width: b.dotSize, height: b.dotSize, opacity: b.opacity }}
+                    />
+                  )}
+                </button>
+              ))}
+            </div>
+            {(DRAWING_ENDPOINT || import.meta.env.DEV) && (
               <button
-                key={b.id}
                 type="button"
-                aria-label={b.label}
-                aria-pressed={brush.id === b.id}
-                onClick={() => setBrush(b)}
-                className={`pointer-events-auto flex h-9 w-9 items-center justify-center rounded-full transition-colors md:h-10 md:w-10 ${
-                  brush.id === b.id ? "bg-black/15" : "hover:bg-black/10"
-                }`}
+                onClick={openSend}
+                disabled={!hasStrokes}
+                className="soft-raised soft-pill pointer-events-auto disabled:pointer-events-none disabled:opacity-40"
               >
-                <span
-                  className="rounded-full bg-black"
-                  style={{ width: b.dotSize, height: b.dotSize, opacity: b.opacity }}
-                />
+                ✉ Send<span className="hidden sm:inline"> to Niia</span>
               </button>
-            ))}
+            )}
+          </div>
+        )}
+
+        {sendState !== "closed" && (
+          <div className="absolute inset-0 flex items-center justify-center bg-[#f07c57]/60 p-4 backdrop-blur-[2px]">
+            <form
+              onSubmit={handleSend}
+              className="soft-raised flex w-full max-w-sm flex-col gap-4 rounded-[28px] p-5"
+              aria-label="Send your drawing"
+            >
+              {sendState === "sent" ? (
+                <>
+                  <p className="font-mono text-xs tracking-widest text-black/70 uppercase">Sent — thank you ✦</p>
+                  <p className="text-sm text-black/70">
+                    {DRAWING_ENDPOINT
+                      ? "It's on its way to me. I read every one."
+                      : "Preview mode: nothing was sent, because no endpoint is set up yet."}
+                  </p>
+                  <button type="button" onClick={closeSend} className="soft-raised soft-pill self-start">
+                    Draw another
+                  </button>
+                </>
+              ) : (
+                <>
+                  {preview && (
+                    <img
+                      src={preview}
+                      alt="Your drawing"
+                      className="soft-inset aspect-[4/3] w-full rounded-2xl object-cover"
+                    />
+                  )}
+                  <input
+                    ref={honeypotRef}
+                    name="website"
+                    tabIndex={-1}
+                    autoComplete="off"
+                    aria-hidden="true"
+                    className="absolute -left-[9999px] h-0 w-0 opacity-0"
+                  />
+                  <label className="flex flex-col gap-2">
+                    <span className="font-mono text-xs tracking-widest text-black/60 uppercase">
+                      A couple of words
+                    </span>
+                    <input
+                      autoFocus
+                      value={words}
+                      onChange={(e) => setWords(e.target.value)}
+                      maxLength={MAX_WORDS_LENGTH}
+                      placeholder="hi niia, this is a cat"
+                      className="soft-inset rounded-full px-4 py-3 text-sm text-black placeholder:text-black/40 focus:outline-none"
+                    />
+                  </label>
+                  {sendState === "error" && (
+                    <p className="text-sm text-black/80">That didn't go through. Try again in a moment?</p>
+                  )}
+                  <div className="flex justify-end gap-3">
+                    <button type="button" onClick={closeSend} className="soft-raised soft-pill">
+                      Cancel
+                    </button>
+                    <button type="submit" disabled={sendState === "sending"} className="soft-raised soft-pill">
+                      {sendState === "sending" ? "Sending…" : "Send"}
+                    </button>
+                  </div>
+                </>
+              )}
+            </form>
           </div>
         )}
 

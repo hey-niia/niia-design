@@ -1,0 +1,13 @@
+# Cloudflare Worker that receives drawings from the site's drawing pad and
+# emails them to Niia through Resend. Setup steps: worker/README.md.
+name = "niia-drawing-mailbox"
+main = "src/index.js"
+compatibility_date = "2025-09-01"
+
+[vars]
+# Sites allowed to send drawings (comma-separated).
+ALLOWED_ORIGINS = "https://niia.design,https://www.niia.design,http://localhost:5182,http://localhost:5180"
+
+# Secrets — set with `npx wrangler secret put <NAME>`, never written here:
+#   RESEND_API_KEY  the API key from resend.com
+#   TO_EMAIL        the inbox drawings should arrive in

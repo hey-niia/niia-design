@@ -58,6 +58,84 @@
   color: #e65f2e;
 }
 
+/* Soft raised buttons (drawing pad) — low, matte "keycap" lift: a solid
+   face a touch lighter at the top, a crisp light edge along the top-left, a
+   short soft shadow bottom-right and a faint glow top-left. Pressed /
+   selected (aria-pressed) sinks the key in. */
+:root {
+  --pad-gap: 14px;
+  --pad-size: 46px;
+  --pad-pad-x: 22px;
+  --pad-pad-y: 12px;
+  --pad-radius: 14px;
+  --pad-lift: 4px;
+  --pad-blur: 10px;
+  --pad-face-top: #f3865f;
+  --pad-face-bottom: #ec7551;
+  --pad-edge: color-mix(in srgb, #ffc4aa 75%, transparent);
+  --pad-shadow: color-mix(in srgb, #96341a 32%, transparent);
+  --pad-glow: #f8946f;
+}
+
+.soft-raised {
+  --k-lift: var(--pad-lift);
+  --k-blur: var(--pad-blur);
+  position: relative;
+  color: rgba(0, 0, 0, 0.72);
+  border-radius: var(--pad-radius);
+  background: linear-gradient(180deg, var(--pad-face-top), var(--pad-face-bottom));
+  box-shadow:
+    inset 1px 1px 0 var(--pad-edge),
+    calc(var(--k-lift) * 0.25) calc(var(--k-lift) * 0.5) calc(var(--k-blur) * 0.3) var(--pad-shadow),
+    var(--k-lift) calc(var(--k-lift) * 1.25) var(--k-blur) var(--pad-shadow),
+    calc(var(--k-lift) * -0.75) calc(var(--k-lift) * -0.75) calc(var(--k-blur) * 0.8) var(--pad-glow);
+  transition:
+    box-shadow 0.18s ease,
+    background 0.18s ease,
+    color 0.15s ease;
+}
+
+@media (hover: hover) {
+  .soft-raised:hover {
+    --k-lift: calc(var(--pad-lift) * 1.5);
+    --k-blur: calc(var(--pad-blur) * 1.4);
+    color: #000;
+  }
+}
+
+.soft-raised:active,
+.soft-raised[aria-pressed="true"] {
+  background: linear-gradient(180deg, var(--pad-face-bottom), var(--pad-face-top));
+  box-shadow:
+    inset calc(var(--k-lift) * 0.5) calc(var(--k-lift) * 0.5) calc(var(--k-blur) * 0.5) var(--pad-shadow),
+    inset calc(var(--k-lift) * -0.5) calc(var(--k-lift) * -0.5) calc(var(--k-blur) * 0.4) var(--pad-glow);
+}
+
+/* Sunken field (the send panel's preview and text box). */
+.soft-inset {
+  background: var(--pad-face-bottom);
+  box-shadow:
+    inset 3px 3px 7px var(--pad-shadow),
+    inset -3px -3px 6px var(--pad-glow);
+}
+
+.soft-raised:focus-visible {
+  outline: 2px solid #b4512f;
+  outline-offset: 3px;
+}
+.soft-raised:focus:not(:focus-visible) {
+  outline: none;
+}
+
+.soft-pill {
+  padding: var(--pad-pad-y) var(--pad-pad-x);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
 /* AI Playground nav Easter egg — intermittent decode animation: the text
    scrambles through random characters and resolves back, in the accent
    color, like a terminal locking in a value. */
