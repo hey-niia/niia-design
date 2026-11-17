@@ -110,7 +110,7 @@ const ANSWERS: CannedAnswer[] = [
       "drawing",
     ],
     answer:
-      "Outside of work: I'm a bit obsessed with how kids learn to make things — blocks, scribbles, taking stuff apart to see how it works. I still draw, badly and often, in a sketchbook where I get to be wrong without consequences. And yoga is the one meeting I don't reschedule.",
+      "I walk, I travel, I meditate, and spend time with my family.",
   },
   {
     keywords: ["what do you do", "what does niia do", "elevator pitch", "what do you help"],

@@ -34,8 +34,8 @@ export default function Home() {
           left, with a little more room below it than above, before the work. */}
       <section id="about" className="pt-16 pb-20 md:pt-24 md:pb-32">
         <div className="mx-auto flex w-fit max-w-full flex-col gap-4 text-left">
-          <p className="t-intro text-3xl">I design products, build with AI, and think like a founder.</p>
-          <p className="t-intro text-3xl">
+          <p className="t-intro text-2xl">I design products, build with AI, and think like a founder.</p>
+          <p className="t-intro text-2xl">
             <span className="md:whitespace-nowrap">
               I love taking ownership, <span className="sm:whitespace-nowrap">connecting design with business</span>,
             </span>{" "}
