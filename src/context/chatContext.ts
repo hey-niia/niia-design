@@ -8,6 +8,8 @@ export interface ChatMessage {
   quote?: string;
   /** Case-study/AI-experiment cards to render under a bot answer, if any. */
   cards?: AnswerCard[];
+  /** A picture to show under a bot answer, if any. */
+  image?: { src: string; alt: string };
 }
 
 export interface NiiaChatContextValue {

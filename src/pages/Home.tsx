@@ -1,6 +1,5 @@
 import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
-import { ExperienceTimeline } from "../components/Experience";
 import Nav from "../components/Nav";
 import WorkGridCard from "../components/WorkGridCard";
 import { projects } from "../data/projects";
@@ -31,20 +30,19 @@ export default function Home() {
     <main className="pb-24">
       <Nav />
 
-      {/* Two equal columns with the work grid's 32px gap, so the bio lines up over the
-          left illustration and the timeline starts where the right one does. */}
-      <section
-        id="about"
-        className="grid gap-10 pt-6 pb-16 md:grid-cols-2 md:items-center md:gap-8 md:pt-24"
-      >
-        <div className="flex flex-col gap-4">
-          <p className="text-3xl">I help companies design ambitious products people actually use.</p>
-          <p className="text-3xl">
-            I've founded two companies and that's shaped how I think about product and business
-            together. Now I'm building with AI.
+      {/* The intro: a centred block as wide as its longest line, text aligned
+          left, with a little more room below it than above, before the work. */}
+      <section id="about" className="pt-16 pb-20 md:pt-24 md:pb-32">
+        <div className="mx-auto flex w-fit max-w-full flex-col gap-4 text-left">
+          <p className="t-intro text-3xl">I design products, build with AI, and think like a founder.</p>
+          <p className="t-intro text-3xl">
+            <span className="md:whitespace-nowrap">
+              I love taking ownership, <span className="sm:whitespace-nowrap">connecting design with business</span>,
+            </span>{" "}
+            <br className="hidden md:block" />
+            and turning ideas into products.
           </p>
         </div>
-        <ExperienceTimeline />
       </section>
 
       {/* On phones the columns dissolve into one list that reads across the rows

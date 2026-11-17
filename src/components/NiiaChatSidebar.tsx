@@ -4,6 +4,7 @@ import { useNiiaChat } from "../context/useNiiaChat";
 import { CONTACT_EMAIL, PROJECT_LINKS, type AnswerCard } from "../lib/niiaLLM";
 
 const LINKEDIN_URL = "https://www.linkedin.com/in/niia-bieliavtseva/";
+const CHAT_POS_KEY = "niia-chat-pos-v1";
 const RESUME_URL = "/resume.pdf";
 
 function escapeRegExp(s: string): string {
@@ -118,7 +119,7 @@ function AnswerCards({ cards }: { cards: AnswerCard[] }) {
         <Link
           key={c.href}
           to={c.href}
-          className="group/card block w-72 shrink-0 overflow-hidden rounded-md bg-neutral-100"
+          className="group/card block w-64 shrink-0 overflow-hidden rounded-xl bg-[color-mix(in_srgb,var(--pad-color)_35%,white)]"
         >
           <div className="h-36 w-full overflow-hidden bg-black">
             <img
@@ -129,9 +130,7 @@ function AnswerCards({ cards }: { cards: AnswerCard[] }) {
           </div>
           <div className="p-3.5">
             <p className="text-base leading-snug text-black">{c.title}</p>
-            <p className="mt-1.5 font-mono text-xs tracking-wide text-gray-400 uppercase">
-              {c.caption}
-            </p>
+            <p className="mt-1 truncate text-sm text-black/50">{c.caption}</p>
           </div>
         </Link>
       ))}
@@ -154,6 +153,70 @@ export default function NiiaChatSidebar() {
   const [draft, setDraft] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const boxRef = useRef<HTMLElement>(null);
+
+  // On wider screens the chat is a floating window you can drag anywhere by
+  // its title bar (it remembers where you left it). On phones it's a sheet
+  // across the bottom of the screen.
+  const [isWide, setIsWide] = useState(() => window.matchMedia("(min-width: 640px)").matches);
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 640px)");
+    const onChange = () => setIsWide(mq.matches);
+    mq.addEventListener("change", onChange);
+    return () => mq.removeEventListener("change", onChange);
+  }, []);
+  const [pos, setPos] = useState<{ x: number; y: number } | null>(() => {
+    try {
+      return JSON.parse(localStorage.getItem(CHAT_POS_KEY) || "null");
+    } catch {
+      return null;
+    }
+  });
+  const drag = useRef<{ dx: number; dy: number } | null>(null);
+  const clamp = (x: number, y: number) => {
+    const r = boxRef.current?.getBoundingClientRect();
+    const w = r?.width ?? 400;
+    const h = r?.height ?? 600;
+    return {
+      x: Math.min(Math.max(8, x), window.innerWidth - w - 8),
+      y: Math.min(Math.max(8, y), window.innerHeight - h - 8),
+    };
+  };
+  useEffect(() => {
+    try {
+      localStorage.setItem(CHAT_POS_KEY, JSON.stringify(pos));
+    } catch {
+      // Ignore — it just won't remember the spot.
+    }
+  }, [pos]);
+  useEffect(() => {
+    const fit = () => setPos((p) => (p ? clamp(p.x, p.y) : p));
+    window.addEventListener("resize", fit);
+    return () => window.removeEventListener("resize", fit);
+  }, []);
+  const dragHandlers = isWide
+    ? {
+        onPointerDown: (e: React.PointerEvent<HTMLDivElement>) => {
+          if ((e.target as HTMLElement).closest("button, a, input")) return;
+          const r = boxRef.current?.getBoundingClientRect();
+          if (!r) return;
+          drag.current = { dx: e.clientX - r.left, dy: e.clientY - r.top };
+          e.currentTarget.setPointerCapture(e.pointerId);
+        },
+        onPointerMove: (e: React.PointerEvent<HTMLDivElement>) => {
+          if (!drag.current) return;
+          setPos(clamp(e.clientX - drag.current.dx, e.clientY - drag.current.dy));
+        },
+        onPointerUp: () => {
+          drag.current = null;
+        },
+      }
+    : {};
+  const placement: React.CSSProperties = isWide
+    ? pos
+      ? { left: pos.x, top: pos.y }
+      : { right: 24, bottom: 24 }
+    : {};
 
   useEffect(() => {
     if (isOpen) inputRef.current?.focus();
@@ -170,34 +233,30 @@ export default function NiiaChatSidebar() {
 
   return (
     <aside
+      ref={boxRef}
       data-niia-chat-sidebar
       aria-hidden={!isOpen}
-      className={`niia-sidebar fixed inset-y-0 right-0 z-30 flex w-full flex-col bg-white/70 shadow-[-16px_0_40px_rgba(0,0,0,0.08)] backdrop-blur-xl sm:w-[380px] ${
-        isOpen ? "translate-x-0 opacity-100" : "pointer-events-none translate-x-full opacity-0"
+      style={placement}
+      // The same pink pressed/raised look as the drawing pad's send window.
+      className={`niia-sidebar soft-window fixed inset-x-2 bottom-2 z-40 flex h-[78vh] flex-col gap-3 rounded-[28px] p-4 text-black/80 sm:inset-x-auto sm:bottom-auto sm:h-[min(640px,80vh)] sm:w-[400px] ${
+        isOpen ? "scale-100 opacity-100" : "pointer-events-none translate-y-4 scale-95 opacity-0"
       }`}
     >
-      <div className="flex items-center justify-between border-b border-black/5 p-4">
-        <p className="flex items-center gap-1.5 font-mono text-xs tracking-widest">
+      <div
+        {...dragHandlers}
+        title={isWide ? "Drag to move" : undefined}
+        className={`flex items-center justify-between px-1 select-none ${isWide ? "cursor-grab touch-none active:cursor-grabbing" : ""}`}
+      >
+        <p className="flex items-center gap-1.5 font-mono text-xs tracking-widest uppercase">
           <span aria-hidden>✦</span> Niia AI
-          <span className="group relative inline-flex cursor-help items-center text-gray-400">
-            ⓘ
-            <span
-              role="tooltip"
-              className="pointer-events-none absolute top-full left-0 z-50 mt-2 w-56 rounded-md bg-black px-2.5 py-1.5 text-[11px] leading-snug font-sans font-normal tracking-normal text-white normal-case opacity-0 shadow-lg transition-opacity duration-150 group-hover:opacity-100"
-            >
-              <span aria-hidden className="absolute -top-1 left-2 h-2 w-2 rotate-45 bg-black" />A
-              little chatbot I vibe-coded for fun — not a live model, just pre-written answers.
-              Try asking about a case study, my AI playground, hiring, or my hobbies.
-            </span>
-          </span>
         </p>
-        <div className="flex items-center gap-3 text-gray-400">
+        <div className="flex items-center gap-2">
           <button
             type="button"
             onClick={reset}
             aria-label="Reset conversation"
             title="Reset conversation"
-            className="transition-colors hover:text-[var(--site-accent)]"
+            className="soft-raised flex h-9 w-9 items-center justify-center text-sm"
           >
             ↺
           </button>
@@ -206,14 +265,14 @@ export default function NiiaChatSidebar() {
             onClick={close}
             aria-label="Close"
             title="Close"
-            className="transition-colors hover:text-[var(--site-accent)]"
+            className="soft-raised flex h-9 w-9 items-center justify-center text-sm"
           >
             ✕
           </button>
         </div>
       </div>
 
-      <div ref={scrollRef} className="flex flex-1 flex-col overflow-y-auto p-4">
+      <div ref={scrollRef} className="soft-inset flex flex-1 flex-col overflow-y-auto rounded-2xl p-4">
         <div className="mt-auto flex flex-col gap-5">
           {messages.length === 0 && (
             <p className="niia-fade-in-up text-lg leading-relaxed">
@@ -223,7 +282,7 @@ export default function NiiaChatSidebar() {
 
           {messages.map((m, i) => (
             <div key={i} className="niia-fade-in-up">
-              <p className="mb-1 font-mono text-xs tracking-widest text-neutral-400 uppercase">
+              <p className="mb-1 font-mono text-xs tracking-widest text-black/50 uppercase">
                 {m.role === "user" ? "You" : "Niia AI"}
               </p>
               {m.quote && (
@@ -234,6 +293,13 @@ export default function NiiaChatSidebar() {
               {m.role === "bot" ? (
                 <>
                   {renderAnswer(m.text)}
+                  {m.image && (
+                    <img
+                      src={m.image.src}
+                      alt={m.image.alt}
+                      className="mt-3 w-full rounded-xl shadow-[0_1px_2px_rgba(60,50,40,0.08),0_8px_20px_rgba(60,50,40,0.12)]"
+                    />
+                  )}
                   {m.cards && <AnswerCards cards={m.cards} />}
                 </>
               ) : (
@@ -244,20 +310,20 @@ export default function NiiaChatSidebar() {
 
           {isTyping && (
             <div className="niia-fade-in-up">
-              <p className="mb-1 font-mono text-xs tracking-widest text-neutral-400 uppercase">
+              <p className="mb-1 font-mono text-xs tracking-widest text-black/50 uppercase">
                 Niia AI
               </p>
               <div className="flex items-center gap-1 py-1.5" aria-label="Niia AI is typing">
                 <span
-                  className="niia-typing-dot h-1.5 w-1.5 rounded-full bg-neutral-400"
+                  className="niia-typing-dot h-1.5 w-1.5 rounded-full bg-black/40"
                   style={{ animationDelay: "0s" }}
                 />
                 <span
-                  className="niia-typing-dot h-1.5 w-1.5 rounded-full bg-neutral-400"
+                  className="niia-typing-dot h-1.5 w-1.5 rounded-full bg-black/40"
                   style={{ animationDelay: "0.15s" }}
                 />
                 <span
-                  className="niia-typing-dot h-1.5 w-1.5 rounded-full bg-neutral-400"
+                  className="niia-typing-dot h-1.5 w-1.5 rounded-full bg-black/40"
                   style={{ animationDelay: "0.3s" }}
                 />
               </div>
@@ -272,7 +338,7 @@ export default function NiiaChatSidebar() {
                   type="button"
                   onClick={() => submit(q)}
                   style={{ animationDelay: `${0.1 + i * 0.08}s` }}
-                  className="niia-fade-in-up -mx-2 flex items-start gap-2 rounded-md px-2 py-1 text-left text-sm leading-relaxed text-neutral-600 transition-colors hover:bg-[var(--site-accent)]/10 hover:text-[var(--site-accent)]"
+                  className="niia-fade-in-up -mx-2 flex items-start gap-2 rounded-md px-2 py-1 text-left text-sm leading-relaxed text-black/70 transition-colors hover:bg-white/40 hover:text-black"
                 >
                   <span aria-hidden>↳</span> {q}
                 </button>
@@ -282,9 +348,9 @@ export default function NiiaChatSidebar() {
         </div>
       </div>
 
-      <div className="border-t border-black/5 p-4">
+      <div>
         {pendingQuote && (
-          <div className="niia-fade-in-up mb-2 flex items-start justify-between gap-2 rounded-lg bg-white/50 px-2 py-1.5 text-xs text-neutral-500 backdrop-blur-sm">
+          <div className="niia-fade-in-up mb-2 flex items-start justify-between gap-2 rounded-xl bg-white/40 px-3 py-1.5 text-xs text-black/60">
             <span className="line-clamp-1 italic">“{pendingQuote}”</span>
             <button
               type="button"
@@ -301,21 +367,17 @@ export default function NiiaChatSidebar() {
             e.preventDefault();
             submit(draft);
           }}
-          className="flex items-center gap-2 rounded-full border border-black/10 bg-white/50 px-3.5 py-2 backdrop-blur-sm"
+          className="flex items-center gap-2"
         >
           <input
             ref={inputRef}
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
             placeholder={pendingQuote ? "Ask about this quote…" : "Ask me anything…"}
-            className="flex-1 bg-transparent text-sm outline-none"
+            className="soft-inset min-w-0 flex-1 rounded-full px-4 py-3 text-sm text-black placeholder:text-black/40 focus:outline-none"
           />
-          <button
-            type="submit"
-            aria-label="Send"
-            className="text-neutral-400 transition-colors hover:text-[var(--site-accent)]"
-          >
-            ↑
+          <button type="submit" className="soft-raised soft-pill">
+            Send
           </button>
         </form>
       </div>

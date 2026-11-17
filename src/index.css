@@ -214,6 +214,18 @@
     inset calc(var(--k-lift) * -0.5) calc(var(--k-lift) * -0.5) calc(var(--k-blur) * 0.4) var(--k-glow);
 }
 
+/* Same raised key as the header hover, but always showing (e.g. About's
+   Download Resume / LinkedIn). Hover lifts the text colour to the accent. */
+.soft-key::before {
+  opacity: 1;
+}
+.soft-key {
+  transition: color 0.15s ease;
+}
+.soft-key:hover {
+  color: var(--site-accent);
+}
+
 /* Pressed in: while clicking, and always for the page you're on.
    Tuned separately via --navp-* (tweak panel "Header pressed"). */
 .soft-hover:active::before,
@@ -226,6 +238,17 @@
       var(--navp-shadow),
     inset var(--navp-shadow-dist) var(--navp-shadow-dist) var(--navp-shadow-blur) var(--navp-shadow),
     inset calc(var(--navp-light-dist) * -1) calc(var(--navp-light-dist) * -1) var(--navp-light-blur) var(--navp-light);
+}
+
+/* A floating window in the pad's raised style (the Niia AI chat). Same look
+   as .soft-raised, but it doesn't lift on hover or sink when clicked inside. */
+.soft-window {
+  background: linear-gradient(180deg, var(--pad-face-top), var(--pad-face-bottom));
+  box-shadow:
+    inset 1px 1px 0 var(--pad-edge),
+    1px 2px 3px var(--pad-shadow),
+    6px 10px 24px var(--pad-shadow),
+    -3px -3px 10px var(--pad-glow);
 }
 
 /* Sunken field (the send panel's preview and text box). */

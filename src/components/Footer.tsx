@@ -4,7 +4,7 @@ export default function Footer() {
   return (
     <footer>
       <div className="flex flex-wrap items-center justify-end gap-x-8 gap-y-2 px-4 py-4 font-mono text-[15px] text-gray-400 uppercase">
-        <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
+        <div className="t-footer flex flex-wrap items-center gap-x-6 gap-y-2">
           <a href="https://www.linkedin.com/in/niia-bieliavtseva/" target="_blank" rel="noopener noreferrer">
             LinkedIn
           </a>

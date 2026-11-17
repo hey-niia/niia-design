@@ -82,11 +82,7 @@ export default function NotFound() {
             <p className="mt-4 max-w-md text-sm text-gray-500">
               Somewhere between shipping an AI chatbot and teaching a cat to roam my menu bar,
               this URL got lost. The black one up there is my actual cat — I coincidentally
-              named{" "}
-              <Link to="/08" className="pointer-events-auto underline">
-                08
-              </Link>{" "}
-              after her. The gold one's just a friend she picked up along the way. Click either,
+              named 08 after her. The gold one's just a friend she picked up along the way. Click either,
               they both like it.
             </p>
 

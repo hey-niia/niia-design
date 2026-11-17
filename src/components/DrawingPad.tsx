@@ -31,6 +31,10 @@ const backgroundColor = () =>
 const PIXEL_SIZE = 5;
 const PIXEL_GAP = 1;
 const MAX_WORDS_LENGTH = 80;
+// Before drawing starts, a short pixel trail follows the cursor and fades
+// out (older bits dither away), as a hint that the pad is for drawing.
+const TRAIL_MS = 380;
+const TRAIL_WIDTH = 20;
 // Signature shown on the pad and stamped into every downloaded / sent drawing.
 const SIGNATURE = "niia.design";
 
@@ -255,6 +259,9 @@ export default function DrawingPad() {
   const gapTileRef = useRef<HTMLCanvasElement | null>(null);
   const strokesRef = useRef<Stroke[]>([]);
   const clearedRef = useRef<Stroke[]>([]);
+  // Cursor trail on the closed pad, in CSS px with timestamps.
+  const trailRef = useRef<{ x: number; y: number; t: number }[]>([]);
+  const trailFrameRef = useRef<number | null>(null);
   const currentStrokeRef = useRef<Stroke | null>(null);
   const dprRef = useRef(1);
   const [hasStarted, setHasStarted] = useState(false);
@@ -301,6 +308,23 @@ export default function DrawingPad() {
       renderStroke(lctx, pts, Math.max(1, stroke.width / PIXEL_SIZE), stroke.opacity);
       lctx.globalCompositeOperation = "source-over";
     }
+    // The fading cursor trail: each bit gets lighter with age, so the dither
+    // thins it out into nothing.
+    const trail = trailRef.current;
+    const now = performance.now();
+    for (let i = 1; i < trail.length; i++) {
+      const fade = 1 - (now - trail[i].t) / TRAIL_MS;
+      if (fade <= 0) continue;
+      renderStroke(
+        lctx,
+        [
+          { x: trail[i - 1].x / PIXEL_SIZE, y: trail[i - 1].y / PIXEL_SIZE },
+          { x: trail[i].x / PIXEL_SIZE, y: trail[i].y / PIXEL_SIZE },
+        ],
+        TRAIL_WIDTH / PIXEL_SIZE,
+        fade,
+      );
+    }
     ditherToPixels(lctx, pixels.width, pixels.height);
 
     // 2. Blow the pixels up with no smoothing, then cut the grid gaps.
@@ -344,7 +368,13 @@ export default function DrawingPad() {
 
     resizeCanvas();
     window.addEventListener("resize", resizeCanvas);
-    return () => window.removeEventListener("resize", resizeCanvas);
+    // The pad also grows when drawing starts, so follow the box's own size.
+    const ro = new ResizeObserver(resizeCanvas);
+    if (containerRef.current) ro.observe(containerRef.current);
+    return () => {
+      window.removeEventListener("resize", resizeCanvas);
+      ro.disconnect();
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -484,9 +514,40 @@ export default function DrawingPad() {
     }
   };
 
+  const tickTrail = () => {
+    const now = performance.now();
+    trailRef.current = trailRef.current.filter((p) => now - p.t < TRAIL_MS);
+    redrawAll();
+    trailFrameRef.current = trailRef.current.length > 0 ? requestAnimationFrame(tickTrail) : null;
+  };
+  const addTrailPoint = (e: React.PointerEvent) => {
+    const rect = containerRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    trailRef.current.push({ x: e.clientX - rect.left, y: e.clientY - rect.top, t: performance.now() });
+    if (trailFrameRef.current === null) trailFrameRef.current = requestAnimationFrame(tickTrail);
+  };
+  const startDrawing = () => {
+    trailRef.current = [];
+    setHasStarted(true);
+    // Once the pad has opened up, bring the whole of it into view.
+    window.setTimeout(() => containerRef.current?.scrollIntoView({ behavior: "smooth", block: "end" }), 750);
+  };
+  useEffect(
+    () => () => {
+      if (trailFrameRef.current !== null) cancelAnimationFrame(trailFrameRef.current);
+    },
+    [],
+  );
+
   return (
     <section id="draw" className="-mx-4 bg-[var(--pad-color)]">
-      <div ref={containerRef} className="relative h-[550px] w-full select-none md:h-[750px]">
+      <div
+        ref={containerRef}
+        // Closed it's half height; "Click to draw" opens it down smoothly.
+        className={`relative w-full overflow-hidden transition-[height] duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] select-none ${
+          hasStarted ? "h-[550px] md:h-[750px]" : "h-[275px] md:h-[375px]"
+        }`}
+      >
         <canvas
           ref={canvasRef}
           onPointerDown={(e) => {
@@ -663,9 +724,10 @@ export default function DrawingPad() {
         {!hasStarted && (
           <button
             type="button"
-            onClick={() => setHasStarted(true)}
+            onClick={startDrawing}
+            onPointerMove={addTrailPoint}
             aria-label="Click to draw"
-            className="group absolute inset-0 flex items-center justify-center"
+            className="group absolute inset-0 flex cursor-crosshair items-center justify-center"
           >
             {/* The whole pad is clickable; the raised key is what you see. */}
             <span className="soft-raised soft-pill">Click to draw</span>

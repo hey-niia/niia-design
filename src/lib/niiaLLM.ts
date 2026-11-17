@@ -20,6 +20,8 @@ export interface CannedAnswer {
   answer: string;
   /** Optional visual cards (case studies, AI playground projects) shown under the text. */
   cards?: AnswerCard[];
+  /** Optional picture shown under the text (e.g. a screenshot). */
+  image?: { src: string; alt: string };
 }
 
 // First-open order, fixed per the client's ask: one about AI tools, one
@@ -48,10 +50,23 @@ export const PROJECT_LINKS: ProjectLink[] = projects.map((p) => ({
 
 // Same cover image + caption convention as the homepage's WorkGridCard, so a
 // case study mentioned in chat can render as a real thumbnail card.
+// A few projects get their own chat preview instead of the first screenshot.
+const CHAT_PREVIEW: Record<string, string> = {
+  "ios-app": "/chat/neuroscience-app-of-the-day.png",
+};
+
+// One-line type shown under each case study's title in chat cards.
+const CHAT_TYPE: Record<string, string> = {
+  "ios-app": "iOS app",
+  connectiq: "Dashboard",
+  hirement: "Web app",
+  "other-projects": "Landing pages, web apps",
+};
+
 export const PROJECT_CARDS: AnswerCard[] = projects.map((p) => ({
   title: p.name,
-  caption: `${p.client} · ${p.lastUpdated}`,
-  image: p.screenshots[0].src,
+  caption: CHAT_TYPE[p.slug] ?? p.category,
+  image: CHAT_PREVIEW[p.slug] ?? p.screenshots[0].src,
   href: `/work/${p.slug}`,
 }));
 
@@ -62,11 +77,18 @@ function projectCard(slug: string): AnswerCard[] {
 
 // AI Playground cards — only entries with a cover image and an internal
 // link render as a card (Taski's first version has neither yet).
+// Plain-language type for each playground project in chat cards.
+const PLATFORM_LABEL: Record<string, string> = {
+  "BROWSER EXTENSION": "Chrome extension",
+  MacOS: "macOS app",
+  "WEB APP": "Web app",
+};
+
 export const PLAYGROUND_CARDS: AnswerCard[] = experiments
   .filter((e): e is typeof e & { image: string; link: string } => Boolean(e.image && e.link))
   .map((e) => ({
     title: e.name,
-    caption: e.stack,
+    caption: PLATFORM_LABEL[e.platform] ?? e.platform,
     image: e.image,
     href: e.link,
   }));
@@ -169,7 +191,11 @@ const ANSWERS: CannedAnswer[] = [
       "how is this site built",
     ],
     answer:
-      "Design first, in Figma, with a small token system — colors, spacing, radius, type — so nothing's a one-off. Then I built it for real: React, Tailwind, and Claude doing a lot of the implementation alongside me. Same workflow I use for client work, just pointed at my own site this time.",
+      "I built this site with Claude and created my own tweak panel, so I can adjust pretty much anything directly on the site, just like in Figma, but without Figma.",
+    image: {
+      src: "/chat/tweak-panel.png",
+      alt: "The tweak panel: tabs for main color, header, pressed header, drawing pad and fonts",
+    },
   },
   {
     keywords: [
@@ -233,7 +259,7 @@ const ANSWERS: CannedAnswer[] = [
   {
     keywords: ["leap", "founder", "founding", "startup story"],
     answer:
-      "Leap was Niia's first company (2016–2021) — she started as a founder, not a designer. Packaging, distribution, the Instagram page, working with other designers, all of it, because there was no one else to hand it to. Design was just the tool she reached for most.",
+      "Leap was Niia's first company (2016–2022). As founder she was also its head of product and head of design — packaging, distribution, the Instagram page, working with other designers, all of it. She sold the company in 2022.",
   },
   {
     keywords: ["overspace", "studio", "co-found", "cofound"],
@@ -243,7 +269,7 @@ const ANSWERS: CannedAnswer[] = [
   {
     keywords: ["experience", "background", "career", "who are you", "who is niia"],
     answer:
-      "Senior Product Designer and AI Design Engineer, freelance since 2022 — current work spans an AI-first iOS wellness app, enterprise dashboards, and web platforms. Before that: co-founder of Overspace (2021–present) and founder of Leap (2016–2021). She started as a founder first, designer second.",
+      "Senior Product Designer and AI Design Engineer, freelance since 2022 — current work spans an AI-first iOS wellness app, enterprise dashboards, and web platforms. Before that: co-founder of Overspace (2021–present) and founder of Leap (2016–2022), which she sold in 2022. She started as a founder first, designer second.",
   },
   {
     keywords: ["resume", "résumé", "cv", "portfolio pdf"],
@@ -292,12 +318,13 @@ function matchesKeyword(question: string, keyword: string): boolean {
 export interface CannedResponse {
   text: string;
   cards?: AnswerCard[];
+  image?: { src: string; alt: string };
 }
 
 export function getCannedAnswer(question: string): CannedResponse {
   for (const entry of ANSWERS) {
     if (entry.keywords.some((k) => matchesKeyword(question, k))) {
-      return { text: entry.answer, cards: entry.cards };
+      return { text: entry.answer, cards: entry.cards, image: entry.image };
     }
   }
   return { text: pickFallback() };

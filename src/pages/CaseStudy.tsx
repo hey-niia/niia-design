@@ -780,6 +780,12 @@ function Block({
   }
 }
 
+// The neuroscience app's case study keeps the original orange accent; the
+// site-wide pink doesn't suit its dark, warm visuals.
+const CASE_ACCENT: Record<string, string> = {
+  "ios-app": "#e65f2e",
+};
+
 export default function CaseStudy() {
   const { slug } = useParams<{ slug: string }>();
   const project = slug ? getProject(slug) : undefined;
@@ -941,7 +947,11 @@ export default function CaseStudy() {
     // and clipping there would cut every card's shadow off at its sides.
     <main className={project.darkVisuals ? "-mx-4 overflow-x-clip px-4" : undefined}>
       <Nav />
-      <div className="mx-auto max-w-4xl pt-6 md:pt-24">
+      <div
+        className="mx-auto max-w-4xl pt-6 md:pt-24"
+        // Some case studies keep their own accent instead of the site's pink.
+        style={CASE_ACCENT[project.slug] ? ({ "--site-accent": CASE_ACCENT[project.slug] } as React.CSSProperties) : undefined}
+      >
         <div className="relative">
           {/* Sits further out in the page margin, outside the reading column, so
               the column itself never has to shrink to make room for it. Spans
@@ -1147,7 +1157,11 @@ export default function CaseStudy() {
         className={`pointer-events-none fixed z-50 flex -translate-x-1/2 -translate-y-1/2 items-center gap-1.5 rounded-full bg-[var(--site-accent)] px-4 py-2 text-sm font-normal text-white transition-[transform,opacity] duration-150 ease-out ${
           cursorLabel.visible ? "scale-100 opacity-100" : "scale-75 opacity-0"
         }`}
-        style={{ left: cursorLabel.x, top: cursorLabel.y }}
+        style={{
+          left: cursorLabel.x,
+          top: cursorLabel.y,
+          ...(CASE_ACCENT[project.slug] ? { "--site-accent": CASE_ACCENT[project.slug] } : {}),
+        } as React.CSSProperties}
       >
         {cursorLabel.text ?? (
           <>

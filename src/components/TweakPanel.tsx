@@ -140,9 +140,124 @@ function buildCss(all: Record<Area, Values>) {
   return `:root {\n${lines.join("\n")}\n}`;
 }
 
+// Typography per section. Elements carry a `t-*` class (or are matched by
+// selector); an override here is injected as a style rule, so untouched
+// sections keep their responsive sizes.
+const FONT_SECTIONS = [
+  { id: "name", label: "Header — name", selector: ".t-name" },
+  { id: "role", label: "Header — subtitle", selector: ".t-role" },
+  { id: "nav", label: "Header — buttons", selector: "header .soft-hover" },
+  { id: "intro", label: "Home — intro", selector: ".t-intro" },
+  { id: "card-title", label: "Work cards — title", selector: ".t-card-title" },
+  { id: "card-meta", label: "Work cards — tag", selector: ".t-card-meta" },
+  { id: "page-intro", label: "AI Playground — intro", selector: ".t-page-intro" },
+  { id: "exp-title", label: "AI Playground cards — title", selector: ".t-exp-title" },
+  { id: "exp-desc", label: "AI Playground cards — text", selector: ".t-exp-desc" },
+  { id: "about", label: "About — text", selector: ".t-about" },
+  { id: "journey", label: "About — journey", selector: ".t-journey p" },
+  { id: "footer", label: "Footer — links", selector: ".t-footer a" },
+  { id: "pad", label: "Drawing pad — buttons", selector: "#draw .soft-pill" },
+] as const;
+type FontOverride = { size?: number; weight?: number };
+type Fonts = Record<string, FontOverride>;
+const FONT_KEY = "niia-font-tweaks-v1";
+const POS_KEY = "niia-tweak-panel-pos-v1";
+const WEIGHT_NAMES: Record<number, string> = {
+  300: "Light",
+  400: "Regular",
+  500: "Medium",
+  600: "Semibold",
+  700: "Bold",
+  800: "Extra bold",
+  900: "Black",
+};
+
+function loadFonts(): Fonts {
+  try {
+    return JSON.parse(localStorage.getItem(FONT_KEY) || "{}");
+  } catch {
+    return {};
+  }
+}
+
+function fontCss(fonts: Fonts, important: boolean) {
+  const bang = important ? " !important" : "";
+  return FONT_SECTIONS.flatMap(({ id, selector }) => {
+    const f = fonts[id];
+    if (!f || (f.size === undefined && f.weight === undefined)) return [];
+    const decls = [
+      f.size !== undefined ? `font-size: ${f.size}px${bang};` : "",
+      f.weight !== undefined ? `font-weight: ${f.weight}${bang};` : "",
+    ].filter(Boolean);
+    return [`${selector} { ${decls.join(" ")} }`];
+  }).join("\n");
+}
+
+// What a section currently renders at, for sliders that haven't been touched.
+function measured(selector: string) {
+  const el = document.querySelector(selector);
+  if (!el) return null;
+  const cs = getComputedStyle(el);
+  return { size: Math.round(parseFloat(cs.fontSize)), weight: Number(cs.fontWeight) };
+}
+
 export default function TweakPanel() {
   const [open, setOpen] = useState(false);
-  const [area, setArea] = useState<Area>("site");
+  const [area, setArea] = useState<Area | "fonts">("site");
+  const [fonts, setFonts] = useState<Fonts>(loadFonts);
+
+  // The panel can be dragged anywhere by its title bar (or the closed pill),
+  // so it never has to sit on top of what you're tuning. Position is kept.
+  const [pos, setPos] = useState<{ x: number; y: number } | null>(() => {
+    try {
+      return JSON.parse(localStorage.getItem(POS_KEY) || "null");
+    } catch {
+      return null;
+    }
+  });
+  const drag = useRef<{ dx: number; dy: number; moved: boolean } | null>(null);
+  const boxRef = useRef<HTMLDivElement>(null);
+  const clamp = (x: number, y: number) => {
+    const r = boxRef.current?.getBoundingClientRect();
+    const w = r?.width ?? 200;
+    const h = r?.height ?? 40;
+    return {
+      x: Math.min(Math.max(0, x), window.innerWidth - w),
+      y: Math.min(Math.max(0, y), window.innerHeight - h),
+    };
+  };
+  const onDragStart = (e: React.PointerEvent) => {
+    const r = boxRef.current?.getBoundingClientRect();
+    if (!r) return;
+    drag.current = { dx: e.clientX - r.left, dy: e.clientY - r.top, moved: false };
+    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+  };
+  const onDragMove = (e: React.PointerEvent) => {
+    if (!drag.current) return;
+    drag.current.moved = true;
+    setPos(clamp(e.clientX - drag.current.dx, e.clientY - drag.current.dy));
+  };
+  const onDragEnd = () => {
+    drag.current = null;
+  };
+  useEffect(() => {
+    try {
+      localStorage.setItem(POS_KEY, JSON.stringify(pos));
+    } catch {
+      // Ignore.
+    }
+  }, [pos]);
+  // Keep it on screen when the window shrinks or the panel opens/closes.
+  useEffect(() => {
+    const fit = () => setPos((p) => (p ? clamp(p.x, p.y) : p));
+    const id = requestAnimationFrame(fit);
+    window.addEventListener("resize", fit);
+    return () => {
+      cancelAnimationFrame(id);
+      window.removeEventListener("resize", fit);
+    };
+  }, [open]);
+  const placement: React.CSSProperties = pos ? { left: pos.x, top: pos.y } : { left: 16, bottom: 16 };
   const [values, setValues] = useState<Record<Area, Values>>(loadSaved);
   const [copied, setCopied] = useState(false);
 
@@ -162,15 +277,31 @@ export default function TweakPanel() {
     window.dispatchEvent(new Event("resize"));
   }, [values]);
 
+  useEffect(() => {
+    let tag = document.getElementById("font-tweaks") as HTMLStyleElement | null;
+    if (!tag) {
+      tag = document.createElement("style");
+      tag.id = "font-tweaks";
+      document.head.appendChild(tag);
+    }
+    tag.textContent = fontCss(fonts, true);
+    try {
+      localStorage.setItem(FONT_KEY, JSON.stringify(fonts));
+    } catch {
+      // Ignore — tweaks just won't persist.
+    }
+    window.dispatchEvent(new Event("resize"));
+  }, [fonts]);
+
   // Undo history. Dragging a slider makes many changes in a row; they count
   // as one step as long as it's the same control within half a second.
-  const history = useRef<Record<Area, Values>[]>([]);
+  const history = useRef<{ values: Record<Area, Values>; fonts: Fonts }[]>([]);
   const lastChange = useRef({ key: "", at: 0 });
   const [canUndo, setCanUndo] = useState(false);
   const remember = (key: string) => {
     const now = Date.now();
     if (key !== lastChange.current.key || now - lastChange.current.at > 500) {
-      history.current = [...history.current.slice(-99), values];
+      history.current = [...history.current.slice(-99), { values, fonts }];
       setCanUndo(true);
     }
     lastChange.current = { key, at: now };
@@ -179,17 +310,25 @@ export default function TweakPanel() {
     const prev = history.current.pop();
     if (!prev) return;
     lastChange.current = { key: "", at: 0 };
-    setValues(prev);
+    setValues(prev.values);
+    setFonts(prev.fonts);
     setCanUndo(history.current.length > 0);
   };
 
   const set = (key: string, value: string | number) => {
+    if (area === "fonts") return;
     remember(`${area}:${key}`);
     setValues((v) => ({ ...v, [area]: { ...v[area], [key]: value } }));
   };
 
+  const setFont = (id: string, prop: keyof FontOverride, value: number | undefined) => {
+    remember(`fonts:${id}:${prop}`);
+    setFonts((f) => ({ ...f, [id]: { ...f[id], [prop]: value } }));
+  };
+
   const [copiedColor, setCopiedColor] = useState<string | null>(null);
   const copyColor = async (c: ColorControl) => {
+    if (area === "fonts") return;
     const text = colorHex(values[area], c);
     try {
       await navigator.clipboard.writeText(text);
@@ -200,34 +339,63 @@ export default function TweakPanel() {
     }
   };
 
+  const fullCss = () => {
+    const f = fontCss(fonts, false);
+    return f ? `${buildCss(values)}\n\n${f}` : buildCss(values);
+  };
+
   const copyCss = async () => {
     try {
-      await navigator.clipboard.writeText(buildCss(values));
+      await navigator.clipboard.writeText(fullCss());
       setCopied(true);
       setTimeout(() => setCopied(false), 1500);
     } catch {
-      window.prompt("Copy these values:", buildCss(values));
+      window.prompt("Copy these values:", fullCss());
     }
   };
 
   if (!open) {
     return (
-      <button
-        type="button"
-        onClick={() => setOpen(true)}
-        className="fixed bottom-4 left-4 z-[100] rounded-full bg-black px-4 py-2 font-mono text-xs tracking-widest text-white uppercase shadow-lg"
+      <div
+        ref={boxRef}
+        style={placement}
+        role="button"
+        tabIndex={0}
+        title="Drag to move · click to open"
+        onPointerDown={onDragStart}
+        onPointerMove={onDragMove}
+        onPointerUp={() => {
+          const wasDrag = drag.current?.moved;
+          onDragEnd();
+          if (!wasDrag) setOpen(true);
+        }}
+        onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && setOpen(true)}
+        className="fixed z-[100] cursor-grab touch-none rounded-full bg-black px-4 py-2 font-mono text-xs tracking-widest text-white uppercase shadow-lg select-none active:cursor-grabbing"
       >
-        ◐ Tweak buttons
-      </button>
+        ◐ Tweak
+      </div>
     );
   }
 
-  const current = AREAS.find((a) => a.id === area)!;
+  const current = AREAS.find((a) => a.id === area);
+  const av: Values = area === "fonts" ? {} : values[area];
 
   return (
-    <div className="fixed bottom-4 left-4 z-[100] flex max-h-[75vh] w-[320px] flex-col overflow-hidden rounded-2xl bg-white font-mono text-[11px] text-black shadow-[0_10px_40px_rgba(0,0,0,0.18)]">
-      <div className="flex items-center justify-between border-b border-black/10 px-3 py-2">
-        <span className="tracking-widest uppercase">Button tweaks</span>
+    <div
+      ref={boxRef}
+      style={placement}
+      className="fixed z-[100] flex max-h-[75vh] w-[320px] flex-col overflow-hidden rounded-2xl bg-white font-mono text-[11px] text-black shadow-[0_10px_40px_rgba(0,0,0,0.18)]">
+      <div
+        onPointerDown={(e) => {
+          if ((e.target as HTMLElement).closest("button")) return;
+          onDragStart(e);
+        }}
+        onPointerMove={onDragMove}
+        onPointerUp={onDragEnd}
+        title="Drag to move"
+        className="flex cursor-grab touch-none items-center justify-between border-b border-black/10 px-3 py-2 select-none active:cursor-grabbing"
+      >
+        <span className="tracking-widest uppercase">⠿ Tweaks</span>
         <button type="button" onClick={() => setOpen(false)} aria-label="Close tweaks" className="px-1 text-base">
           ×
         </button>
@@ -246,16 +414,86 @@ export default function TweakPanel() {
             {a.label}
           </button>
         ))}
+        <button
+          type="button"
+          onClick={() => setArea("fonts")}
+          className={`rounded-lg px-2 py-1.5 tracking-wider uppercase ${
+            area === "fonts" ? "bg-black text-white" : "bg-black/5 text-black/70"
+          }`}
+        >
+          Fonts
+        </button>
       </div>
 
       <div className="flex flex-col gap-2.5 overflow-y-auto px-3 py-3">
-        {current.controls.map((c) =>
+        {area === "fonts" && (
+          <>
+            <p className="text-black/50">
+              Untouched sections keep their own (responsive) sizes. Sections on other pages show “—”
+              until you visit them.
+            </p>
+            {FONT_SECTIONS.map(({ id, label, selector }) => {
+              const o = fonts[id] ?? {};
+              const m = measured(selector);
+              const size = o.size ?? m?.size ?? 16;
+              const weight = o.weight ?? m?.weight ?? 400;
+              const touched = o.size !== undefined || o.weight !== undefined;
+              return (
+                <div key={id} className="flex flex-col gap-1 border-b border-black/5 pb-2">
+                  <span className="flex items-center justify-between">
+                    <span className={touched ? "text-black" : "text-black/60"}>{label}</span>
+                    {touched && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          remember(`fonts:${id}:clear`);
+                          setFonts((f) => ({ ...f, [id]: {} }));
+                        }}
+                        className="rounded bg-black/5 px-1.5 text-[10px] uppercase"
+                      >
+                        Clear
+                      </button>
+                    )}
+                  </span>
+                  <label className="flex items-center gap-2">
+                    <span className="w-12 text-black/50">Size</span>
+                    <input
+                      type="range"
+                      min={8}
+                      max={96}
+                      value={size}
+                      onChange={(e) => setFont(id, "size", Number(e.target.value))}
+                      className="min-w-0 flex-1 accent-black"
+                    />
+                    <span className="w-10 text-right">{m || o.size !== undefined ? `${size}px` : "—"}</span>
+                  </label>
+                  <label className="flex items-center gap-2">
+                    <span className="w-12 text-black/50">Weight</span>
+                    <input
+                      type="range"
+                      min={300}
+                      max={900}
+                      step={100}
+                      value={weight}
+                      onChange={(e) => setFont(id, "weight", Number(e.target.value))}
+                      className="min-w-0 flex-1 accent-black"
+                    />
+                    <span className="w-16 text-right">
+                      {m || o.weight !== undefined ? (WEIGHT_NAMES[weight] ?? weight) : "—"}
+                    </span>
+                  </label>
+                </div>
+              );
+            })}
+          </>
+        )}
+        {current?.controls.map((c) =>
           c.kind !== "color" ? (
             <label key={c.key} className="flex flex-col gap-1">
               <span className="flex justify-between text-black/60">
                 <span>{c.label}</span>
                 <span className="text-black">
-                  {values[area][c.key]}
+                  {av[c.key]}
                   {c.kind === "pct" ? "%" : "px"}
                 </span>
               </span>
@@ -264,7 +502,7 @@ export default function TweakPanel() {
                 min={c.min}
                 max={c.max}
                 step={1}
-                value={Number(values[area][c.key])}
+                value={Number(av[c.key])}
                 onChange={(e) => set(c.key, Number(e.target.value))}
                 className="accent-black"
               />
@@ -273,7 +511,7 @@ export default function TweakPanel() {
             <div key={c.key} className="flex items-center gap-2">
               <input
                 type="color"
-                value={String(values[area][c.key])}
+                value={String(av[c.key])}
                 onChange={(e) => set(c.key, e.target.value)}
                 aria-label={c.label}
                 className="h-6 w-8 shrink-0 cursor-pointer rounded border border-black/10 bg-transparent p-0"
@@ -285,18 +523,18 @@ export default function TweakPanel() {
                     type="range"
                     min={0}
                     max={100}
-                    value={Number(values[area][`${c.key}-a`])}
+                    value={Number(av[`${c.key}-a`])}
                     onChange={(e) => set(`${c.key}-a`, Number(e.target.value))}
                     aria-label={`${c.label} opacity`}
                     className="min-w-0 flex-1 accent-black"
                   />
-                  <span className="w-8 text-right">{values[area][`${c.key}-a`]}%</span>
+                  <span className="w-8 text-right">{av[`${c.key}-a`]}%</span>
                 </>
               )}
               <button
                 type="button"
                 onClick={() => copyColor(c)}
-                title={`Copy ${colorHex(values[area], c)}`}
+                title={`Copy ${colorHex(av, c)}`}
                 aria-label={`Copy ${c.label} colour`}
                 className="ml-auto shrink-0 rounded bg-black/5 px-1.5 py-0.5 text-[10px] tracking-wider uppercase"
               >
@@ -325,11 +563,12 @@ export default function TweakPanel() {
           type="button"
           onClick={() => {
             remember("reset");
-            setValues((v) => ({ ...v, [area]: { ...DEFAULTS[area] } }));
+            if (area === "fonts") setFonts({});
+            else setValues((v) => ({ ...v, [area]: { ...DEFAULTS[area] } }));
           }}
           className="flex-1 rounded-lg bg-black/5 px-2 py-1.5 tracking-wider uppercase"
         >
-          Reset {current.label}
+          Reset {current?.label ?? "fonts"}
         </button>
         <button
           type="button"

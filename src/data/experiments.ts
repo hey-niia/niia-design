@@ -5,9 +5,11 @@ export interface Experiment {
   platform: "MacOS" | "WEB APP" | "BROWSER EXTENSION";
   link?: string;
   image?: string;
+  /** Hidden from every list on the site (kept here to bring back later). */
+  hidden?: boolean;
 }
 
-export const experiments: Experiment[] = [
+export const allExperiments: Experiment[] = [
   {
     name: "Skin",
     description:
@@ -52,5 +54,10 @@ export const experiments: Experiment[] = [
     platform: "MacOS",
     link: "/08",
     image: "/experiments/08-cover.png",
+    // Being reworked — hidden until it's ready to come back.
+    hidden: true,
   },
 ];
+
+/** What the site shows: everything not marked hidden. */
+export const experiments = allExperiments.filter((e) => !e.hidden);

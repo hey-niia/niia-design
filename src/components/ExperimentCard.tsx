@@ -23,14 +23,14 @@ export default function ExperimentCard({ exp }: { exp: Experiment }) {
   );
 
   const body = (
-    <div className="p-4">
-      <div className="flex items-start justify-between gap-3">
-        <h4 className="min-w-0 flex-1 text-lg font-semibold">{exp.name}</h4>
-        <p className="shrink-0 font-mono text-xs tracking-widest text-neutral-400">
+    <div className="px-4 pt-2 pb-4">
+      <div className="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between sm:gap-4">
+        <h4 className="t-exp-title min-w-0 flex-1">{exp.name}</h4>
+        <p className="shrink-0 font-mono text-xs tracking-widest text-neutral-400 uppercase">
           {exp.platform}
         </p>
       </div>
-      <p className="mt-2 text-sm text-neutral-600">{exp.description}</p>
+      <p className="t-exp-desc mt-2 text-sm text-neutral-600">{exp.description}</p>
     </div>
   );
 

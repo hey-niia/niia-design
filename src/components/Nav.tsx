@@ -71,10 +71,10 @@ export default function Nav() {
 
       <div className={`flex justify-between gap-x-8 ${fitsInline ? "items-center" : "items-start"}`}>
         <p className={`flex gap-x-2 ${fitsInline ? "items-baseline" : "flex-col"}`}>
-          <Link to="/" className="font-medium text-black">
+          <Link to="/" className="t-name font-medium text-gray-500">
             Niia Bieliavtseva
           </Link>
-          <Link to="/" className="text-gray-400 transition-colors hover:text-[var(--site-accent)]">
+          <Link to="/" className="t-role text-gray-400 transition-colors hover:text-[var(--site-accent)]">
             Product Designer + Engineer
           </Link>
         </p>

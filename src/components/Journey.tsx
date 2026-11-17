@@ -8,7 +8,7 @@ type Milestone = {
 
 const MILESTONES: Milestone[] = [
   {
-    years: "2016–2021",
+    years: "2016–2022",
     role: "Founder",
     org: "Leap",
     description:

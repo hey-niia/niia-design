@@ -41,7 +41,7 @@ export function ExperienceTimeline() {
   return (
     // A container: the rows go to three columns when the timeline itself is wide enough,
     // whatever the window width, so a narrow column never squeezes the role into a sliver.
-    <div className="@container relative">
+    <div className="t-journey @container relative">
       {/* pr-10 keeps the rows clear of the button, which sits on the first row's line. */}
       <ul
         id={detailsId}

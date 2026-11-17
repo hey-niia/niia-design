@@ -68,9 +68,9 @@ export default function WorkGridCard({
           />
         )}
       </div>
-      <div className="mt-3 flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between sm:gap-4">
-        <p className={titleClassName}>{name}</p>
-        <p className="shrink-0 font-mono text-xs tracking-widest text-neutral-400 uppercase">
+      <div className="mt-2 flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between sm:gap-4">
+        <p className={`t-card-title ${titleClassName ?? ""}`}>{name}</p>
+        <p className="t-card-meta shrink-0 font-mono text-xs tracking-widest text-neutral-400 uppercase">
           {metaParts.map((part, i) => (
             <span key={i}>
               {i > 0 && " · "}
