@@ -53,8 +53,8 @@ export default function Journey() {
         {MILESTONES.map((m) => (
           <div key={m.years} className="group relative md:flex-1">
             <div className="relative z-10 mb-5 flex items-center gap-3">
-              <span className="h-[7px] w-[7px] shrink-0 rounded-full bg-black transition-colors duration-300 group-hover:bg-[#e65f2e]" />
-              <span className="inline-flex items-center rounded-full bg-black px-3 py-1 font-mono text-[11px] tracking-widest text-white uppercase transition-all duration-300 group-hover:-translate-y-0.5 group-hover:bg-[#e65f2e]">
+              <span className="h-[7px] w-[7px] shrink-0 rounded-full bg-black transition-colors duration-300 group-hover:bg-[var(--site-accent)]" />
+              <span className="inline-flex items-center rounded-full bg-black px-3 py-1 font-mono text-[11px] tracking-widest text-white uppercase transition-all duration-300 group-hover:-translate-y-0.5 group-hover:bg-[var(--site-accent)]">
                 {m.years}
               </span>
             </div>

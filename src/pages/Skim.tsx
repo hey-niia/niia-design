@@ -17,7 +17,7 @@ export default function Skim() {
         <header className="border-b border-gray-200 pb-8">
           <Link
             to="/ai-playground"
-            className="mb-6 block text-sm text-gray-400 hover:text-[#e65f2e]"
+            className="mb-6 block text-sm text-gray-400 hover:text-[var(--site-accent)]"
           >
             <WiggleText>← AI Playground</WiggleText>
           </Link>

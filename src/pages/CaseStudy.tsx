@@ -96,7 +96,7 @@ function CreditAvatars({ credits }: { credits: Credit[] }) {
             type="button"
             onClick={() => setActiveIndex(activeIndex === i ? null : i)}
             className={`flex h-9 w-9 items-center justify-center rounded-full border-2 border-white text-xs font-medium text-white ${
-              credit.highlight ? "bg-[#e65f2e]" : "bg-black"
+              credit.highlight ? "bg-[var(--site-accent)]" : "bg-black"
             }`}
           >
             {credit.initials}
@@ -491,7 +491,7 @@ function Block({
       );
     case "heading":
       return block.mono ? (
-        <h3 className="mt-12 mb-3 font-mono text-sm tracking-widest text-[#e65f2e] uppercase">
+        <h3 className="mt-12 mb-3 font-mono text-sm tracking-widest text-[var(--site-accent)] uppercase">
           {block.text}
         </h3>
       ) : (
@@ -501,7 +501,7 @@ function Block({
       return (
         <h2 id={block.id} className="mt-16 mb-4 scroll-mt-8 text-3xl font-medium">
           {sectionNumber !== undefined && (
-            <span className="mb-3 block font-mono text-xs tracking-widest text-[#e65f2e]">
+            <span className="mb-3 block font-mono text-xs tracking-widest text-[var(--site-accent)]">
               {String(sectionNumber).padStart(2, "0")}/
             </span>
           )}
@@ -909,7 +909,7 @@ export default function CaseStudy() {
     <div className={project.darkPage ? "my-20" : "mt-12"}>
       <p
         className={`mb-4 text-sm tracking-wide uppercase ${
-          project.darkPage ? "text-[#e65f2e]" : "text-gray-400"
+          project.darkPage ? "text-[var(--site-accent)]" : "text-gray-400"
         }`}
       >
         Impact
@@ -954,7 +954,7 @@ export default function CaseStudy() {
               <div className="min-[1360px]:sticky min-[1360px]:top-24">
                 <Link
                   to="/"
-                  className={`mb-6 block text-sm hover:text-[#e65f2e] ${
+                  className={`mb-6 block text-sm hover:text-[var(--site-accent)] ${
                     tocOnDark ? "text-neutral-400" : "text-gray-400"
                   }`}
                 >
@@ -966,7 +966,7 @@ export default function CaseStudy() {
                       <li key={item.id}>
                         <a
                           href={`#${item.id}`}
-                          className={`text-sm transition-colors hover:text-[#e65f2e] ${
+                          className={`text-sm transition-colors hover:text-[var(--site-accent)] ${
                             activeId === item.id
                               ? tocOnDark
                                 ? "font-medium text-neutral-100"
@@ -1144,7 +1144,7 @@ export default function CaseStudy() {
 
       <span
         aria-hidden
-        className={`pointer-events-none fixed z-50 flex -translate-x-1/2 -translate-y-1/2 items-center gap-1.5 rounded-full bg-[#e65f2e] px-4 py-2 text-sm font-normal text-white transition-[transform,opacity] duration-150 ease-out ${
+        className={`pointer-events-none fixed z-50 flex -translate-x-1/2 -translate-y-1/2 items-center gap-1.5 rounded-full bg-[var(--site-accent)] px-4 py-2 text-sm font-normal text-white transition-[transform,opacity] duration-150 ease-out ${
           cursorLabel.visible ? "scale-100 opacity-100" : "scale-75 opacity-0"
         }`}
         style={{ left: cursorLabel.x, top: cursorLabel.y }}

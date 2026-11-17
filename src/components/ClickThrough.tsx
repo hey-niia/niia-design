@@ -164,7 +164,7 @@ export default function ClickThrough({ steps, label }: { steps: ClickThroughStep
         >
           {/* Click ripple, centred on the fingertip. */}
           <span
-            className="absolute rounded-full bg-[#e65f2e]/35"
+            className="absolute rounded-full bg-[var(--site-accent)]/35"
             style={{
               width: 22 * cursor,
               height: 22 * cursor,

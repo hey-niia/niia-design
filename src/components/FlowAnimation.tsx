@@ -673,7 +673,7 @@ export default function FlowAnimation({
                 type="button"
                 onClick={() => jumpTo(i)}
                 aria-current={i === activeChapter ? "step" : undefined}
-                className={`text-xs font-medium transition-colors hover:text-[#e65f2e] sm:text-sm ${
+                className={`text-xs font-medium transition-colors hover:text-[var(--site-accent)] sm:text-sm ${
                   i === activeChapter ? "text-[var(--nd-ink-strong,#000)]" : "text-gray-400"
                 }`}
               >
@@ -685,7 +685,7 @@ export default function FlowAnimation({
                 type="button"
                 onClick={() => setPaused((p) => !p)}
                 aria-label={paused ? "Play animation" : "Pause animation"}
-                className="flex h-6 w-6 items-center justify-center rounded-full text-gray-400 transition-colors hover:text-[#e65f2e]"
+                className="flex h-6 w-6 items-center justify-center rounded-full text-gray-400 transition-colors hover:text-[var(--site-accent)]"
               >
                 {paused ? (
                   <svg viewBox="0 0 12 12" className="h-3 w-3" fill="currentColor" aria-hidden>

@@ -14,7 +14,7 @@ export default function ExperimentCard({ exp }: { exp: Experiment }) {
       />
       {exp.link && (
         <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-black/0 opacity-0 transition-all duration-200 group-hover:bg-black/20 group-hover:opacity-100">
-          <span className="scale-95 rounded-full bg-[#e65f2e] px-4 py-2 text-sm text-white shadow-lg transition-transform duration-200 group-hover:scale-100">
+          <span className="scale-95 rounded-full bg-[var(--site-accent)] px-4 py-2 text-sm text-white shadow-lg transition-transform duration-200 group-hover:scale-100">
             {tooltip}
           </span>
         </div>

@@ -15,6 +15,7 @@ import Footer from "./components/Footer";
 import NiiaChatSidebar from "./components/NiiaChatSidebar";
 import SelectionAskTooltip from "./components/SelectionAskTooltip";
 import ImageContextMenu from "./components/ImageContextMenu";
+import TweakPanel from "./components/TweakPanel";
 import { NiiaChatProvider } from "./context/NiiaChatContext";
 import { useNiiaChat } from "./context/useNiiaChat";
 
@@ -45,6 +46,8 @@ function AppContent() {
       <SelectionAskTooltip />
       <NiiaChatSidebar />
       <ImageContextMenu />
+      {/* Dev-only: live button tuning. Never included in the built site. */}
+      {import.meta.env.DEV && <TweakPanel />}
     </>
   );
 }

@@ -42,57 +42,156 @@
 
   @media (hover: hover) {
     a:hover {
-      color: #e65f2e;
+      color: var(--site-accent);
     }
   }
 }
 
 ::selection {
-  color: #e65f2e;
+  color: var(--site-accent);
   background-color: rgba(230, 95, 46, 0.1);
 }
 
 /* Active nav page: the same color treatment as :hover, held statically
    instead of only firing on mouse-over — a persistent "you are here". */
 .nav-active {
-  color: #e65f2e;
+  color: var(--site-accent);
 }
 
-/* Soft raised buttons (drawing pad) — low, matte "keycap" lift: a solid
-   face a touch lighter at the top, a crisp light edge along the top-left, a
-   short soft shadow bottom-right and a faint glow top-left. Pressed /
-   selected (aria-pressed) sinks the key in. */
+/* Soft raised buttons — low, matte "keycap" lift: a solid face that is a
+   touch lighter at the top, a crisp light edge along the top-left, a short
+   soft shadow bottom-right and a faint glow top-left. Rounded rectangles.
+   Pressed / selected (aria-pressed) sinks the key in.
+
+   Every value is a CSS variable so the dev-only tweak panel
+   (src/components/TweakPanel.tsx) can adjust each area live:
+   --pad-*  drawing-pad buttons (.soft-raised)
+   --nav-*  header buttons (.soft-hover) */
 :root {
-  --pad-gap: 14px;
+  /* Main accent colour used across the site. */
+  --site-accent: #ff75bf;
+  /* Page background: a whisper of warmth so white keys show their light. */
+  --site-bg: #fafafa;
+
+  /* Drawing pad: every colour is mixed from --pad-color, so the pad and its
+     buttons follow it. Two light presets: raised keys, and keys pressed in
+     (concave). */
+  --pad-color: #ffa4ca;
+  --pad-gap: 8px;
   --pad-size: 46px;
   --pad-pad-x: 22px;
   --pad-pad-y: 12px;
   --pad-radius: 14px;
-  --pad-lift: 4px;
+  --pad-lift: 3px;
   --pad-blur: 10px;
-  --pad-face-top: #f3865f;
-  --pad-face-bottom: #ec7551;
-  --pad-edge: color-mix(in srgb, #ffc4aa 75%, transparent);
-  --pad-shadow: color-mix(in srgb, #96341a 32%, transparent);
-  --pad-glow: #f8946f;
+  --pad-shadow-a: 24%;
+  --pad-glow-a: 27%;
+  --pad-glow-pressed-a: 69%;
+  --pad-edge-a: 27%;
+  --pad-face-top: color-mix(in srgb, var(--pad-color) 92%, white);
+  --pad-face-bottom: color-mix(in srgb, var(--pad-color) 96%, black);
+  --pad-shadow: color-mix(in srgb, color-mix(in srgb, var(--pad-color) 55%, black) var(--pad-shadow-a), transparent);
+  --pad-glow: color-mix(in srgb, color-mix(in srgb, var(--pad-color) 75%, white) var(--pad-glow-a), transparent);
+  --pad-glow-pressed: color-mix(
+    in srgb,
+    color-mix(in srgb, var(--pad-color) 75%, white) var(--pad-glow-pressed-a),
+    transparent
+  );
+  --pad-edge: color-mix(in srgb, color-mix(in srgb, var(--pad-color) 40%, white) var(--pad-edge-a), transparent);
+
+  /* Header: two shadows and a two-colour face, each set on its own. */
+  --nav-gap: 2px;
+  --nav-pad-x: 18px;
+  --nav-pad-y: 10px;
+  --nav-radius: 20px;
+  --nav-tl-dist: 19px;
+  --nav-tl-blur: 32px;
+  --nav-tl-shadow: color-mix(in srgb, #ffffff 100%, transparent);
+  --nav-br-dist: 2px;
+  --nav-br-blur: 10px;
+  --nav-br-shadow: color-mix(in srgb, #3c3228 14%, transparent);
+  --nav-face-tl: #f8f8f8;
+  --nav-face-br: #fdfdfd;
+  --nav-edge: color-mix(in srgb, #ffffff 100%, transparent);
+  --nav-edge-w: 1px;
+
+  /* Header, pressed (current page / while clicking). */
+  --navp-face-tl: #ffffff;
+  --navp-face-br: #ffffff;
+  --navp-shadow: color-mix(in srgb, #b0b0b0 14%, transparent);
+  --navp-shadow-dist: 4px;
+  --navp-shadow-blur: 4px;
+  --navp-light: color-mix(in srgb, #ffffff 100%, transparent);
+  --navp-light-dist: 1px;
+  --navp-light-blur: 30px;
+  --navp-edge: color-mix(in srgb, #ffffff 100%, transparent);
+  --navp-edge-w: 1px;
 }
 
 .soft-raised {
+  --k-radius: var(--pad-radius);
   --k-lift: var(--pad-lift);
   --k-blur: var(--pad-blur);
-  position: relative;
+  --k-face-top: var(--pad-face-top);
+  --k-face-bottom: var(--pad-face-bottom);
+  --k-edge: var(--pad-edge);
+  --k-shadow: var(--pad-shadow);
+  --k-glow: var(--pad-glow);
   color: rgba(0, 0, 0, 0.72);
-  border-radius: var(--pad-radius);
-  background: linear-gradient(180deg, var(--pad-face-top), var(--pad-face-bottom));
+}
+
+/* Header buttons: same keycap in off-white, each its own button. */
+.soft-hover {
+  --k-radius: var(--nav-radius);
+  display: inline-flex;
+  align-items: center;
+  padding: var(--nav-pad-y) var(--nav-pad-x);
+}
+
+.soft-raised,
+.soft-hover {
+  position: relative;
+  border-radius: var(--k-radius);
+  background: linear-gradient(180deg, var(--k-face-top), var(--k-face-bottom));
   box-shadow:
-    inset 1px 1px 0 var(--pad-edge),
-    calc(var(--k-lift) * 0.25) calc(var(--k-lift) * 0.5) calc(var(--k-blur) * 0.3) var(--pad-shadow),
-    var(--k-lift) calc(var(--k-lift) * 1.25) var(--k-blur) var(--pad-shadow),
-    calc(var(--k-lift) * -0.75) calc(var(--k-lift) * -0.75) calc(var(--k-blur) * 0.8) var(--pad-glow);
+    inset 1px 1px 0 var(--k-edge),
+    calc(var(--k-lift) * 0.25) calc(var(--k-lift) * 0.5) calc(var(--k-blur) * 0.3) var(--k-shadow),
+    var(--k-lift) calc(var(--k-lift) * 1.25) var(--k-blur) var(--k-shadow),
+    calc(var(--k-lift) * -0.75) calc(var(--k-lift) * -0.75) calc(var(--k-blur) * 0.8) var(--k-glow);
   transition:
     box-shadow 0.18s ease,
     background 0.18s ease,
     color 0.15s ease;
+}
+
+/* Header keycap: flat text at rest; on hover a raised key appears behind
+   it (a ::before layer, so it can fade in). Face blends from the top-left
+   colour to the bottom-right colour; one shadow up-left, one down-right.
+   Every header button gets the same fixed height. */
+.soft-hover {
+  isolation: isolate;
+  height: calc(1lh + var(--nav-pad-y) * 2);
+  padding-block: 0;
+  background: none;
+  box-shadow: none;
+}
+.soft-hover::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background: linear-gradient(135deg, var(--nav-face-tl), var(--nav-face-br));
+  box-shadow:
+    inset var(--nav-edge-w) var(--nav-edge-w) 0 var(--nav-edge),
+    calc(var(--nav-tl-dist) * -1) calc(var(--nav-tl-dist) * -1) var(--nav-tl-blur) var(--nav-tl-shadow),
+    var(--nav-br-dist) var(--nav-br-dist) var(--nav-br-blur) var(--nav-br-shadow);
+  opacity: 0;
+  transition: opacity 0.18s ease;
+  pointer-events: none;
+}
+.soft-hover:focus-visible::before {
+  opacity: 1;
 }
 
 @media (hover: hover) {
@@ -101,30 +200,54 @@
     --k-blur: calc(var(--pad-blur) * 1.4);
     color: #000;
   }
+  .soft-hover:hover::before {
+    opacity: 1;
+  }
 }
 
 .soft-raised:active,
 .soft-raised[aria-pressed="true"] {
-  background: linear-gradient(180deg, var(--pad-face-bottom), var(--pad-face-top));
+  --k-glow: var(--pad-glow-pressed);
+  background: linear-gradient(180deg, var(--k-face-bottom), var(--k-face-top));
   box-shadow:
-    inset calc(var(--k-lift) * 0.5) calc(var(--k-lift) * 0.5) calc(var(--k-blur) * 0.5) var(--pad-shadow),
-    inset calc(var(--k-lift) * -0.5) calc(var(--k-lift) * -0.5) calc(var(--k-blur) * 0.4) var(--pad-glow);
+    inset calc(var(--k-lift) * 0.5) calc(var(--k-lift) * 0.5) calc(var(--k-blur) * 0.5) var(--k-shadow),
+    inset calc(var(--k-lift) * -0.5) calc(var(--k-lift) * -0.5) calc(var(--k-blur) * 0.4) var(--k-glow);
+}
+
+/* Pressed in: while clicking, and always for the page you're on.
+   Tuned separately via --navp-* (tweak panel "Header pressed"). */
+.soft-hover:active::before,
+.soft-hover.nav-active::before {
+  opacity: 1;
+  background: linear-gradient(135deg, var(--navp-face-tl), var(--navp-face-br));
+  box-shadow:
+    inset calc(var(--navp-edge-w) * -1) calc(var(--navp-edge-w) * -1) 0 var(--navp-edge),
+    inset calc(var(--navp-shadow-dist) * 0.5) calc(var(--navp-shadow-dist) * 0.5) calc(var(--navp-shadow-blur) * 0.3)
+      var(--navp-shadow),
+    inset var(--navp-shadow-dist) var(--navp-shadow-dist) var(--navp-shadow-blur) var(--navp-shadow),
+    inset calc(var(--navp-light-dist) * -1) calc(var(--navp-light-dist) * -1) var(--navp-light-blur) var(--navp-light);
 }
 
 /* Sunken field (the send panel's preview and text box). */
 .soft-inset {
-  background: var(--pad-face-bottom);
+  /* Same face as the raised keys, just sunk in. */
+  background: linear-gradient(180deg, var(--pad-face-top), var(--pad-face-bottom));
   box-shadow:
     inset 3px 3px 7px var(--pad-shadow),
-    inset -3px -3px 6px var(--pad-glow);
+    inset -3px -3px 6px var(--pad-glow-pressed);
 }
 
+/* Keyboard focus in the same orange family instead of the browser's blue. */
 .soft-raised:focus-visible {
   outline: 2px solid #b4512f;
   outline-offset: 3px;
 }
 .soft-raised:focus:not(:focus-visible) {
   outline: none;
+}
+.soft-hover:focus-visible {
+  outline: 2px solid var(--site-accent);
+  outline-offset: 2px;
 }
 
 .soft-pill {
@@ -159,7 +282,7 @@
   pointer-events: none;
   overflow: visible;
   white-space: nowrap;
-  color: #e65f2e;
+  color: var(--site-accent);
   font-variant-numeric: tabular-nums;
   transition: opacity 0.15s ease;
 }
@@ -354,4 +477,14 @@
 video::-webkit-media-controls-start-playback-button {
   display: none !important;
   -webkit-appearance: none;
+}
+
+/* Keep the AI Playground decode overlay aligned with the hover pill padding. */
+.soft-hover.ai-nav-link {
+  display: inline-flex;
+}
+.soft-hover.ai-nav-link .ai-nav-text-overlay {
+  display: flex;
+  align-items: center;
+  padding: inherit;
 }

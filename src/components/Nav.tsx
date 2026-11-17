@@ -34,13 +34,19 @@ export default function Nav() {
 
     const observer = new ResizeObserver(checkFit);
     observer.observe(header);
-    return () => observer.disconnect();
+    // Also re-check when spacing changes without the header resizing
+    // (the dev tweak panel fires a resize event after each change).
+    window.addEventListener("resize", checkFit);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("resize", checkFit);
+    };
   }, []);
 
   return (
     <header
       ref={headerRef}
-      className="-mx-4 flex flex-col gap-y-2 bg-white px-4 pt-3 pb-4 font-mono text-[15px] uppercase"
+      className="-mx-4 flex flex-col gap-y-2 bg-[var(--site-bg)] px-4 pt-3 pb-4 font-mono text-[15px] uppercase"
     >
       <div
         ref={measureRef}
@@ -51,52 +57,52 @@ export default function Nav() {
           <span className="font-medium">Niia Bieliavtseva</span>
           <span>Product Designer + Engineer</span>
         </span>
-        <span className="flex items-center gap-x-6">
-          <span>Work</span>
-          <span>AI Playground</span>
-          <span>About</span>
-          <span>✦ Niia AI</span>
+        <span className="flex items-center gap-x-[var(--nav-gap)]">
+          <span className="soft-hover">Work</span>
+          <span className="soft-hover">AI Playground</span>
+          <span className="soft-hover">About</span>
+          <span className="soft-hover">✦ Niia AI</span>
         </span>
-        <span className="flex items-center gap-x-6">
-          <span>Email</span>
-          <span>LinkedIn</span>
+        <span className="flex items-center gap-x-[var(--nav-gap)]">
+          <span className="soft-hover">Email</span>
+          <span className="soft-hover">LinkedIn</span>
         </span>
       </div>
 
-      <div className="flex items-start justify-between gap-x-8">
+      <div className={`flex justify-between gap-x-8 ${fitsInline ? "items-center" : "items-start"}`}>
         <p className={`flex gap-x-2 ${fitsInline ? "items-baseline" : "flex-col"}`}>
           <Link to="/" className="font-medium text-black">
             Niia Bieliavtseva
           </Link>
-          <Link to="/" className="text-gray-400">
+          <Link to="/" className="text-gray-400 transition-colors hover:text-[var(--site-accent)]">
             Product Designer + Engineer
           </Link>
         </p>
 
         {fitsInline ? (
           <>
-            <nav className="flex items-center gap-x-6 text-gray-400">
-              <Link to="/" state={{ scrollTo: "work" }} className={pathname === "/" ? "nav-active" : undefined}>
+            <nav className="flex items-center gap-x-[var(--nav-gap)] text-gray-500">
+              <Link to="/" state={{ scrollTo: "work" }} className={`soft-hover ${pathname === "/" ? "nav-active" : ""}`}>
                 Work
               </Link>
-              <AIPlaygroundNavLink />
-              <Link to="/about" className={pathname === "/about" ? "nav-active" : undefined}>
+              <AIPlaygroundNavLink className="soft-hover" />
+              <Link to="/about" className={`soft-hover ${pathname === "/about" ? "nav-active" : ""}`}>
                 About
               </Link>
               <button
                 type="button"
                 onClick={openWelcome}
-                className="flex cursor-pointer items-center gap-1 hover:text-[#e65f2e]"
+                className="soft-hover flex cursor-pointer items-center gap-1 hover:text-[var(--site-accent)]"
               >
-                <span aria-hidden className="text-[20px]">✦</span> Niia AI
+                <span aria-hidden className="text-[20px] leading-none">✦</span> Niia AI
               </button>
             </nav>
 
-            <div className="flex items-center gap-x-6 text-gray-400">
-              <a href="mailto:nia.bieliavtseva@gmail.com" target="_blank" rel="noopener noreferrer">
+            <div className="flex items-center gap-x-[var(--nav-gap)] text-gray-500">
+              <a className="soft-hover" href="mailto:nia.bieliavtseva@gmail.com" target="_blank" rel="noopener noreferrer">
                 Email
               </a>
-              <a href={LINKEDIN_URL} target="_blank" rel="noopener noreferrer">
+              <a className="soft-hover" href={LINKEDIN_URL} target="_blank" rel="noopener noreferrer">
                 LinkedIn
               </a>
             </div>
@@ -143,7 +149,7 @@ export default function Nav() {
               setIsMenuOpen(false);
               openWelcome();
             }}
-            className="flex cursor-pointer items-center gap-1 text-left hover:text-[#e65f2e]"
+            className="flex cursor-pointer items-center gap-1 text-left hover:text-[var(--site-accent)]"
           >
             <span aria-hidden className="text-[20px]">✦</span> Niia AI
           </button>

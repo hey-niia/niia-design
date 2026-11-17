@@ -1,6 +1,6 @@
 import { NADIIA_CARD_SHELL } from "./nadiia";
 
-const ACCENT = "#e65f2e";
+const ACCENT = "var(--site-accent)";
 
 export interface ResearchQuote {
   /** Shown inside the avatar circle, e.g. "AS". */
@@ -83,7 +83,7 @@ function QuoteCard({
           // Under the message on a phone; beside it on a wider screen.
           single ? "col-start-2 sm:col-start-auto sm:ml-3" : "col-start-2"
         }`}
-        style={{ color: "var(--nd-note, #e65f2e)" }}
+        style={{ color: "var(--nd-note, var(--site-accent))" }}
       >
         {item.takeaway}
       </figcaption>

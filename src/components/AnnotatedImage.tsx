@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { FRAME_RADIUS, ScrollHint } from "./ScreenshotFrame";
 
-const ACCENT = "#e65f2e";
+const ACCENT = "var(--site-accent)";
 /** Past this height fraction a note would fall off the bottom, so open it upward. */
 const FLIP_ABOVE = 0.72;
 // Matches the note's `w-60`.

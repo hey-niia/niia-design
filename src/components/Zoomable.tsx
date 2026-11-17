@@ -44,7 +44,7 @@ export default function Zoomable({
 
       <span
         aria-hidden
-        className={`pointer-events-none fixed z-50 flex -translate-x-1/2 -translate-y-1/2 items-center gap-1.5 rounded-full bg-[#e65f2e] px-4 py-2 text-sm font-normal text-white transition-[transform,opacity] duration-150 ease-out ${
+        className={`pointer-events-none fixed z-50 flex -translate-x-1/2 -translate-y-1/2 items-center gap-1.5 rounded-full bg-[var(--site-accent)] px-4 py-2 text-sm font-normal text-white transition-[transform,opacity] duration-150 ease-out ${
           cursorLabel.visible ? "scale-100 opacity-100" : "scale-75 opacity-0"
         }`}
         style={{ left: cursorLabel.x, top: cursorLabel.y }}

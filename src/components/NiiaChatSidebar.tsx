@@ -197,7 +197,7 @@ export default function NiiaChatSidebar() {
             onClick={reset}
             aria-label="Reset conversation"
             title="Reset conversation"
-            className="transition-colors hover:text-[#e65f2e]"
+            className="transition-colors hover:text-[var(--site-accent)]"
           >
             ↺
           </button>
@@ -206,7 +206,7 @@ export default function NiiaChatSidebar() {
             onClick={close}
             aria-label="Close"
             title="Close"
-            className="transition-colors hover:text-[#e65f2e]"
+            className="transition-colors hover:text-[var(--site-accent)]"
           >
             ✕
           </button>
@@ -227,7 +227,7 @@ export default function NiiaChatSidebar() {
                 {m.role === "user" ? "You" : "Niia AI"}
               </p>
               {m.quote && (
-                <p className="mb-1.5 border-l-2 border-[#e65f2e]/40 pl-2 text-xs text-neutral-500 italic">
+                <p className="mb-1.5 border-l-2 border-[var(--site-accent)]/40 pl-2 text-xs text-neutral-500 italic">
                   “{m.quote}”
                 </p>
               )}
@@ -272,7 +272,7 @@ export default function NiiaChatSidebar() {
                   type="button"
                   onClick={() => submit(q)}
                   style={{ animationDelay: `${0.1 + i * 0.08}s` }}
-                  className="niia-fade-in-up -mx-2 flex items-start gap-2 rounded-md px-2 py-1 text-left text-sm leading-relaxed text-neutral-600 transition-colors hover:bg-[#e65f2e]/10 hover:text-[#e65f2e]"
+                  className="niia-fade-in-up -mx-2 flex items-start gap-2 rounded-md px-2 py-1 text-left text-sm leading-relaxed text-neutral-600 transition-colors hover:bg-[var(--site-accent)]/10 hover:text-[var(--site-accent)]"
                 >
                   <span aria-hidden>↳</span> {q}
                 </button>
@@ -290,7 +290,7 @@ export default function NiiaChatSidebar() {
               type="button"
               onClick={clearPendingQuote}
               aria-label="Remove quote"
-              className="shrink-0 text-neutral-400 transition-colors hover:text-[#e65f2e]"
+              className="shrink-0 text-neutral-400 transition-colors hover:text-[var(--site-accent)]"
             >
               ✕
             </button>
@@ -313,7 +313,7 @@ export default function NiiaChatSidebar() {
           <button
             type="submit"
             aria-label="Send"
-            className="text-neutral-400 transition-colors hover:text-[#e65f2e]"
+            className="text-neutral-400 transition-colors hover:text-[var(--site-accent)]"
           >
             ↑
           </button>

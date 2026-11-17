@@ -30,7 +30,7 @@ function scrambledFrame(frame: number): string {
  * decodes itself, resolving left-to-right out of random characters in the
  * accent color like a terminal locking in a value, then fades back to rest.
  */
-export default function AIPlaygroundNavLink() {
+export default function AIPlaygroundNavLink({ className = "" }: { className?: string }) {
   const { pathname } = useLocation();
   const isActive = pathname === "/ai-playground";
   const [isAnimating, setIsAnimating] = useState(false);
@@ -75,7 +75,7 @@ export default function AIPlaygroundNavLink() {
   return (
     <Link
       to="/ai-playground"
-      className={`ai-nav-link ${isActive ? "nav-active" : ""}`}
+      className={`ai-nav-link ${className} ${isActive ? "nav-active" : ""}`}
     >
       <span className={`ai-nav-text-base ${isAnimating ? "is-hidden" : ""}`}>{BASE_TEXT}</span>
       <span className={`ai-nav-text-overlay ${isAnimating ? "is-active" : ""}`} aria-hidden="true">

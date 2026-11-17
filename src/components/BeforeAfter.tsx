@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import AnnotatedImage, { type Pin } from "./AnnotatedImage";
 import { FRAME_RADIUS, ScrollHint } from "./ScreenshotFrame";
 
-const ACCENT = "#e65f2e";
+const ACCENT = "var(--site-accent)";
 /** Treat "within this many px of the end" as scrolled through. */
 const END_SLOP = 24;
 

@@ -1,6 +1,5 @@
 import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
-import DrawingPad from "../components/DrawingPad";
 import { ExperienceTimeline } from "../components/Experience";
 import Nav from "../components/Nav";
 import WorkGridCard from "../components/WorkGridCard";
@@ -62,7 +61,6 @@ export default function Home() {
         ))}
       </section>
 
-      <DrawingPad />
     </main>
   );
 }

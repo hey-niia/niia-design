@@ -91,7 +91,7 @@ export default function NotFound() {
             </p>
 
             <div className="pointer-events-auto mt-6 flex flex-col items-center gap-2 font-mono text-sm tracking-widest text-gray-400 uppercase sm:flex-row sm:gap-4">
-              <Link to="/" className="text-black hover:text-[#e65f2e]">
+              <Link to="/" className="text-black hover:text-[var(--site-accent)]">
                 <WiggleText>Back to Homepage</WiggleText>
               </Link>
               <span aria-hidden className="hidden sm:inline">
@@ -136,7 +136,7 @@ export default function NotFound() {
               className="group block rounded-sm bg-neutral-100 p-5 text-left transition-colors hover:bg-neutral-200/70"
             >
               <p className="font-medium text-black">
-                <span aria-hidden className="mr-1 text-[#e65f2e]">
+                <span aria-hidden className="mr-1 text-[var(--site-accent)]">
                   ✦
                 </span>
                 <WiggleText>Talk to Niia AI</WiggleText>{" "}
