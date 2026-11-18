@@ -43,10 +43,10 @@ export function NiiaChatProvider({ children }: { children: ReactNode }) {
   const clearPendingQuote = useCallback(() => setPendingQuote(null), []);
 
   const sendMessage = useCallback(
-    (text: string) => {
+    (text: string, quoteOverride?: string) => {
       const trimmed = text.trim();
       if (!trimmed) return;
-      const quote = pendingQuote ?? undefined;
+      const quote = quoteOverride ?? pendingQuote ?? undefined;
       setMessages((prev) => [...prev, { role: "user", text: trimmed, quote }]);
       setPendingQuote(null);
       setSuggestions([]);

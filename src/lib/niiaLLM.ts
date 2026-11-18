@@ -94,6 +94,12 @@ export const PLAYGROUND_CARDS: AnswerCard[] = experiments
   }));
 
 const ANSWERS: CannedAnswer[] = [
+  // The homepage intro's "Ask Niia AI" pill asks this one.
+  {
+    keywords: ["what you love", "what do you love"],
+    answer:
+      "I believe great design solves real business problems.\n\nMaking something intuitive is actually hard work. The best design feels effortless to use. To me, that's the key to a great product, even when a lot of thought and complexity went into making it that simple.\n\nAnd I also believe solutions should be beautiful. Aesthetics, personality, and the joy of using a product aren't just nice extras. They're part of what makes people choose a product, fall in love with it, and keep coming back.",
+  },
   // Checked first: specific personal phrasing like "what do you do outside
   // of work" would otherwise get swallowed by the broader "what do you do"
   // entry below, since that's a substring of the question.

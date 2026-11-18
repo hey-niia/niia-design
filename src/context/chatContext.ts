@@ -26,7 +26,8 @@ export interface NiiaChatContextValue {
   close: () => void;
   reset: () => void;
   clearPendingQuote: () => void;
-  sendMessage: (text: string) => void;
+  /** `quote` shows a highlighted line above the question (the intro's Ask Niia AI pill uses it). */
+  sendMessage: (text: string, quote?: string) => void;
 }
 
 export const NiiaChatContext = createContext<NiiaChatContextValue | null>(null);

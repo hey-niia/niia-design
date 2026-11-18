@@ -58,6 +58,17 @@
   background-color: rgba(230, 95, 46, 0.1);
 }
 
+/* Homepage intro: the "What I love" part looks like selected text, in the
+   same colours as a real selection. */
+.intro-highlight {
+  color: var(--site-accent);
+  background-color: rgba(230, 95, 46, 0.1);
+  /* Fill the line height, so the highlighted lines touch like a selection. */
+  padding: 0.01em 0;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+
 /* Active nav page: the same color treatment as :hover, held statically
    instead of only firing on mouse-over — a persistent "you are here". */
 .nav-active {
