@@ -868,7 +868,7 @@ export default function DrawingPad() {
                 ? { top: sendView.top, height: sendView.height }
                 : undefined
             }
-            className="fixed inset-x-0 top-0 z-50 flex h-dvh items-center justify-center bg-[var(--pad-color)]/80 p-3 backdrop-blur-[3px] sm:absolute sm:inset-0 sm:h-auto sm:bg-[var(--pad-color)]/60 sm:p-4 sm:backdrop-blur-[2px]"
+            className="fixed inset-x-0 top-0 z-50 flex h-dvh items-center justify-center bg-white/60 p-3 backdrop-blur-[3px] sm:absolute sm:inset-0 sm:h-auto sm:bg-white/50 sm:p-4 sm:backdrop-blur-[2px]"
           >
             <form
               onSubmit={handleSend}
