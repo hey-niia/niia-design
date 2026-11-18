@@ -264,12 +264,12 @@ const ANSWERS: CannedAnswer[] = [
   {
     keywords: ["overspace", "studio", "co-found", "cofound"],
     answer:
-      "Overspace is the product design studio Niia co-founded in 2021 — a small team doing the unglamorous parts of product design that make the flashy parts possible: research nobody sees, systems nobody notices until they're missing.",
+      "Overspace is the product design studio Niia co-founded in 2022 — a small team doing the unglamorous parts of product design that make the flashy parts possible: research nobody sees, systems nobody notices until they're missing.",
   },
   {
     keywords: ["experience", "background", "career", "who are you", "who is niia"],
     answer:
-      "Senior Product Designer and AI Design Engineer, freelance since 2022 — current work spans an AI-first iOS wellness app, enterprise dashboards, and web platforms. Before that: co-founder of Overspace (2021–present) and founder of Leap (2016–2022), which she sold in 2022. She started as a founder first, designer second.",
+      "Senior Product Designer and AI Design Engineer, freelance since 2022 — current work spans an AI-first iOS wellness app, enterprise dashboards, and web platforms. Before that: co-founder of Overspace (2022–present) and founder of Leap (2016–2022), which she sold in 2022. She started as a founder first, designer second.",
   },
   {
     keywords: ["resume", "résumé", "cv", "portfolio pdf"],
@@ -278,6 +278,12 @@ const ANSWERS: CannedAnswer[] = [
   {
     keywords: ["contact", "email", "reach", "linkedin", "get in touch", "say hello"],
     answer: `Email is ${CONTACT_EMAIL}, or find her on LinkedIn — both linked in the footer. She reads everything herself.`,
+  },
+  // Last on purpose: a plain "hey" gets a hello, but "hey, tell me about
+  // Leap" still lands on the Leap answer above.
+  {
+    keywords: ["hey", "hi", "hello", "hiya", "heya", "yo", "howdy", "good morning", "good afternoon", "good evening", "привіт", "вітаю"],
+    answer: "Hey! Glad you're here. Let's design something together!",
   },
 ];
 

@@ -20,7 +20,7 @@ const MILESTONES: Milestone[] = [
     ],
   },
   {
-    years: "2021–Present",
+    years: "2022–Present",
     role: "Co-founder",
     org: "Overspace",
     description:
