@@ -15,8 +15,8 @@ function escapeRegExp(s: string): string {
 // study's name — whichever known terms show up in a canned answer's
 // plain-text copy — so they render as real links instead of inert prose.
 const LINK_TERM_REGEX = new RegExp(
-  `(${CONTACT_EMAIL.replace(/\./g, "\\.")}|LinkedIn|r[ée]sum[ée]|${PROJECT_LINKS.map((p) =>
-    escapeRegExp(p.name),
+  `(${CONTACT_EMAIL.replace(/\./g, "\\.")}|LinkedIn|r[ée]sum[ée]|${PROJECT_LINKS.map(
+    (p) => escapeRegExp(p.name),
   ).join("|")})`,
   "gi",
 );
@@ -31,8 +31,11 @@ function linkForTerm(term: string): TermLink | null {
     return { href: `mailto:${CONTACT_EMAIL}`, internal: false };
   }
   if (/^linkedin$/i.test(term)) return { href: LINKEDIN_URL, internal: false };
-  if (/^r[ée]sum[ée]$/i.test(term)) return { href: RESUME_URL, internal: false };
-  const project = PROJECT_LINKS.find((p) => p.name.toLowerCase() === term.toLowerCase());
+  if (/^r[ée]sum[ée]$/i.test(term))
+    return { href: RESUME_URL, internal: false };
+  const project = PROJECT_LINKS.find(
+    (p) => p.name.toLowerCase() === term.toLowerCase(),
+  );
   if (project) return { href: `/work/${project.slug}`, internal: true };
   return null;
 }
@@ -85,7 +88,10 @@ function renderAnswer(text: string): ReactNode {
   const flushBullets = (key: string) => {
     if (bullets.length === 0) return;
     blocks.push(
-      <ul key={key} className="list-disc space-y-1 pl-4 marker:text-neutral-400">
+      <ul
+        key={key}
+        className="list-disc space-y-1 pl-4 marker:text-neutral-400"
+      >
         {bullets.map((b, bi) => (
           <li key={bi}>{linkifyKnownTerms(b)}</li>
         ))}
@@ -104,7 +110,9 @@ function renderAnswer(text: string): ReactNode {
   });
   flushBullets("ul-end");
 
-  return <div className="flex flex-col gap-2 text-sm leading-relaxed">{blocks}</div>;
+  return (
+    <div className="flex flex-col gap-2 text-sm leading-relaxed">{blocks}</div>
+  );
 }
 
 // Thumbnail cards for case studies / AI playground projects mentioned in an answer —
@@ -158,7 +166,9 @@ export default function NiiaChatSidebar() {
   // On wider screens the chat is a floating window you can drag anywhere by
   // its title bar (it remembers where you left it). On phones it's a sheet
   // across the bottom of the screen.
-  const [isWide, setIsWide] = useState(() => window.matchMedia("(min-width: 640px)").matches);
+  const [isWide, setIsWide] = useState(
+    () => window.matchMedia("(min-width: 640px)").matches,
+  );
   useEffect(() => {
     const mq = window.matchMedia("(min-width: 640px)");
     const onChange = () => setIsWide(mq.matches);
@@ -205,25 +215,63 @@ export default function NiiaChatSidebar() {
         },
         onPointerMove: (e: React.PointerEvent<HTMLDivElement>) => {
           if (!drag.current) return;
-          setPos(clamp(e.clientX - drag.current.dx, e.clientY - drag.current.dy));
+          setPos(
+            clamp(e.clientX - drag.current.dx, e.clientY - drag.current.dy),
+          );
         },
         onPointerUp: () => {
           drag.current = null;
         },
       }
     : {};
+  // Phones: the chat fills the visible part of the screen from the very top,
+  // and shrinks when the keyboard opens so the latest messages and the input
+  // stay above it. visualViewport is the area the keyboard leaves visible.
+  const [phoneView, setPhoneView] = useState<{
+    top: number;
+    height: number;
+  } | null>(null);
+  useEffect(() => {
+    if (isWide) return;
+    const vv = window.visualViewport;
+    const update = () =>
+      setPhoneView(
+        vv
+          ? { top: vv.offsetTop, height: vv.height }
+          : { top: 0, height: window.innerHeight },
+      );
+    update();
+    vv?.addEventListener("resize", update);
+    vv?.addEventListener("scroll", update);
+    window.addEventListener("resize", update);
+    return () => {
+      vv?.removeEventListener("resize", update);
+      vv?.removeEventListener("scroll", update);
+      window.removeEventListener("resize", update);
+    };
+  }, [isWide]);
+  // Keep the newest message in sight when the keyboard changes the height.
+  useEffect(() => {
+    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight });
+  }, [phoneView?.height]);
+
   const placement: React.CSSProperties = isWide
     ? pos
       ? { left: pos.x, top: pos.y }
       : { right: 24, bottom: 24 }
-    : {};
+    : phoneView
+      ? { top: phoneView.top + 8, height: phoneView.height - 16 }
+      : {};
 
   useEffect(() => {
     if (isOpen) inputRef.current?.focus();
   }, [isOpen, pendingQuote]);
 
   useEffect(() => {
-    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
+    scrollRef.current?.scrollTo({
+      top: scrollRef.current.scrollHeight,
+      behavior: "smooth",
+    });
   }, [messages, isTyping, suggestions]);
 
   function submit(text: string) {
@@ -238,8 +286,10 @@ export default function NiiaChatSidebar() {
       aria-hidden={!isOpen}
       style={placement}
       // The same pink pressed/raised look as the drawing pad's send window.
-      className={`niia-sidebar soft-window fixed inset-x-2 bottom-2 z-40 flex h-[78vh] flex-col gap-3 rounded-[28px] p-4 text-black/80 sm:inset-x-auto sm:bottom-auto sm:h-[min(640px,80vh)] sm:w-[400px] ${
-        isOpen ? "scale-100 opacity-100" : "pointer-events-none translate-y-4 scale-95 opacity-0"
+      className={`niia-sidebar soft-window fixed inset-x-2 top-2 z-40 flex h-[calc(100dvh-16px)] flex-col gap-2 rounded-[28px] p-3 text-black/80 sm:inset-x-auto sm:top-auto sm:bottom-auto sm:gap-3 sm:p-4 sm:h-[min(640px,80vh)] sm:w-[400px] ${
+        isOpen
+          ? "scale-100 opacity-100"
+          : "pointer-events-none -translate-y-4 scale-95 opacity-0 sm:translate-y-4"
       }`}
     >
       <div
@@ -272,7 +322,10 @@ export default function NiiaChatSidebar() {
         </div>
       </div>
 
-      <div ref={scrollRef} className="soft-inset flex flex-1 flex-col overflow-y-auto rounded-2xl p-4">
+      <div
+        ref={scrollRef}
+        className="soft-inset flex min-h-0 flex-1 flex-col overflow-y-auto rounded-2xl p-3 sm:p-4"
+      >
         <div className="mt-auto flex flex-col gap-5">
           {messages.length === 0 && (
             <p className="niia-fade-in-up text-lg leading-relaxed">
@@ -313,7 +366,10 @@ export default function NiiaChatSidebar() {
               <p className="mb-1 font-mono text-xs tracking-widest text-black/50 uppercase">
                 Niia AI
               </p>
-              <div className="flex items-center gap-1 py-1.5" aria-label="Niia AI is typing">
+              <div
+                className="flex items-center gap-1 py-1.5"
+                aria-label="Niia AI is typing"
+              >
                 <span
                   className="niia-typing-dot h-1.5 w-1.5 rounded-full bg-black/40"
                   style={{ animationDelay: "0s" }}
@@ -373,8 +429,10 @@ export default function NiiaChatSidebar() {
             ref={inputRef}
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
-            placeholder={pendingQuote ? "Ask about this quote…" : "Ask me anything…"}
-            className="soft-inset min-w-0 flex-1 rounded-full px-4 py-3 text-sm text-black placeholder:text-black/40 focus:outline-none"
+            placeholder={
+              pendingQuote ? "Ask about this quote…" : "Ask me anything…"
+            }
+            className="soft-inset min-w-0 flex-1 rounded-full px-4 py-3 text-base text-black sm:text-sm placeholder:text-black/40 focus:outline-none"
           />
           <button type="submit" className="soft-raised soft-pill">
             Send

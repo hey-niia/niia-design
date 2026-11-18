@@ -30,7 +30,7 @@ export default function About() {
         </section>
 
         {/* Then the whole story. */}
-        <section className="pt-16">
+        <section className="pt-8 sm:pt-16">
           <div className="max-w-2xl">
             <p className="t-about mb-4">
               {
