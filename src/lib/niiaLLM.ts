@@ -273,9 +273,9 @@ const ANSWERS: CannedAnswer[] = [
       "Figma for design, Claude for prototyping and documentation, Figjam for workflow mapping, Notion for research notes — and code (React, Tailwind) when a project needs the design shipped, not just specified. Token systems get named so they map straight from Figma variables to code, no separate handoff doc needed.",
   },
   {
-    keywords: ["value", "values", "believe", "philosophy", "principle"],
+    keywords: ["value", "values", "believe", "philosophy", "principle", "design products"],
     answer:
-      "1. It's all about the users. Great design starts with understanding people, their needs, frustrations, and behaviors. My goal is to make complex things feel simple, intuitive, and effortless.\n2. I keep a business perspective. Having built and sold my own company, I design with both user needs and business goals in mind.\n3. I believe in delightful design. Good solutions should not only work well but also look and feel beautiful.",
+      "The principles that shape how I work:\n1. It's all about the users. Great design starts with understanding people, their needs, frustrations, and behaviors. My goal is to make complex things feel simple, intuitive, and effortless.\n2. I keep a business perspective. Having built and sold my own company, I design with both user needs and business goals in mind.\n3. I believe in delightful design. Good solutions should not only work well but also look and feel beautiful.",
   },
   {
     keywords: ["leap", "founder", "founding", "startup story"],
