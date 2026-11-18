@@ -251,6 +251,39 @@
     -3px -3px 10px var(--pad-glow);
 }
 
+/* Pad keys that hold a word or an icon (Undo, Clear, Download, niia.design):
+   same height as the brush keys; square with just an icon on phones, padded
+   for the word on wider screens. */
+.soft-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: var(--pad-size);
+  min-width: var(--pad-size);
+  padding: 0 12px;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  cursor: pointer;
+}
+@media (min-width: 640px) {
+  .soft-action {
+    padding: 0 var(--pad-pad-x);
+  }
+}
+
+/* Phones: slightly smaller pad keys and gaps so a full row (six brushes
+   plus Send) fits across the screen. Set on the pad itself so it also wins
+   over values the dev tweak panel puts on :root. */
+@media (max-width: 639px) {
+  #draw {
+    --pad-size: 40px;
+    --pad-gap: 6px;
+  }
+}
+
 /* Sunken field (the send panel's preview and text box). */
 .soft-inset {
   /* Same face as the raised keys, just sunk in. */

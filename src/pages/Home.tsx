@@ -51,7 +51,12 @@ export default function Home() {
         {splitIntoColumns(homeProjects).map((column, i) => (
           <div key={i} className="max-sm:contents sm:flex sm:flex-1 sm:flex-col sm:gap-8">
             {column.map((project, row) => (
-              <div key={project.slug} style={{ order: row * 2 + i }}>
+              <div
+                key={project.slug}
+                // Phones read across the rows; the first row is flipped so Giant
+                // Pumpkin (right column) comes before the app (left column).
+                style={{ order: row === 0 ? 1 - i : row * 2 + i }}
+              >
                 <WorkGridCard project={project} />
               </div>
             ))}

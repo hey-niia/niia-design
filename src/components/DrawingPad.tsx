@@ -560,12 +560,15 @@ export default function DrawingPad() {
           className="h-full w-full touch-none select-none"
         />
 
-        <p
-          ref={badgeRef}
-          className="soft-inset soft-pill pointer-events-none absolute top-4 left-4 rounded-[var(--pad-radius)] text-black/60 md:top-6 md:left-6"
-        >
-          {SIGNATURE}
-        </p>
+        {/* The niia.design key shows up once the pad is opened. */}
+        {hasStarted && (
+          <p
+            ref={badgeRef}
+            className="soft-inset soft-action pointer-events-none absolute top-4 left-4 rounded-[var(--pad-radius)] text-black/60 md:top-6 md:left-6"
+          >
+            {SIGNATURE}
+          </p>
+        )}
 
         {hasDrawn && (
           <div className="pointer-events-none absolute top-4 right-4 flex gap-x-[var(--pad-gap)] md:top-6 md:right-6">
@@ -574,7 +577,7 @@ export default function DrawingPad() {
               onClick={handleUndo}
               aria-label="Undo"
               title="Undo (⌘Z)"
-              className="soft-raised pointer-events-auto soft-pill flex items-center"
+              className="soft-raised soft-action pointer-events-auto"
             >
               {/* Curved arrow turning back to the left — the usual undo mark. */}
               <svg
@@ -593,11 +596,27 @@ export default function DrawingPad() {
                 <path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11" />
               </svg>
             </button>
-            <button type="button" onClick={handleClear} className="soft-raised pointer-events-auto soft-pill">
-              Clear
+            {/* Download is always an icon; on phones Clear shrinks to one too, so the row fits beside niia.design. */}
+            <button
+              type="button"
+              onClick={handleClear}
+              aria-label="Clear"
+              className="soft-raised soft-action pointer-events-auto"
+            >
+              <span className="hidden sm:inline">Clear</span>
+              <svg aria-hidden width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="sm:hidden">
+                <path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3" />
+              </svg>
             </button>
-            <button type="button" onClick={handleDownload} className="soft-raised pointer-events-auto soft-pill">
-              Download
+            <button
+              type="button"
+              onClick={handleDownload}
+              aria-label="Download"
+              className="soft-raised soft-action pointer-events-auto"
+            >
+              <svg aria-hidden width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 4v11M7 10l5 5 5-5M5 20h14" />
+              </svg>
             </button>
           </div>
         )}
@@ -631,7 +650,8 @@ export default function DrawingPad() {
                 type="button"
                 onClick={openSend}
                 disabled={!hasStrokes}
-                className="soft-raised soft-pill pointer-events-auto flex h-[var(--pad-size)] items-center py-0 disabled:pointer-events-none disabled:opacity-40"
+                aria-label="Send to Niia"
+                className="soft-raised soft-action pointer-events-auto disabled:pointer-events-none disabled:opacity-40"
               >
                 <svg
                   aria-hidden
@@ -642,14 +662,12 @@ export default function DrawingPad() {
                   stroke="black"
                   strokeWidth="2"
                   strokeLinejoin="round"
-                  className="mr-2"
+                  className="sm:mr-2"
                 >
                   <rect x="3" y="5.5" width="18" height="13" rx="2" />
                   <path d="m3.5 7 8.5 6.5L20.5 7" />
                 </svg>
-                <span>
-                  Send<span className="hidden sm:inline"> to Niia</span>
-                </span>
+                <span className="hidden sm:inline">Send to Niia</span>
               </button>
             )}
           </div>
@@ -726,11 +744,14 @@ export default function DrawingPad() {
             type="button"
             onClick={startDrawing}
             onPointerMove={addTrailPoint}
-            aria-label="Click to draw"
+            aria-label="Start drawing"
             className="group absolute inset-0 flex cursor-crosshair items-center justify-center"
           >
             {/* The whole pad is clickable; the raised key is what you see. */}
-            <span className="soft-raised soft-pill">Click to draw</span>
+            <span className="soft-raised soft-pill">
+              <span className="sm:hidden">Tap to draw</span>
+              <span className="hidden sm:inline">Click to draw</span>
+            </span>
           </button>
         )}
       </div>
