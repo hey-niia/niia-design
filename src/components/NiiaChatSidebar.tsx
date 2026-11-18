@@ -118,7 +118,13 @@ function renderAnswer(text: string): ReactNode {
 // Thumbnail cards for case studies / AI playground projects mentioned in an answer —
 // one horizontally-scrollable row, sized generously so the image actually
 // reads as a preview rather than a cramped icon.
-function AnswerCards({ cards }: { cards: AnswerCard[] }) {
+function AnswerCards({
+  cards,
+  onOpen,
+}: {
+  cards: AnswerCard[];
+  onOpen?: () => void;
+}) {
   if (cards.length === 0) return null;
 
   return (
@@ -250,10 +256,30 @@ export default function NiiaChatSidebar() {
       window.removeEventListener("resize", update);
     };
   }, [isWide]);
-  // Keep the newest message in sight when the keyboard changes the height.
+  // Jump to the newest message only when the keyboard opens (a big drop in
+  // height). Safari's toolbar also nudges the height while you scroll, and
+  // reacting to that kept snapping the chat back to the bottom.
+  const lastHeight = useRef<number | null>(null);
   useEffect(() => {
-    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight });
+    const h = phoneView?.height;
+    if (h == null) return;
+    if (lastHeight.current != null && lastHeight.current - h > 150) {
+      scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight });
+    }
+    lastHeight.current = h;
   }, [phoneView?.height]);
+
+  // While the chat covers the phone screen, the page behind it stays put, so
+  // swipes scroll the conversation instead of the page.
+  useEffect(() => {
+    if (isWide || !isOpen) return;
+    const html = document.documentElement;
+    const prev = html.style.overflow;
+    html.style.overflow = "hidden";
+    return () => {
+      html.style.overflow = prev;
+    };
+  }, [isWide, isOpen]);
 
   const placement: React.CSSProperties = isWide
     ? pos
@@ -324,7 +350,13 @@ export default function NiiaChatSidebar() {
 
       <div
         ref={scrollRef}
-        className="soft-inset flex min-h-0 flex-1 flex-col overflow-y-auto rounded-2xl p-3 sm:p-4"
+        // On phones the chat covers the page, so any link inside an answer
+        // (a project card or a linked name) closes it to show the page.
+        onClick={(e) => {
+          if (!isWide && (e.target as HTMLElement).closest("a[href^='/']"))
+            close();
+        }}
+        className="soft-inset flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain rounded-2xl p-3 sm:p-4"
       >
         <div className="mt-auto flex flex-col gap-5">
           {messages.length === 0 && (
@@ -353,7 +385,12 @@ export default function NiiaChatSidebar() {
                       className="mt-3 w-full rounded-xl shadow-[0_1px_2px_rgba(60,50,40,0.08),0_8px_20px_rgba(60,50,40,0.12)]"
                     />
                   )}
-                  {m.cards && <AnswerCards cards={m.cards} />}
+                  {m.cards && (
+                    <AnswerCards
+                      cards={m.cards}
+                      onOpen={isWide ? undefined : close}
+                    />
+                  )}
                 </>
               ) : (
                 <p className="text-sm leading-relaxed">{m.text}</p>

@@ -30,6 +30,12 @@
   body {
     font-family: var(--font-sans);
   }
+  /* Past the end of the page (iOS bounce, the area under Safari's bottom bar)
+     the page shows pink, so the site ends in the drawing pad's colour. The
+     body keeps the light background for everything above it. */
+  html {
+    background-color: var(--pad-color);
+  }
 
   /* Link treatment: no underline at rest, hover turns burnt orange. */
   a {
