@@ -104,6 +104,11 @@ const ANSWERS: CannedAnswer[] = [
     answer:
       "Building with AI feels like being a kid in a sandbox. You can make pretty much anything! And as a designer, I love that I can now take full ownership of my ideas, from figuring out how something should look and work to actually building it. Combining that freedom with years of design experience is just the best feeling ever.",
   },
+  {
+    keywords: ["like a founder", "founder's mindset", "founder mindset", "think like a founder"],
+    answer:
+      "I've always had a founder's mindset. Years ago, I had an idea for what I thought would be the perfect healthy snack. So I built a company around it, from the product itself to the packaging, branding, and distribution. I sold the company in 2022.\n\nThat experience shaped how I approach design today. I think about the whole product, not just how it looks, but how it works, why people need it, and whether it makes sense as a business.",
+  },
   // The homepage intro's "Ask Niia AI" pill asks this one.
   {
     keywords: ["business problems", "business problem", "solving business", "what you love", "what do you love"],
