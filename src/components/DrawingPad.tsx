@@ -782,7 +782,7 @@ export default function DrawingPad() {
               ))}
             </div>
             {/* Phones: the niia.design key sits under the brushes. */}
-            <span className="contents sm:hidden">
+            <span className="mt-3 block sm:hidden">
               <p
                 ref={phoneBadgeRef}
                 className="soft-inset soft-action rounded-[var(--pad-radius)] text-black/60"
