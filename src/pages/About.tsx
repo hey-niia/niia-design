@@ -13,7 +13,8 @@ export default function About() {
         {/* Top: the journey on the left, the photo on the right. */}
         <section className="pt-6 md:pt-24">
           <div className="flex flex-col-reverse gap-8 md:flex-row md:items-start md:gap-12">
-            <div className="min-w-0 flex-1">
+            {/* My Journey is left out on phones. */}
+            <div className="hidden min-w-0 flex-1 sm:block">
               <p className="mb-8 font-mono text-xs tracking-widest text-neutral-400 uppercase">
                 My Journey
               </p>
