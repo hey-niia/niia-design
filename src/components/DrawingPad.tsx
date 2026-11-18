@@ -304,6 +304,22 @@ export default function DrawingPad() {
   const dprRef = useRef(1);
   const [hasStarted, setHasStarted] = useState(false);
   const [hasStrokes, setHasStrokes] = useState(false);
+
+  // Phones: the send form covers the visible screen (the part the keyboard
+  // leaves free), so the drawing, the words and the buttons all fit.
+  const [isWide, setIsWide] = useState(
+    () => window.matchMedia("(min-width: 640px)").matches,
+  );
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 640px)");
+    const onChange = () => setIsWide(mq.matches);
+    mq.addEventListener("change", onChange);
+    return () => mq.removeEventListener("change", onChange);
+  }, []);
+  const [sendView, setSendView] = useState<{
+    top: number;
+    height: number;
+  } | null>(null);
   // Becomes true with the first stroke and stays true (so Undo after Clear works).
   const [hasDrawn, setHasDrawn] = useState(false);
   const [brush, setBrush] = useState<Brush>(BRUSHES[4]);
@@ -629,6 +645,30 @@ export default function DrawingPad() {
     [],
   );
 
+  // Track the visible screen while the phone send form is open, and keep the
+  // page behind it from scrolling.
+  useEffect(() => {
+    if (isWide || sendState === "closed") return;
+    const vv = window.visualViewport;
+    const update = () =>
+      setSendView(
+        vv
+          ? { top: vv.offsetTop, height: vv.height }
+          : { top: 0, height: window.innerHeight },
+      );
+    update();
+    vv?.addEventListener("resize", update);
+    vv?.addEventListener("scroll", update);
+    const html = document.documentElement;
+    const prev = html.style.overflow;
+    html.style.overflow = "hidden";
+    return () => {
+      vv?.removeEventListener("resize", update);
+      vv?.removeEventListener("scroll", update);
+      html.style.overflow = prev;
+    };
+  }, [isWide, sendState]);
+
   return (
     <section id="draw" className="-mx-4 bg-[var(--pad-color)]">
       <div
@@ -662,19 +702,20 @@ export default function DrawingPad() {
           </span>
         )}
 
-        {/* On phones Send to Niia takes the top-left spot instead. */}
-        {hasStarted && (DRAWING_ENDPOINT || import.meta.env.DEV) && (
-          <div className="absolute top-4 left-4 sm:hidden">
-            <button
-              type="button"
-              onClick={openSend}
-              disabled={!hasStrokes}
-              className="soft-raised soft-action disabled:pointer-events-none disabled:opacity-40"
-            >
-              Send to Niia
-            </button>
-          </div>
-        )}
+        {/* On phones Send to Niia takes the top-left spot, once there's a drawing. */}
+        {hasStarted &&
+          hasStrokes &&
+          (DRAWING_ENDPOINT || import.meta.env.DEV) && (
+            <div className="absolute top-4 left-4 sm:hidden">
+              <button
+                type="button"
+                onClick={openSend}
+                className="soft-raised soft-action"
+              >
+                Send to Niia
+              </button>
+            </div>
+          )}
 
         {hasDrawn && (
           <div className="pointer-events-none absolute top-4 right-4 flex gap-x-[var(--pad-gap)] md:top-6 md:right-6">
@@ -821,10 +862,17 @@ export default function DrawingPad() {
         )}
 
         {sendState !== "closed" && (
-          <div className="absolute inset-0 flex items-center justify-center bg-[var(--pad-color)]/60 p-4 backdrop-blur-[2px]">
+          <div
+            style={
+              !isWide && sendView
+                ? { top: sendView.top, height: sendView.height }
+                : undefined
+            }
+            className="fixed inset-x-0 top-0 z-50 flex h-dvh items-center justify-center bg-[var(--pad-color)]/80 p-3 backdrop-blur-[3px] sm:absolute sm:inset-0 sm:h-auto sm:bg-[var(--pad-color)]/60 sm:p-4 sm:backdrop-blur-[2px]"
+          >
             <form
               onSubmit={handleSend}
-              className="soft-raised flex w-full max-w-sm flex-col gap-4 rounded-[28px] p-5"
+              className="soft-raised flex max-h-full w-full max-w-sm flex-col gap-3 rounded-[28px] p-4 sm:gap-4 sm:p-5"
               aria-label="Send your drawing"
             >
               {sendState === "sent" ? (
@@ -851,7 +899,7 @@ export default function DrawingPad() {
                     <img
                       src={preview}
                       alt="Your drawing"
-                      className="soft-inset w-full rounded-2xl object-contain"
+                      className="soft-inset min-h-0 w-full flex-1 rounded-2xl object-contain"
                     />
                   )}
                   <input
@@ -867,12 +915,12 @@ export default function DrawingPad() {
                       A couple of words
                     </span>
                     <input
-                      autoFocus
+                      autoFocus={isWide}
                       value={words}
                       onChange={(e) => setWords(e.target.value)}
                       maxLength={MAX_WORDS_LENGTH}
                       placeholder="Hi Niia, this is my project idea"
-                      className="soft-inset rounded-full px-4 py-3 text-sm text-black placeholder:text-black/40 focus:outline-none"
+                      className="soft-inset rounded-full px-4 py-3 text-base text-black placeholder:text-black/40 focus:outline-none sm:text-sm"
                     />
                   </label>
                   {sendState === "error" && (
