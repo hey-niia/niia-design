@@ -65,7 +65,7 @@ export default {
         to: [env.TO_EMAIL],
         subject: message ? `New drawing: ${message}` : "New drawing from your site",
         html: `<p style="font:16px/1.5 sans-serif">${escapeHtml(message) || "<em>(no words)</em>"}</p>
-<img src="cid:drawing" alt="drawing" style="max-width:100%;border-radius:12px">
+<img src="cid:drawing" alt="drawing" width="600" style="width:100%;max-width:600px;height:auto;border-radius:12px;image-rendering:pixelated">
 <p style="font:12px sans-serif;color:#888">Sent from the drawing pad on niia.design · ${when}</p>`,
         attachments: [{ filename: "drawing.png", content: png, content_id: "drawing" }],
       }),
