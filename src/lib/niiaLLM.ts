@@ -275,7 +275,7 @@ const ANSWERS: CannedAnswer[] = [
   {
     keywords: ["value", "values", "believe", "philosophy", "principle"],
     answer:
-      "Three, from the About page: build the thing, not the deck. Hide the complexity, not the effort. And trust compounds faster than good ideas — the best outcomes rarely come from being the smartest person in the room.",
+      "1. It's all about the users. Great design starts with understanding people, their needs, frustrations, and behaviors. My goal is to make complex things feel simple, intuitive, and effortless.\n2. I keep a business perspective. Having built and sold my own company, I design with both user needs and business goals in mind.\n3. I believe in delightful design. Good solutions should not only work well but also look and feel beautiful.",
   },
   {
     keywords: ["leap", "founder", "founding", "startup story"],

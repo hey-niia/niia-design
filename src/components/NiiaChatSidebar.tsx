@@ -84,25 +84,41 @@ function renderAnswer(text: string): ReactNode {
     .filter(Boolean);
   const blocks: ReactNode[] = [];
   let bullets: string[] = [];
+  // "- " lines make a bulleted list, "1. " lines a numbered one.
+  let numbered = false;
 
   const flushBullets = (key: string) => {
     if (bullets.length === 0) return;
+    const items = bullets.map((b, bi) => (
+      <li key={bi}>{linkifyKnownTerms(b)}</li>
+    ));
     blocks.push(
-      <ul
-        key={key}
-        className="list-disc space-y-1 pl-4 marker:text-neutral-400"
-      >
-        {bullets.map((b, bi) => (
-          <li key={bi}>{linkifyKnownTerms(b)}</li>
-        ))}
-      </ul>,
+      numbered ? (
+        <ol
+          key={key}
+          className="list-decimal space-y-2 pl-5 marker:text-black/50"
+        >
+          {items}
+        </ol>
+      ) : (
+        <ul
+          key={key}
+          className="list-disc space-y-1 pl-4 marker:text-neutral-400"
+        >
+          {items}
+        </ul>
+      ),
     );
     bullets = [];
   };
 
   lines.forEach((line, i) => {
-    if (line.startsWith("- ")) {
-      bullets.push(line.slice(2));
+    const num = line.match(/^\d+\.\s+/);
+    if (line.startsWith("- ") || num) {
+      const isNum = !!num;
+      if (bullets.length > 0 && isNum !== numbered) flushBullets(`ul-${i}`);
+      numbered = isNum;
+      bullets.push(num ? line.slice(num[0].length) : line.slice(2));
     } else {
       flushBullets(`ul-${i}`);
       blocks.push(<p key={`p-${i}`}>{linkifyKnownTerms(line)}</p>);
@@ -379,9 +395,7 @@ export default function NiiaChatSidebar() {
                       className="mt-3 w-full rounded-xl shadow-[0_1px_2px_rgba(60,50,40,0.08),0_8px_20px_rgba(60,50,40,0.12)]"
                     />
                   )}
-                  {m.cards && (
-<AnswerCards cards={m.cards} />
-                  )}
+                  {m.cards && <AnswerCards cards={m.cards} />}
                 </>
               ) : (
                 <p className="text-sm leading-relaxed">{m.text}</p>
