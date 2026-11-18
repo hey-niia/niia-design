@@ -297,6 +297,8 @@ export default function DrawingPad() {
   const gapTileRef = useRef<HTMLCanvasElement | null>(null);
   const strokesRef = useRef<Stroke[]>([]);
   const clearedRef = useRef<Stroke[]>([]);
+  // True right after Clear, so Undo stays on screen to bring the drawing back.
+  const [canRestore, setCanRestore] = useState(false);
   // Cursor trail on the closed pad, in CSS px with timestamps.
   const trailRef = useRef<{ x: number; y: number; t: number }[]>([]);
   const trailFrameRef = useRef<number | null>(null);
@@ -320,8 +322,6 @@ export default function DrawingPad() {
     top: number;
     height: number;
   } | null>(null);
-  // Becomes true with the first stroke and stays true (so Undo after Clear works).
-  const [hasDrawn, setHasDrawn] = useState(false);
   const [brush, setBrush] = useState<Brush>(BRUSHES[4]);
   const brushRef = useRef(brush);
   brushRef.current = brush;
@@ -484,15 +484,18 @@ export default function DrawingPad() {
       strokesRef.current.push(currentStrokeRef.current);
       // A new stroke after Clear means the cleared drawing can't come back.
       clearedRef.current = [];
+      setCanRestore(false);
       setHasStrokes(true);
-      setHasDrawn(true);
     }
     currentStrokeRef.current = null;
   };
 
   const handleClear = () => {
     // Keep what was cleared so Undo can bring it back.
-    if (strokesRef.current.length > 0) clearedRef.current = strokesRef.current;
+    if (strokesRef.current.length > 0) {
+      clearedRef.current = strokesRef.current;
+      setCanRestore(true);
+    }
     strokesRef.current = [];
     currentStrokeRef.current = null;
     setHasStrokes(false);
@@ -506,6 +509,7 @@ export default function DrawingPad() {
     } else if (clearedRef.current.length > 0) {
       strokesRef.current = clearedRef.current;
       clearedRef.current = [];
+      setCanRestore(false);
     } else {
       return;
     }
@@ -717,7 +721,9 @@ export default function DrawingPad() {
             </div>
           )}
 
-        {hasDrawn && (
+        {/* Clear and Download show only while there is something drawn; Undo
+            also stays after Clear, to bring an accidentally cleared drawing back. */}
+        {(hasStrokes || canRestore) && (
           <div className="pointer-events-none absolute top-4 right-4 flex gap-x-[var(--pad-gap)] md:top-6 md:right-6">
             <button
               type="button"
@@ -743,49 +749,53 @@ export default function DrawingPad() {
                 <path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11" />
               </svg>
             </button>
-            {/* Download is always an icon; on phones Clear shrinks to one too, so the row fits beside niia.design. */}
-            <button
-              type="button"
-              onClick={handleClear}
-              aria-label="Clear"
-              className="soft-raised soft-action pointer-events-auto"
-            >
-              <span className="hidden sm:inline">Clear</span>
-              <svg
-                aria-hidden
-                width="18"
-                height="18"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="sm:hidden"
-              >
-                <path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3" />
-              </svg>
-            </button>
-            <button
-              type="button"
-              onClick={handleDownload}
-              aria-label="Download"
-              className="soft-raised soft-action pointer-events-auto"
-            >
-              <svg
-                aria-hidden
-                width="18"
-                height="18"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M12 4v11M7 10l5 5 5-5M5 20h14" />
-              </svg>
-            </button>
+            {hasStrokes && (
+              <>
+                {/* Download is always an icon; on phones Clear shrinks to one too, so the row fits beside niia.design. */}
+                <button
+                  type="button"
+                  onClick={handleClear}
+                  aria-label="Clear"
+                  className="soft-raised soft-action pointer-events-auto"
+                >
+                  <span className="hidden sm:inline">Clear</span>
+                  <svg
+                    aria-hidden
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="sm:hidden"
+                  >
+                    <path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3" />
+                  </svg>
+                </button>
+                <button
+                  type="button"
+                  onClick={handleDownload}
+                  aria-label="Download"
+                  className="soft-raised soft-action pointer-events-auto"
+                >
+                  <svg
+                    aria-hidden
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M12 4v11M7 10l5 5 5-5M5 20h14" />
+                  </svg>
+                </button>
+              </>
+            )}
           </div>
         )}
 
@@ -901,7 +911,10 @@ export default function DrawingPad() {
                       alt="Your drawing"
                       // A lighter frame around the drawing, so when it shrinks to
                       // fit above the keyboard the space beside it reads as paper.
-                      style={{ background: "color-mix(in srgb, var(--pad-color) 40%, white)" }}
+                      style={{
+                        background:
+                          "color-mix(in srgb, var(--pad-color) 40%, white)",
+                      }}
                       className="soft-inset min-h-0 w-full flex-1 rounded-2xl object-contain"
                     />
                   )}
