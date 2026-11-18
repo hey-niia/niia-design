@@ -240,7 +240,7 @@ const ANSWERS: CannedAnswer[] = [
       "diy",
     ],
     answer:
-      "Yes — I design and build. Less handoff, more just... done. Most of my recent work, this site included, I've taken from Figma through to shipped code myself, usually with Claude alongside me.",
+      "Yes! I design and build. I use Claude to turn my designs into working products.\n\nI also really value collaboration. I love working closely with engineers and figuring things out together. I'm especially passionate about design systems and making them easy to use in code. I build token-based systems that map directly to code, so there's less back-and-forth, fewer handoff documents, and sometimes no handoff at all. Design and development should feel like one continuous process, not two separate worlds.",
   },
   {
     keywords: ["generalist", "jack of all trades", "wear many hats", "beyond design"],

@@ -9,7 +9,7 @@ export default function AIPlayground() {
 
       {/* Laid out like the About text: the same centred column, size and colour. */}
       <header className="mx-auto max-w-4xl pt-6 pb-8 md:pt-24">
-        <p className="t-page-intro mx-auto max-w-2xl">
+        <p className="t-page-intro mx-auto max-w-2xl text-sm">
           I've always been a builder, but I needed other people to help me out. AI finally
           empowered me to build products for myself and my friends, exactly the way I imagine
           them. Below are the apps, tools, and experiments that came out of it — each one built to
