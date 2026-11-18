@@ -24,7 +24,9 @@ const PAINT_COLOR = "#000000";
 // The pad's background colour lives in CSS (--pad-color) so it can be tuned.
 const FALLBACK_BACKGROUND = "#ffa4ca";
 const backgroundColor = () =>
-  getComputedStyle(document.documentElement).getPropertyValue("--pad-color").trim() || FALLBACK_BACKGROUND;
+  getComputedStyle(document.documentElement)
+    .getPropertyValue("--pad-color")
+    .trim() || FALLBACK_BACKGROUND;
 // Paint is rendered on a coarse pixel grid, like an old game screen: each
 // "pixel" is PIXEL_SIZE CSS px, with a PIXEL_GAP-px gap between pixels where
 // the background shows through. The bare canvas stays one flat colour.
@@ -41,7 +43,8 @@ const SIGNATURE = "niia.design";
 // Where finished drawings get POSTed as multipart form data
 // (fields: `message`, `image`). Set VITE_DRAWING_ENDPOINT to a form service
 // that accepts file uploads. Without it the send flow runs in preview mode.
-const DRAWING_ENDPOINT = import.meta.env.VITE_DRAWING_ENDPOINT as string | undefined;
+const DRAWING_ENDPOINT = import.meta.env.VITE_DRAWING_ENDPOINT as
+  string | undefined;
 
 // Widths are in CSS px. Strokes keep their full width end to end (no taper).
 const BRUSHES: Brush[] = [
@@ -49,14 +52,29 @@ const BRUSHES: Brush[] = [
   { id: "pen", label: "Pen", width: 12, opacity: 1, dotSize: 12 },
   { id: "marker", label: "Marker", width: 20, opacity: 1, dotSize: 16 },
   { id: "brush", label: "Brush", width: 30, opacity: 1, dotSize: 20 },
-  { id: "highlighter", label: "Highlighter", width: 38, opacity: 0.4, dotSize: 24 },
-  { id: "eraser", label: "Eraser", width: 34, opacity: 1, dotSize: 20, erase: true },
+  {
+    id: "highlighter",
+    label: "Highlighter",
+    width: 38,
+    opacity: 0.4,
+    dotSize: 24,
+  },
+  {
+    id: "eraser",
+    label: "Eraser",
+    width: 34,
+    opacity: 1,
+    dotSize: 20,
+    erase: true,
+  },
 ];
 
 // 4x4 ordered-dither (Bayer) thresholds: partial coverage — the highlighter,
 // soft stroke edges — turns into a checkerboard of whole pixels, the way old
 // games faked transparency, instead of grey.
-const BAYER_4 = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5].map((v) => (v + 0.5) / 16);
+const BAYER_4 = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5].map(
+  (v) => (v + 0.5) / 16,
+);
 
 // Which "game pixels" a single dab of this brush turns on: the same circle,
 // coverage and Bayer dither the canvas uses, so the button shows the real
@@ -136,15 +154,24 @@ function insetShadows(boxShadow: string) {
   return parts
     .filter((p) => p.includes("inset"))
     .map((p) => {
-      const color = p.match(/(rgba?|color|oklch|lab|lch)\([^)]*\)/)?.[0] ?? "transparent";
-      const nums = p.replace(color, "").match(/-?[\d.]+px/g)?.map(parseFloat) ?? [];
+      const color =
+        p.match(/(rgba?|color|oklch|lab|lch)\([^)]*\)/)?.[0] ?? "transparent";
+      const nums =
+        p
+          .replace(color, "")
+          .match(/-?[\d.]+px/g)
+          ?.map(parseFloat) ?? [];
       return { color, x: nums[0] ?? 0, y: nums[1] ?? 0, blur: nums[2] ?? 0 };
     });
 }
 
 // Copy of the canvas with the pressed-in "niia.design" key drawn where it sits
 // on screen, so it stays on every downloaded or sent drawing.
-function signedCanvas(canvas: HTMLCanvasElement, dpr: number, badge: HTMLElement | null) {
+function signedCanvas(
+  canvas: HTMLCanvasElement,
+  dpr: number,
+  badge: HTMLElement | null,
+) {
   if (!badge) return canvas;
   const out = document.createElement("canvas");
   out.width = canvas.width;
@@ -191,15 +218,25 @@ function signedCanvas(canvas: HTMLCanvasElement, dpr: number, badge: HTMLElement
   ctx.textBaseline = "middle";
   ctx.textAlign = "center";
   if ("letterSpacing" in ctx) {
-    (ctx as CanvasRenderingContext2D & { letterSpacing: string }).letterSpacing =
-      `${parseFloat(cs.letterSpacing) * dpr}px`;
+    (
+      ctx as CanvasRenderingContext2D & { letterSpacing: string }
+    ).letterSpacing = `${parseFloat(cs.letterSpacing) * dpr}px`;
   }
   // Letter spacing adds trailing space after the last letter; nudge it back.
-  ctx.fillText(SIGNATURE.toUpperCase(), x + w / 2 + (parseFloat(cs.letterSpacing) * dpr) / 2, y + h / 2);
+  ctx.fillText(
+    SIGNATURE.toUpperCase(),
+    x + w / 2 + (parseFloat(cs.letterSpacing) * dpr) / 2,
+    y + h / 2,
+  );
   return out;
 }
 
-function renderStroke(ctx: CanvasRenderingContext2D, points: Point[], width: number, opacity: number) {
+function renderStroke(
+  ctx: CanvasRenderingContext2D,
+  points: Point[],
+  width: number,
+  opacity: number,
+) {
   if (points.length === 0) return;
   ctx.strokeStyle = PAINT_COLOR;
   ctx.fillStyle = PAINT_COLOR;
@@ -215,7 +252,8 @@ function renderStroke(ctx: CanvasRenderingContext2D, points: Point[], width: num
     // One path per stroke so overlapping segments don't build up opacity.
     ctx.beginPath();
     ctx.moveTo(points[0].x, points[0].y);
-    for (let i = 1; i < points.length; i++) ctx.lineTo(points[i].x, points[i].y);
+    for (let i = 1; i < points.length; i++)
+      ctx.lineTo(points[i].x, points[i].y);
     ctx.stroke();
   }
   ctx.globalAlpha = 1;
@@ -276,7 +314,14 @@ export default function DrawingPad() {
   const [words, setWords] = useState("");
   // Hidden from people, filled in by spam bots — the mailbox drops those.
   const honeypotRef = useRef<HTMLInputElement>(null);
+  // Two copies of the niia.design key: top-left on bigger screens, under the
+  // brushes on phones. Only the one on screen gets stamped into exports.
   const badgeRef = useRef<HTMLParagraphElement>(null);
+  const phoneBadgeRef = useRef<HTMLParagraphElement>(null);
+  const visibleBadge = () =>
+    [badgeRef.current, phoneBadgeRef.current].find(
+      (b) => b && b.getClientRects().length > 0,
+    ) ?? null;
   const [preview, setPreview] = useState<string | null>(null);
 
   const redrawAll = () => {
@@ -304,8 +349,15 @@ export default function DrawingPad() {
         y: (p.y * cssHeight) / PIXEL_SIZE,
       }));
       // The eraser is just a stroke that removes paint instead of adding it.
-      lctx.globalCompositeOperation = stroke.erase ? "destination-out" : "source-over";
-      renderStroke(lctx, pts, Math.max(1, stroke.width / PIXEL_SIZE), stroke.opacity);
+      lctx.globalCompositeOperation = stroke.erase
+        ? "destination-out"
+        : "source-over";
+      renderStroke(
+        lctx,
+        pts,
+        Math.max(1, stroke.width / PIXEL_SIZE),
+        stroke.opacity,
+      );
       lctx.globalCompositeOperation = "source-over";
     }
     // The fading cursor trail: each bit gets lighter with age, so the dither
@@ -333,7 +385,9 @@ export default function DrawingPad() {
     pctx.clearRect(0, 0, paint.width, paint.height);
     pctx.imageSmoothingEnabled = false;
     pctx.drawImage(pixels, 0, 0, pixels.width * cellPx, pixels.height * cellPx);
-    const gaps = gapTileRef.current ? pctx.createPattern(gapTileRef.current, "repeat") : null;
+    const gaps = gapTileRef.current
+      ? pctx.createPattern(gapTileRef.current, "repeat")
+      : null;
     if (gaps) {
       pctx.globalCompositeOperation = "destination-out";
       pctx.fillStyle = gaps;
@@ -356,11 +410,16 @@ export default function DrawingPad() {
       canvas.width = rect.width * dpr;
       canvas.height = rect.height * dpr;
 
-      gapTileRef.current = makeGapTile(PIXEL_SIZE * dpr, Math.max(1, Math.round(PIXEL_GAP * dpr)));
-      if (!pixelLayerRef.current) pixelLayerRef.current = document.createElement("canvas");
+      gapTileRef.current = makeGapTile(
+        PIXEL_SIZE * dpr,
+        Math.max(1, Math.round(PIXEL_GAP * dpr)),
+      );
+      if (!pixelLayerRef.current)
+        pixelLayerRef.current = document.createElement("canvas");
       pixelLayerRef.current.width = Math.ceil(rect.width / PIXEL_SIZE);
       pixelLayerRef.current.height = Math.ceil(rect.height / PIXEL_SIZE);
-      if (!paintLayerRef.current) paintLayerRef.current = document.createElement("canvas");
+      if (!paintLayerRef.current)
+        paintLayerRef.current = document.createElement("canvas");
       paintLayerRef.current.width = canvas.width;
       paintLayerRef.current.height = canvas.height;
       redrawAll();
@@ -444,9 +503,20 @@ export default function DrawingPad() {
   useEffect(() => {
     if (!hasStarted) return;
     const onKey = (e: KeyboardEvent) => {
-      if (!(e.metaKey || e.ctrlKey) || e.shiftKey || e.key.toLowerCase() !== "z") return;
+      if (
+        !(e.metaKey || e.ctrlKey) ||
+        e.shiftKey ||
+        e.key.toLowerCase() !== "z"
+      )
+        return;
       const t = e.target as HTMLElement | null;
-      if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.isContentEditable)) return;
+      if (
+        t &&
+        (t.tagName === "INPUT" ||
+          t.tagName === "TEXTAREA" ||
+          t.isContentEditable)
+      )
+        return;
       e.preventDefault();
       handleUndoRef.current();
     };
@@ -457,7 +527,7 @@ export default function DrawingPad() {
   const handleDownload = () => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    signedCanvas(canvas, dprRef.current, badgeRef.current).toBlob((blob) => {
+    signedCanvas(canvas, dprRef.current, visibleBadge()).toBlob((blob) => {
       if (!blob) return;
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
@@ -471,7 +541,11 @@ export default function DrawingPad() {
   const openSend = () => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    setPreview(signedCanvas(canvas, dprRef.current, badgeRef.current).toDataURL("image/png"));
+    setPreview(
+      signedCanvas(canvas, dprRef.current, visibleBadge()).toDataURL(
+        "image/png",
+      ),
+    );
     setSendState("open");
   };
 
@@ -490,8 +564,10 @@ export default function DrawingPad() {
     if (!canvas) return;
     setSendState("sending");
     try {
-      const signed = signedCanvas(canvas, dprRef.current, badgeRef.current);
-      const blob = await new Promise<Blob | null>((resolve) => signed.toBlob(resolve, "image/png"));
+      const signed = signedCanvas(canvas, dprRef.current, visibleBadge());
+      const blob = await new Promise<Blob | null>((resolve) =>
+        signed.toBlob(resolve, "image/png"),
+      );
       if (!blob) throw new Error("Could not export drawing");
       if (DRAWING_ENDPOINT) {
         const body = new FormData();
@@ -518,23 +594,37 @@ export default function DrawingPad() {
     const now = performance.now();
     trailRef.current = trailRef.current.filter((p) => now - p.t < TRAIL_MS);
     redrawAll();
-    trailFrameRef.current = trailRef.current.length > 0 ? requestAnimationFrame(tickTrail) : null;
+    trailFrameRef.current =
+      trailRef.current.length > 0 ? requestAnimationFrame(tickTrail) : null;
   };
   const addTrailPoint = (e: React.PointerEvent) => {
     const rect = containerRef.current?.getBoundingClientRect();
     if (!rect) return;
-    trailRef.current.push({ x: e.clientX - rect.left, y: e.clientY - rect.top, t: performance.now() });
-    if (trailFrameRef.current === null) trailFrameRef.current = requestAnimationFrame(tickTrail);
+    trailRef.current.push({
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top,
+      t: performance.now(),
+    });
+    if (trailFrameRef.current === null)
+      trailFrameRef.current = requestAnimationFrame(tickTrail);
   };
   const startDrawing = () => {
     trailRef.current = [];
     setHasStarted(true);
     // Once the pad has opened up, bring the whole of it into view.
-    window.setTimeout(() => containerRef.current?.scrollIntoView({ behavior: "smooth", block: "end" }), 750);
+    window.setTimeout(
+      () =>
+        containerRef.current?.scrollIntoView({
+          behavior: "smooth",
+          block: "end",
+        }),
+      750,
+    );
   };
   useEffect(
     () => () => {
-      if (trailFrameRef.current !== null) cancelAnimationFrame(trailFrameRef.current);
+      if (trailFrameRef.current !== null)
+        cancelAnimationFrame(trailFrameRef.current);
     },
     [],
   );
@@ -560,14 +650,30 @@ export default function DrawingPad() {
           className="h-full w-full touch-none select-none"
         />
 
-        {/* The niia.design key shows up once the pad is opened. */}
+        {/* The niia.design key shows up once the pad is opened (top-left from sm up). */}
         {hasStarted && (
-          <p
-            ref={badgeRef}
-            className="soft-inset soft-action pointer-events-none absolute top-4 left-4 rounded-[var(--pad-radius)] text-black/60 md:top-6 md:left-6"
-          >
-            {SIGNATURE}
-          </p>
+          <span className="hidden sm:contents">
+            <p
+              ref={badgeRef}
+              className="soft-inset soft-action pointer-events-none absolute top-4 left-4 rounded-[var(--pad-radius)] text-black/60 md:top-6 md:left-6"
+            >
+              {SIGNATURE}
+            </p>
+          </span>
+        )}
+
+        {/* On phones Send to Niia takes the top-left spot instead. */}
+        {hasStarted && (DRAWING_ENDPOINT || import.meta.env.DEV) && (
+          <div className="absolute top-4 left-4 sm:hidden">
+            <button
+              type="button"
+              onClick={openSend}
+              disabled={!hasStrokes}
+              className="soft-raised soft-action disabled:pointer-events-none disabled:opacity-40"
+            >
+              Send to Niia
+            </button>
+          </div>
         )}
 
         {hasDrawn && (
@@ -604,7 +710,18 @@ export default function DrawingPad() {
               className="soft-raised soft-action pointer-events-auto"
             >
               <span className="hidden sm:inline">Clear</span>
-              <svg aria-hidden width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="sm:hidden">
+              <svg
+                aria-hidden
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="sm:hidden"
+              >
                 <path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3" />
               </svg>
             </button>
@@ -614,7 +731,17 @@ export default function DrawingPad() {
               aria-label="Download"
               className="soft-raised soft-action pointer-events-auto"
             >
-              <svg aria-hidden width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <svg
+                aria-hidden
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
                 <path d="M12 4v11M7 10l5 5 5-5M5 20h14" />
               </svg>
             </button>
@@ -622,7 +749,7 @@ export default function DrawingPad() {
         )}
 
         {hasStarted && (
-          <div className="pointer-events-none absolute inset-x-0 bottom-6 flex items-center justify-center gap-x-[calc(var(--pad-gap)*1.6)] whitespace-nowrap md:bottom-10">
+          <div className="pointer-events-none absolute inset-x-0 bottom-6 flex flex-col items-center justify-center gap-y-[calc(var(--pad-gap)*1.6)] whitespace-nowrap sm:flex-row sm:gap-x-[calc(var(--pad-gap)*1.6)] md:bottom-10">
             <div className="flex items-center gap-x-[var(--pad-gap)]">
               {BRUSHES.map((b) => (
                 <button
@@ -634,7 +761,16 @@ export default function DrawingPad() {
                   className="soft-raised pointer-events-auto flex h-[var(--pad-size)] w-[var(--pad-size)] items-center justify-center"
                 >
                   {b.erase ? (
-                    <svg aria-hidden width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="2" strokeLinejoin="round">
+                    <svg
+                      aria-hidden
+                      width="22"
+                      height="22"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="black"
+                      strokeWidth="2"
+                      strokeLinejoin="round"
+                    >
                       <path d="M4 15.5 13.5 6l5 5-9.5 9.5H6.5L4 18z" />
                       <path d="m9 10.5 5 5" />
                       <path d="M10 20.5h10" strokeLinecap="round" />
@@ -645,30 +781,41 @@ export default function DrawingPad() {
                 </button>
               ))}
             </div>
-            {(DRAWING_ENDPOINT || import.meta.env.DEV) && (
-              <button
-                type="button"
-                onClick={openSend}
-                disabled={!hasStrokes}
-                aria-label="Send to Niia"
-                className="soft-raised soft-action pointer-events-auto disabled:pointer-events-none disabled:opacity-40"
+            {/* Phones: the niia.design key sits under the brushes. */}
+            <span className="contents sm:hidden">
+              <p
+                ref={phoneBadgeRef}
+                className="soft-inset soft-action rounded-[var(--pad-radius)] text-black/60"
               >
-                <svg
-                  aria-hidden
-                  width="20"
-                  height="20"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="black"
-                  strokeWidth="2"
-                  strokeLinejoin="round"
-                  className="sm:mr-2"
+                {SIGNATURE}
+              </p>
+            </span>
+            {(DRAWING_ENDPOINT || import.meta.env.DEV) && (
+              <span className="hidden sm:contents">
+                <button
+                  type="button"
+                  onClick={openSend}
+                  disabled={!hasStrokes}
+                  aria-label="Send to Niia"
+                  className="soft-raised soft-action pointer-events-auto disabled:pointer-events-none disabled:opacity-40"
                 >
-                  <rect x="3" y="5.5" width="18" height="13" rx="2" />
-                  <path d="m3.5 7 8.5 6.5L20.5 7" />
-                </svg>
-                <span className="hidden sm:inline">Send to Niia</span>
-              </button>
+                  <svg
+                    aria-hidden
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="black"
+                    strokeWidth="2"
+                    strokeLinejoin="round"
+                    className="sm:mr-2"
+                  >
+                    <rect x="3" y="5.5" width="18" height="13" rx="2" />
+                    <path d="m3.5 7 8.5 6.5L20.5 7" />
+                  </svg>
+                  <span className="hidden sm:inline">Send to Niia</span>
+                </button>
+              </span>
             )}
           </div>
         )}
@@ -682,13 +829,19 @@ export default function DrawingPad() {
             >
               {sendState === "sent" ? (
                 <>
-                  <p className="font-mono text-xs tracking-widest text-black/70 uppercase">Sent — thank you ✦</p>
+                  <p className="font-mono text-xs tracking-widest text-black/70 uppercase">
+                    Sent — thank you ✦
+                  </p>
                   <p className="text-sm text-black/70">
                     {DRAWING_ENDPOINT
                       ? "It's on its way to me. I read every one."
                       : "Preview mode: nothing was sent, because no endpoint is set up yet."}
                   </p>
-                  <button type="button" onClick={closeSend} className="soft-raised soft-pill self-start">
+                  <button
+                    type="button"
+                    onClick={closeSend}
+                    className="soft-raised soft-pill self-start"
+                  >
                     Draw another
                   </button>
                 </>
@@ -723,13 +876,23 @@ export default function DrawingPad() {
                     />
                   </label>
                   {sendState === "error" && (
-                    <p className="text-sm text-black/80">That didn't go through. Try again in a moment?</p>
+                    <p className="text-sm text-black/80">
+                      That didn't go through. Try again in a moment?
+                    </p>
                   )}
                   <div className="flex justify-end gap-3">
-                    <button type="button" onClick={closeSend} className="soft-raised soft-pill">
+                    <button
+                      type="button"
+                      onClick={closeSend}
+                      className="soft-raised soft-pill"
+                    >
                       Cancel
                     </button>
-                    <button type="submit" disabled={sendState === "sending"} className="soft-raised soft-pill">
+                    <button
+                      type="submit"
+                      disabled={sendState === "sending"}
+                      className="soft-raised soft-pill"
+                    >
                       {sendState === "sending" ? "Sending…" : "Send"}
                     </button>
                   </div>
