@@ -118,13 +118,7 @@ function renderAnswer(text: string): ReactNode {
 // Thumbnail cards for case studies / AI playground projects mentioned in an answer —
 // one horizontally-scrollable row, sized generously so the image actually
 // reads as a preview rather than a cramped icon.
-function AnswerCards({
-  cards,
-  onOpen,
-}: {
-  cards: AnswerCard[];
-  onOpen?: () => void;
-}) {
+function AnswerCards({ cards }: { cards: AnswerCard[] }) {
   if (cards.length === 0) return null;
 
   return (
@@ -386,10 +380,7 @@ export default function NiiaChatSidebar() {
                     />
                   )}
                   {m.cards && (
-                    <AnswerCards
-                      cards={m.cards}
-                      onOpen={isWide ? undefined : close}
-                    />
+<AnswerCards cards={m.cards} />
                   )}
                 </>
               ) : (
