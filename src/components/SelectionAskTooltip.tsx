@@ -10,7 +10,7 @@ interface Pill {
 /** Floating "Ask Niia AI" pill that appears above any text the visitor selects
  * on the page, mirroring rachelchen.tech's select-to-ask affordance. */
 export default function SelectionAskTooltip() {
-  const { openWithQuote } = useNiiaChat();
+  const { openWelcome, sendMessage } = useNiiaChat();
   const [pill, setPill] = useState<Pill | null>(null);
 
   useEffect(() => {
@@ -67,7 +67,10 @@ export default function SelectionAskTooltip() {
         e.preventDefault();
       }}
       onClick={() => {
-        openWithQuote(pill.text);
+        // Ask straight away, as if the visitor typed "Tell me more" about it.
+        openWelcome();
+        sendMessage("Tell me more", pill.text);
+        window.getSelection()?.removeAllRanges();
         setPill(null);
       }}
     >

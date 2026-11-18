@@ -99,6 +99,11 @@ const ANSWERS: CannedAnswer[] = [
     answer:
       "For me, taking ownership means caring deeply about the people we're designing for and the impact of what we build. I love collaborating with engineers, designers, and product teams, bringing different perspectives together, challenging assumptions, and finding solutions that genuinely work for users. It's about taking initiative, sharing responsibility, and working together to make the best possible product.",
   },
+  {
+    keywords: ["turning ideas", "ideas into real products", "ideas into products", "real products"],
+    answer:
+      "Building with AI feels like being a kid in a sandbox. You can make pretty much anything! And as a designer, I love that I can now take full ownership of my ideas, from figuring out how something should look and work to actually building it. Combining that freedom with years of design experience is just the best feeling ever.",
+  },
   // The homepage intro's "Ask Niia AI" pill asks this one.
   {
     keywords: ["business problems", "business problem", "solving business", "what you love", "what do you love"],
