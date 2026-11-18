@@ -94,9 +94,14 @@ export const PLAYGROUND_CARDS: AnswerCard[] = experiments
   }));
 
 const ANSWERS: CannedAnswer[] = [
+  {
+    keywords: ["ownership", "taking ownership", "take ownership"],
+    answer:
+      "For me, taking ownership means caring deeply about the people we're designing for and the impact of what we build. I love collaborating with engineers, designers, and product teams, bringing different perspectives together, challenging assumptions, and finding solutions that genuinely work for users. It's about taking initiative, sharing responsibility, and working together to make the best possible product.",
+  },
   // The homepage intro's "Ask Niia AI" pill asks this one.
   {
-    keywords: ["what you love", "what do you love"],
+    keywords: ["business problems", "business problem", "solving business", "what you love", "what do you love"],
     answer:
       "I believe great design solves real business problems.\n\nMaking something intuitive is actually hard work. The best design feels effortless to use. To me, that's the key to a great product, even when a lot of thought and complexity went into making it that simple.\n\nAnd I also believe solutions should be beautiful. Aesthetics, personality, and the joy of using a product aren't just nice extras. They're part of what makes people choose a product, fall in love with it, and keep coming back.",
   },
@@ -333,13 +338,20 @@ export interface CannedResponse {
   image?: { src: string; alt: string };
 }
 
-export function getCannedAnswer(question: string): CannedResponse {
+function findAnswer(text: string): CannedResponse | null {
   for (const entry of ANSWERS) {
-    if (entry.keywords.some((k) => matchesKeyword(question, k))) {
+    if (entry.keywords.some((k) => matchesKeyword(text, k))) {
       return { text: entry.answer, cards: entry.cards, image: entry.image };
     }
   }
-  return { text: pickFallback() };
+  return null;
+}
+
+/** Answers the question; if it matches nothing (say "tell me more"), falls back
+ * to the text the visitor selected, so selecting "taking ownership" and asking
+ * anything gets the ownership answer. */
+export function getCannedAnswer(question: string, quote?: string): CannedResponse {
+  return findAnswer(question) ?? (quote ? findAnswer(quote) : null) ?? { text: pickFallback() };
 }
 
 /** True if `question` matches a real entry above (not the fallback pool) — used to sanity-check every suggested/follow-up question actually has an answer. */
