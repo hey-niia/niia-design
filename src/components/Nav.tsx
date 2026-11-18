@@ -7,7 +7,7 @@ const LINKEDIN_URL = "https://www.linkedin.com/in/niia-bieliavtseva/";
 
 export default function Nav() {
   const { pathname } = useLocation();
-  const { openWelcome } = useNiiaChat();
+  const { openWelcome, close, isOpen: isChatOpen } = useNiiaChat();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [fitsInline, setFitsInline] = useState(true);
   const headerRef = useRef<HTMLElement>(null);
@@ -89,10 +89,12 @@ export default function Nav() {
               <Link to="/about" className={`soft-hover ${pathname === "/about" ? "nav-active" : ""}`}>
                 About
               </Link>
+              {/* Stays pressed while the chat is open; clicking again closes it. */}
               <button
                 type="button"
-                onClick={openWelcome}
-                className="soft-hover flex cursor-pointer items-center gap-1 hover:text-[var(--site-accent)]"
+                onClick={isChatOpen ? close : openWelcome}
+                aria-pressed={isChatOpen}
+                className={`soft-hover flex cursor-pointer items-center gap-1 hover:text-[var(--site-accent)] ${isChatOpen ? "nav-active" : ""}`}
               >
                 <span aria-hidden className="text-[20px] leading-none">✦</span> Niia AI
               </button>
