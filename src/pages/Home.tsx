@@ -36,11 +36,9 @@ export default function Home() {
         <div className="mx-auto flex w-fit max-w-full flex-col gap-4 text-left">
           <p className="t-intro text-2xl">I design products, build with AI, and think like a founder.</p>
           <p className="t-intro text-2xl">
-            <span className="md:whitespace-nowrap">
-              I love taking ownership, <span className="sm:whitespace-nowrap">connecting design with business</span>,
-            </span>{" "}
+            <span className="md:whitespace-nowrap">What I love: taking ownership, solving business problems</span>{" "}
             <br className="hidden md:block" />
-            and turning ideas into products.
+            through design, and turning ideas into real products.
           </p>
         </div>
       </section>
