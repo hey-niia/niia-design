@@ -899,6 +899,9 @@ export default function DrawingPad() {
                     <img
                       src={preview}
                       alt="Your drawing"
+                      // A lighter frame around the drawing, so when it shrinks to
+                      // fit above the keyboard the space beside it reads as paper.
+                      style={{ background: "color-mix(in srgb, var(--pad-color) 40%, white)" }}
                       className="soft-inset min-h-0 w-full flex-1 rounded-2xl object-contain"
                     />
                   )}
