@@ -323,9 +323,9 @@ export default function InfiniteCanvas({
       onDragStart={(e) => e.preventDefault()}
       className="absolute inset-0 cursor-grab touch-none overflow-hidden bg-[var(--site-bg)] select-none active:cursor-grabbing"
       style={{
-        // A dotted grid that moves and scales with the canvas.
-        backgroundImage:
-          "radial-gradient(circle, rgba(60,50,40,0.16) 1.1px, transparent 1.6px)",
+        // A dotted grid that moves and scales with the canvas: zooming out
+        // brings the dots closer and shrinks them too, so it never gets heavy.
+        backgroundImage: `radial-gradient(circle, rgba(60,50,40,0.16) ${1.1 * Math.min(z, 1)}px, transparent ${1.1 * Math.min(z, 1) + 0.5}px)`,
         backgroundSize: `${24 * z}px ${24 * z}px`,
         backgroundPosition: `${originX}px ${originY}px`,
       }}
