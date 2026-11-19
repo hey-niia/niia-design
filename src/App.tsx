@@ -1,4 +1,4 @@
-import { Route, Routes } from "react-router-dom";
+import { Route, Routes, useLocation } from "react-router-dom";
 import Home from "./pages/Home";
 import About from "./pages/About";
 import CaseStudy from "./pages/CaseStudy";
@@ -20,6 +20,9 @@ import TweakPanel from "./components/TweakPanel";
 import { NiiaChatProvider } from "./context/NiiaChatContext";
 
 function AppContent() {
+  // The AI Playground is an endless canvas that fills the window, so it has no footer.
+  const { pathname } = useLocation();
+  const showFooter = pathname !== "/ai-playground";
 
   return (
     <>
@@ -38,7 +41,7 @@ function AppContent() {
           <Route path="/work/:slug" element={<CaseStudy />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
-        <Footer />
+        {showFooter && <Footer />}
       </div>
       <SelectionAskTooltip />
       <NiiaChatSidebar />
