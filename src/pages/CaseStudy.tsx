@@ -8,6 +8,7 @@ import {
   type MouseEvent,
   type ReactNode,
 } from "react";
+import TimeAssignHero from "../components/TimeAssignHero";
 import { Link, useParams } from "react-router-dom";
 import { getProject, projects, type ContentBlock, type Credit } from "../data/projects";
 import AnnotatedImage from "../components/AnnotatedImage";
@@ -1056,7 +1057,13 @@ export default function CaseStudy() {
           <DarkHalf on={!!project.darkPage} onEnter={setTocOnDark}>
 
           {/* After the overview, so its rule stays right under Role / Team / Timeline. */}
-          {project.hero && (
+          {project.heroAnimation === "connectiq-time-assign" && project.hero ? (
+            <div className="pt-8">
+              <div className={`overflow-hidden ${FRAME_RADIUS} shadow-[0_2px_4px_rgba(0,0,0,0.04),0_12px_32px_rgba(0,0,0,0.08)] ring-1 ring-black/10`}>
+                <TimeAssignHero label="A job's time is set to 8:00 from the time-slot dropdown, then the job moves from To do into In progress" />
+              </div>
+            </div>
+          ) : project.hero && (
             <div className="pt-8">
               <img
                 src={project.hero.src}

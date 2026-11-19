@@ -235,6 +235,8 @@ export interface Project {
   impact?: ImpactStat[];
   /** Screenshot shown right under Role / Team / Timeline, before `featured`. */
   hero?: { src: string; alt: string };
+  /** A coded animation shown in place of `hero` (which stays as its label). */
+  heroAnimation?: "connectiq-time-assign";
   /** Before/after toggle shown right under Role / Team / Timeline. */
   featured?: Extract<ContentBlock, { type: "before-after" }>;
   /** Every visual sits on a full-bleed dark grey band, and sections are numbered — the PDF case study look. */
@@ -970,6 +972,8 @@ export const projects: Project[] = [
     // Home page: the jobs board, animated, in place of the static cover above.
     coverAnimation: "connectiq-kanban",
     cardMeta: "Dashboard · 2024",
+    // Case study: the board animation (set a time, move the job) in place of the hero still.
+    heroAnimation: "connectiq-time-assign",
     hero: {
       src: "/projects/connectiq/partner-jobs-board.webp",
       alt: "Partner-facing jobs board, columns for Unassigned, To do, In progress, and Done, with a job card mid-drag showing avatars and job details",
