@@ -299,9 +299,11 @@ export default function NiiaChatSidebar() {
       ? { top: phoneView.top + 8, height: phoneView.height - 16 }
       : {};
 
+  // Phones: no auto-focus, so the keyboard stays down and the answer gets the
+  // whole screen; it comes up only when the visitor taps the input.
   useEffect(() => {
-    if (isOpen) inputRef.current?.focus();
-  }, [isOpen, pendingQuote]);
+    if (isOpen && isWide) inputRef.current?.focus();
+  }, [isOpen, isWide, pendingQuote]);
 
   useEffect(() => {
     scrollRef.current?.scrollTo({
