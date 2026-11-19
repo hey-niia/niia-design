@@ -18,32 +18,32 @@ const LAYOUT: Record<
 > = {
   Skin: {
     image: "/experiments/skin-cover.webp",
-    x: -440,
-    y: -290,
+    x: -480,
+    y: -330,
     w: 600,
     h: 305,
     radius: 10,
   },
   "Taski — first version": {
     image: "/experiments/canvas/taski-v1.jpg",
-    x: 450,
-    y: -310,
+    x: 490,
+    y: -350,
     w: 400,
     h: 361,
     radius: 8,
   },
   Taski: {
     image: "/experiments/canvas/taski.jpg",
-    x: -420,
-    y: 330,
+    x: -460,
+    y: 370,
     w: 480,
     h: 383,
     radius: 6,
   },
   Skim: {
     image: "/experiments/canvas/skim.jpg",
-    x: 450,
-    y: 320,
+    x: 490,
+    y: 360,
     w: 560,
     h: 380,
     radius: 14,
@@ -88,10 +88,19 @@ export default function AIPlayground() {
       <div className="fixed inset-x-0 bottom-0 z-0" style={{ top: headerH }}>
         <InfiniteCanvas
           cards={cards}
-          centerW={460}
-          centerH={240}
+          centerW={360}
+          centerH={360}
           center={
-            <div className="flex w-[min(80vw,440px)] flex-col items-center gap-4 text-center">
+            // A pressed-in, flat panel in the studded surface's colour, so the
+            // text sits in a smooth recess instead of on the bumps.
+            <div
+              className="flex aspect-square w-[min(84vw,340px)] flex-col items-center justify-center gap-4 rounded-[28px] px-7 py-8 text-center"
+              style={{
+                backgroundColor: "#e2ddd8",
+                boxShadow:
+                  "inset 7px 7px 14px rgba(125,108,92,0.28), inset -7px -7px 14px rgba(255,255,255,0.85), inset 0 0 0 1px rgba(125,108,92,0.06)",
+              }}
+            >
               <h1 className="t-intro text-2xl md:text-3xl">AI Playground</h1>
               <p className="t-page-intro text-sm">
                 I've always been a builder, but I needed other people to help me

@@ -5,6 +5,21 @@ import {
   useState,
   type ReactNode,
 } from "react";
+
+// Background texture: one stud per tile. A soft dark crescent under the
+// bottom right edge, a faint light rim on the top left, the cap in the
+// surface colour.
+const STUD_BG = "#e2ddd8";
+const STUD_PITCH = 22;
+const STUD_TILE = `url("data:image/svg+xml,${encodeURIComponent(
+  `<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 22 22">` +
+    `<defs><filter id="b" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="0.45"/></filter></defs>` +
+    `<circle cx="11.7" cy="12.1" r="7.2" fill="#2e2924" fill-opacity="0.55" filter="url(#b)"/>` +
+    `<circle cx="10.6" cy="10.6" r="7.2" fill="#ffffff" fill-opacity="0.7" filter="url(#b)"/>` +
+    `<circle cx="11" cy="11" r="7.2" fill="${STUD_BG}"/>` +
+    `<circle cx="11" cy="11" r="7.05" fill="none" stroke="#000" stroke-opacity="0.07" stroke-width="0.3"/>` +
+    `</svg>`,
+)}")`;
 import { Link } from "react-router-dom";
 
 export type CanvasCard = {
@@ -321,12 +336,13 @@ export default function InfiniteCanvas({
         }
       }}
       onDragStart={(e) => e.preventDefault()}
-      className="absolute inset-0 cursor-grab touch-none overflow-hidden bg-[var(--site-bg)] select-none active:cursor-grabbing"
+      className="absolute inset-0 cursor-grab touch-none overflow-hidden select-none active:cursor-grabbing"
       style={{
-        // A dotted grid that moves and scales with the canvas: zooming out
-        // brings the dots closer and shrinks them too, so it never gets heavy.
-        backgroundImage: `radial-gradient(circle, rgba(60,50,40,0.16) ${1.1 * Math.min(z, 1)}px, transparent ${1.1 * Math.min(z, 1) + 0.5}px)`,
-        backgroundSize: `${24 * z}px ${24 * z}px`,
+        // Studded surface (raised round bumps, lit from the top left), drawn
+        // as a vector tile so it stays crisp at any zoom and screen density.
+        backgroundColor: STUD_BG,
+        backgroundImage: STUD_TILE,
+        backgroundSize: `${STUD_PITCH * z}px ${STUD_PITCH * z}px`,
         backgroundPosition: `${originX}px ${originY}px`,
       }}
     >
