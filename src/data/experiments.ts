@@ -21,7 +21,7 @@ export const allExperiments: Experiment[] = [
     image: "/experiments/skin-cover.webp",
   },
   {
-    name: "Taski — first version",
+    name: "Taski 1.0",
     description:
       "The original Taski — a no-pressure to-do list I shipped as a simple web app, still live and working exactly as it did back then.",
     stack:

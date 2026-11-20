@@ -13,7 +13,7 @@ const PINK_BRICK = studTile("#ef7fb2", "#7a2149", true);
 // A small smiley of pink 1x1 bricks on the plate, in the canvas's bottom left
 // corner (its edges count towards the bounds, so it's the last thing there).
 // Cells are stud-grid steps from SMILE_AT (a stud centre: 22k + 11).
-const SMILE_AT = { x: -1045, y: 847 };
+const DEFAULT_SMILE_AT = { x: -1045, y: 847 };
 const SMILE: [number, number][] = [
   [-1, -1],
   [1, -1],
@@ -45,9 +45,25 @@ type Props = {
   /** Size of the area kept clear around the centre (counts towards the bounds). */
   centerW: number;
   centerH: number;
+  /** Where the centre block sits in the world (default 0,0). */
+  centerX?: number;
+  centerY?: number;
+  /** Centre of the pink smiley (a stud centre: 22k + 11). */
+  smileAt?: { x: number; y: number };
+  /** Dev only: drag the blocks around instead of panning. `id` is the card's
+   * title, or "center". */
+  /** Where the view starts: centred on the title block (default), or at the
+   * canvas's top-left corner, at the given zoom. */
+  start?: { corner: "top-left"; zoom: number };
+  arrange?: boolean;
+  onArrange?: (id: string, dx: number, dy: number) => void;
+  onArrangeEnd?: () => void;
 };
 
 const DRAG_THRESHOLD = 6;
+// Arrange mode: each movable block gets a dashed outline and a move cursor.
+const ARRANGE_RING =
+  "cursor-move rounded-[28px] outline-2 outline-offset-4 outline-dashed outline-[var(--site-accent)]";
 const MAX_ZOOM = 2.5;
 // Room around the projects when zoomed all the way out.
 const FIT_MARGIN = 60;
@@ -65,6 +81,13 @@ export default function InfiniteCanvas({
   center,
   centerW,
   centerH,
+  centerX = 0,
+  centerY = 0,
+  smileAt: SMILE_AT = DEFAULT_SMILE_AT,
+  start,
+  arrange = false,
+  onArrange,
+  onArrangeEnd,
 }: Props) {
   const boxRef = useRef<HTMLDivElement>(null);
   const [view, setView] = useState({
@@ -86,13 +109,13 @@ export default function InfiniteCanvas({
       // The smiley sits one stud in from the canvas's bottom left corner
       // (the bounds sit inside it by the margin, minus one stud).
       minX: Math.min(
-        -centerW / 2,
+        centerX - centerW / 2,
         SMILE_AT.x - 2.5 * STUD_PITCH - STUD_PITCH + FIT_MARGIN,
       ),
-      maxX: centerW / 2,
-      minY: -centerH / 2,
+      maxX: centerX + centerW / 2,
+      minY: centerY - centerH / 2,
       maxY: Math.max(
-        centerH / 2,
+        centerY + centerH / 2,
         SMILE_AT.y + 2.5 * STUD_PITCH + STUD_PITCH - FIT_MARGIN,
       ),
     },
@@ -112,12 +135,15 @@ export default function InfiniteCanvas({
   };
 
   // Where the world's centre sits relative to the screen's centre, and the zoom.
-  // Phones start zoomed out a little so the title and a project or two show.
-  const [cam, setCam] = useState(() => ({
-    x: 0,
-    y: 0,
-    z: window.innerWidth < 640 ? 0.55 : 1,
-  }));
+  // It opens on the title block (as near the screen's middle as the canvas
+  // edges allow), or, with `start`, in the top-left corner (the clamp stops a
+  // far-off camera at the canvas edges). Phones start zoomed out a little so
+  // the title and a project or two show.
+  const [cam, setCam] = useState(() => {
+    if (start) return { x: 1e6, y: 1e6, z: start.zoom };
+    const z = window.innerWidth < 640 ? 0.55 : 1;
+    return { x: -centerX * z, y: -centerY * z, z };
+  });
   const camRef = useRef(cam);
   const raf = useRef<number | null>(null);
   const velocity = useRef({ x: 0, y: 0 });
@@ -128,6 +154,8 @@ export default function InfiniteCanvas({
     moved: number;
   } | null>(null);
   const suppressClick = useRef(false);
+  // Arrange mode: the block being moved, and where the pointer last was.
+  const moving = useRef<{ id: string; x: number; y: number } | null>(null);
   // Fingers currently on the canvas, for pinch-to-zoom.
   const pointers = useRef(new Map<number, { x: number; y: number }>());
   const pinch = useRef<{ dist: number; mid: { x: number; y: number } } | null>(
@@ -273,6 +301,17 @@ export default function InfiniteCanvas({
 
   const onPointerDown = (e: React.PointerEvent) => {
     if (e.button !== 0) return;
+    if (arrange) {
+      const item = (e.target as HTMLElement).closest<HTMLElement>(
+        "[data-item]",
+      );
+      if (item) {
+        moving.current = { id: item.dataset.item!, x: e.clientX, y: e.clientY };
+        boxRef.current?.setPointerCapture(e.pointerId);
+        suppressClick.current = true;
+        return;
+      }
+    }
     pointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
     if (pointers.current.size === 2) {
       // Second finger down: switch from dragging to pinching.
@@ -291,6 +330,14 @@ export default function InfiniteCanvas({
     suppressClick.current = false;
   };
   const onPointerMove = (e: React.PointerEvent) => {
+    const m = moving.current;
+    if (m) {
+      const z = camRef.current.z;
+      onArrange?.(m.id, (e.clientX - m.x) / z, (e.clientY - m.y) / z);
+      m.x = e.clientX;
+      m.y = e.clientY;
+      return;
+    }
     if (pointers.current.has(e.pointerId)) {
       pointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
     }
@@ -322,6 +369,11 @@ export default function InfiniteCanvas({
     moveBy(dx, dy);
   };
   const onPointerUp = (e: React.PointerEvent) => {
+    if (moving.current) {
+      moving.current = null;
+      onArrangeEnd?.();
+      return;
+    }
     pointers.current.delete(e.pointerId);
     if (pinch.current) {
       // Lifting a finger ends the pinch; don't treat the rest as a drag or tap.
@@ -370,12 +422,17 @@ export default function InfiniteCanvas({
       <div
         className="pointer-events-none absolute"
         style={{
-          left: originX,
-          top: originY,
+          left: originX + centerX * z,
+          top: originY + centerY * z,
           transform: `translate(-50%, -50%) scale(${z})`,
         }}
       >
-        <div className="pointer-events-auto">{center}</div>
+        <div
+          data-item="center"
+          className={`pointer-events-auto ${arrange ? ARRANGE_RING : ""}`}
+        >
+          {center}
+        </div>
       </div>
 
       {SMILE.map(([cx, cy]) => {
@@ -406,7 +463,8 @@ export default function InfiniteCanvas({
             key={card.href}
             to={card.href}
             draggable={false}
-            className="group absolute block transition-transform duration-200 hover:scale-[1.02]"
+            data-item={card.title}
+            className={`group absolute block ${arrange ? ARRANGE_RING : "transition-transform duration-200 hover:scale-[1.02]"}`}
             style={{
               left: originX + card.x * z - w / 2,
               top: originY + card.y * z - h / 2,

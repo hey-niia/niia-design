@@ -12,13 +12,6 @@ export default function Taski() {
 
       <div className="mx-auto max-w-4xl pt-6 md:pt-24">
         <header className="pb-8">
-          <Link
-            to="/ai-playground"
-            className="soft-hover soft-key gap-2 font-mono text-xs tracking-widest text-neutral-700 uppercase mb-8"
-          >
-            <span aria-hidden>←</span> AI Playground
-          </Link>
-
           {/* Same header as the Work case studies. */}
           <p className="mb-4 font-mono text-xs tracking-widest text-gray-400 uppercase">
             <span className="normal-case">macOS</span> app

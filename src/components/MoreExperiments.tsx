@@ -8,7 +8,7 @@ import { FooterLinks } from "./Footer";
 // radius; taller windows lose a little at the bottom, Skin a little at the sides.
 const SHOT: Record<string, { image: string; position?: string }> = {
   Skin: { image: "/experiments/skin-cover.webp", position: "center top" },
-  "Taski — first version": { image: "/experiments/canvas/taski-v1.jpg" },
+  "Taski 1.0": { image: "/experiments/canvas/taski-v1.jpg" },
   Taski: { image: "/experiments/canvas/taski.jpg" },
   Skim: { image: "/experiments/canvas/skim.jpg" },
 };

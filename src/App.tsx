@@ -10,6 +10,7 @@ import Skim from "./pages/Skim";
 // 08 is hidden while it's being reworked; restore this import and its route to bring it back.
 // import CatEight from "./pages/CatEight";
 import Skin from "./pages/Skin";
+import Focus from "./pages/Focus";
 import NotFound from "./pages/NotFound";
 import ScrollToTop from "./components/ScrollToTop";
 import Footer from "./components/Footer";
@@ -22,7 +23,8 @@ import { NiiaChatProvider } from "./context/NiiaChatContext";
 function AppContent() {
   // The AI Playground is an endless canvas that fills the window, so it has no footer.
   const { pathname } = useLocation();
-  const showFooter = pathname !== "/ai-playground";
+  // /focus is the checklist alone, so it has no footer either.
+  const showFooter = pathname !== "/ai-playground" && pathname !== "/focus";
   // Project pages put the footer links above their "More AI experiments" band;
   // About has its own Resume / LinkedIn / Email buttons, so the row would repeat them.
   const linksInPage = ["/skin", "/taski", "/taski-v1", "/skim", "/about"].includes(pathname);
@@ -41,6 +43,7 @@ function AppContent() {
           <Route path="/skim" element={<Skim />} />
           {/* <Route path="/08" element={<CatEight />} /> */}
           <Route path="/skin" element={<Skin />} />
+          <Route path="/focus" element={<Focus />} />
           <Route path="/work/:slug" element={<CaseStudy />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
