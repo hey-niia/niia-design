@@ -22,10 +22,10 @@ export default function Home() {
   const { openWelcome, sendMessage } = useNiiaChat();
   const location = useLocation();
 
-  // "Work" in the header lands on the project grid, with a little room above
-  // it. Coming from another page the images are still loading, so the page
-  // grows after the first scroll: keep it on target until the layout settles
-  // (or the visitor scrolls themselves).
+  // "Work" in the header lands on the project grid, with the same 16px above
+  // it as the page has on its sides. Coming from another page the images are
+  // still loading, so the page grows after the first scroll: keep it on
+  // target until the layout settles (or the visitor scrolls themselves).
   useEffect(() => {
     const state = location.state as { scrollTo?: string } | null;
     if (!state?.scrollTo) return;
@@ -34,7 +34,7 @@ export default function Home() {
       const el = document.getElementById(id);
       if (el) {
         window.scrollTo({
-          top: el.getBoundingClientRect().top + window.scrollY - 30,
+          top: el.getBoundingClientRect().top + window.scrollY - 16,
         });
       }
     };
@@ -66,7 +66,9 @@ export default function Home() {
           left, with a little more room below it than above, before the work. */}
       <section id="about" className="pt-16 pb-20 md:pt-24 md:pb-32">
         <div className="mx-auto flex w-fit max-w-full flex-col gap-4 text-left">
-          <p className="t-intro text-2xl">I design products, build with AI, and think like a founder.</p>
+          <p className="t-intro text-2xl">
+            I design products, build with AI, and think like a founder.
+          </p>
           {/* One phrase looks like text you've selected, with the Ask Niia AI pill
               beside it (below it on phones), to show visitors they can select
               any text and ask about it. */}
@@ -75,16 +77,22 @@ export default function Home() {
               <span className="md:whitespace-nowrap">
                 What I love: collaborating with great teams,{" "}
                 {/* The space sits inside the highlight so it stays one band on phones. */}
-                <span className="intro-highlight">solving business problems </span>
+                <span className="intro-highlight">
+                  solving business problems{" "}
+                </span>
               </span>
               <br className="hidden md:block" />
-              <span className="intro-highlight">through design</span>, and turning ideas into real products.
+              <span className="intro-highlight">through design</span>, and
+              turning ideas into real products.
             </p>
             <button
               type="button"
               onClick={() => {
                 openWelcome();
-                sendMessage("Tell me more about solving business problems through design", INTRO_LOVE);
+                sendMessage(
+                  "Tell me more about solving business problems through design",
+                  INTRO_LOVE,
+                );
               }}
               className="flex items-center gap-1.5 rounded-full bg-[var(--site-accent)]/90 px-3 py-1.5 text-xs whitespace-nowrap text-white shadow-lg backdrop-blur-sm transition-transform hover:scale-105 md:absolute md:top-0.5 md:left-full md:ml-6"
             >
@@ -98,7 +106,10 @@ export default function Home() {
           (left, right, left, right), not down the first column and then the second. */}
       <section id="work" className="flex flex-col gap-8 sm:flex-row">
         {splitIntoColumns(homeProjects).map((column, i) => (
-          <div key={i} className="max-sm:contents sm:flex sm:flex-1 sm:flex-col sm:gap-8">
+          <div
+            key={i}
+            className="max-sm:contents sm:flex sm:flex-1 sm:flex-col sm:gap-8"
+          >
             {column.map((project, row) => (
               <div
                 key={project.slug}
@@ -112,7 +123,6 @@ export default function Home() {
           </div>
         ))}
       </section>
-
     </main>
   );
 }
