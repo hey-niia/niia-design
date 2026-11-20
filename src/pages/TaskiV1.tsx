@@ -27,7 +27,7 @@ export default function TaskiV1() {
             rel="noopener noreferrer"
             className="soft-hover soft-key mt-6 gap-2 font-mono text-xs tracking-widest text-neutral-700 uppercase"
           >
-            Open in a new tab <span aria-hidden>↗</span>
+            Try zen mode <span aria-hidden>↗</span>
           </a>
         </header>
 

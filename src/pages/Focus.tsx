@@ -26,7 +26,7 @@ export default function Focus() {
       {/* The site's name, pinned to the bottom-left corner. */}
       <Link
         to="/"
-        className="fixed bottom-4 left-4 font-mono text-xs tracking-widest text-gray-400 hover:text-[var(--site-accent)]"
+        className="fixed bottom-4 left-4 font-mono text-xs tracking-widest text-gray-400 uppercase hover:text-[var(--site-accent)]"
       >
         niia.design
       </Link>
