@@ -46,7 +46,7 @@ export function FooterLinks({
         >
           GitHub
         </a>
-        <a href="/resume.pdf" target="_blank" rel="noopener noreferrer">
+        <a href="/Niia-Bieliavtseva-Resume.pdf" target="_blank" rel="noopener noreferrer">
           Résumé
         </a>
       </div>

@@ -5,7 +5,7 @@ import { CONTACT_EMAIL, PROJECT_LINKS, type AnswerCard } from "../lib/niiaLLM";
 
 const LINKEDIN_URL = "https://www.linkedin.com/in/niia-bieliavtseva/";
 const CHAT_POS_KEY = "niia-chat-pos-v1";
-const RESUME_URL = "/resume.pdf";
+const RESUME_URL = "/Niia-Bieliavtseva-Resume.pdf";
 
 function escapeRegExp(s: string): string {
   return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");

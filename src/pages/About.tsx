@@ -49,20 +49,31 @@ export default function About() {
                     "I'm looking for my next role, ideally working on AI-driven products that help shape a better future for people. Feel free to reach out!"
                   }
                 </p>
-                {/* Let's Talk, LinkedIn, Download Resume in one row on desktop; on
-                    phones the résumé drops below. Each key's white glow spills
+                {/* Let's Talk, LinkedIn, Resume, GitHub in one row on
+                    desktop; on phones the last two drop below. Each key's white glow spills
                     up and left, so the keys are painted right-to-left and
                     bottom-up (reversed flex order): no glow lands on another
                     key's label. */}
                 <div className="flex flex-col-reverse items-start gap-3 md:flex-row-reverse md:justify-end">
-                  <a
-                    href="/resume.pdf"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="soft-hover soft-key gap-2 font-mono text-xs tracking-widest text-neutral-700 uppercase"
-                  >
-                    <span aria-hidden>↓</span> Download Resume
-                  </a>
+                  {/* GitHub sits right of the résumé (reversed, as above). */}
+                  <div className="flex flex-row-reverse justify-end gap-3">
+                    <a
+                      href="https://github.com/hey-niia"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="soft-hover soft-key gap-2 font-mono text-xs tracking-widest text-neutral-700 uppercase"
+                    >
+                      GitHub <span aria-hidden>↗</span>
+                    </a>
+                    <a
+                      href="/Niia-Bieliavtseva-Resume.pdf"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="soft-hover soft-key gap-2 font-mono text-xs tracking-widest text-neutral-700 uppercase"
+                    >
+                      <span aria-hidden>↓</span> Resume
+                    </a>
+                  </div>
                   <div className="flex flex-row-reverse justify-end gap-3">
                     <a
                       href={LINKEDIN_URL}
