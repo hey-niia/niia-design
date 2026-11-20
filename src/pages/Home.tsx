@@ -34,7 +34,7 @@ export default function Home() {
       const el = document.getElementById(id);
       if (el) {
         window.scrollTo({
-          top: el.getBoundingClientRect().top + window.scrollY - 60,
+          top: el.getBoundingClientRect().top + window.scrollY - 30,
         });
       }
     };

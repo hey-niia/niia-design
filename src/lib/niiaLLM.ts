@@ -123,7 +123,7 @@ const ANSWERS: CannedAnswer[] = [
   {
     keywords: ["like a founder", "founder's mindset", "founder mindset", "think like a founder"],
     answer:
-      "I've always had a founder's mindset. Years ago, I had an idea for what I thought would be the perfect healthy snack. So I built a company around it, from the product itself to the packaging, branding, and distribution. I sold the company in 2022.\n\nThat experience shaped how I approach design today. I think about the whole product, not just how it looks, but how it works, why people need it, and whether it makes sense as a business.\n\nIt also means taking ownership. I care about the people we're designing for and the impact of what we build, I take the initiative instead of waiting to be asked, and I treat the outcome as mine, not just the screens.",
+      "It means taking ownership. I care about the people we're designing for and the impact of what we build, I take the initiative instead of waiting to be asked, and I treat the outcome as mine, not just the screens.\n\nI've always had a founder's mindset. Years ago, I had an idea for what I thought would be the perfect healthy snack. So I built a company around it, from the product itself to the packaging, branding, and distribution. I sold the company in 2022.\n\nThat experience shaped how I approach design today. I think about the whole product, not just how it looks, but how it works, why people need it, and whether it makes sense as a business.",
   },
   // The homepage intro's "Ask Niia AI" pill asks this one.
   {
