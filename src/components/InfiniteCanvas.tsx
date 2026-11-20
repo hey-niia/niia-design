@@ -55,6 +55,9 @@ type Props = {
   /** Where the view starts: centred on the title block (default), or at the
    * canvas's top-left corner, at the given zoom. */
   start?: { corner: "top-left"; zoom: number };
+  /** Room kept between the blocks and the screen edge at the canvas's edges,
+   * in world px (default 60 on both axes). */
+  margin?: { x: number; y: number };
   arrange?: boolean;
   onArrange?: (id: string, dx: number, dy: number) => void;
   onArrangeEnd?: () => void;
@@ -85,6 +88,7 @@ export default function InfiniteCanvas({
   centerY = 0,
   smileAt: SMILE_AT = DEFAULT_SMILE_AT,
   start,
+  margin = { x: FIT_MARGIN, y: FIT_MARGIN },
   arrange = false,
   onArrange,
   onArrangeEnd,
@@ -110,17 +114,19 @@ export default function InfiniteCanvas({
       // (the bounds sit inside it by the margin, minus one stud).
       minX: Math.min(
         centerX - centerW / 2,
-        SMILE_AT.x - 2.5 * STUD_PITCH - STUD_PITCH + FIT_MARGIN,
+        SMILE_AT.x - 2.5 * STUD_PITCH - STUD_PITCH + margin.x,
       ),
       maxX: centerX + centerW / 2,
       minY: centerY - centerH / 2,
       maxY: Math.max(
         centerY + centerH / 2,
-        SMILE_AT.y + 2.5 * STUD_PITCH + STUD_PITCH - FIT_MARGIN,
+        SMILE_AT.y + 2.5 * STUD_PITCH + STUD_PITCH - margin.y,
       ),
     },
   );
   const boundsRef = useRef(bounds);
+  const marginRef = useRef(margin);
+  marginRef.current = margin;
   boundsRef.current = bounds;
 
   // Zoomed all the way out, every project fits on screen (never past 100%).
@@ -129,8 +135,8 @@ export default function InfiniteCanvas({
     const b = boundsRef.current;
     return Math.min(
       1,
-      v.w / (b.maxX - b.minX + FIT_MARGIN * 2),
-      v.h / (b.maxY - b.minY + FIT_MARGIN * 2),
+      v.w / (b.maxX - b.minX + marginRef.current.x * 2),
+      v.h / (b.maxY - b.minY + marginRef.current.y * 2),
     );
   };
 
@@ -170,17 +176,24 @@ export default function InfiniteCanvas({
     const b = boundsRef.current;
     const v = viewRef.current;
     const z = Math.min(MAX_ZOOM, Math.max(minZoom(), c.z));
-    const axis = (cam: number, min: number, max: number, half: number) => {
-      const lo = min - FIT_MARGIN + half / z;
-      const hi = max + FIT_MARGIN - half / z;
+    const m = marginRef.current;
+    const axis = (
+      cam: number,
+      min: number,
+      max: number,
+      half: number,
+      pad: number,
+    ) => {
+      const lo = min - pad + half / z;
+      const hi = max + pad - half / z;
       const centre =
         lo > hi ? (min + max) / 2 : Math.min(hi, Math.max(lo, -cam / z));
       return -centre * z;
     };
     return {
       z,
-      x: axis(c.x, b.minX, b.maxX, v.w / 2),
-      y: axis(c.y, b.minY, b.maxY, v.h / 2),
+      x: axis(c.x, b.minX, b.maxX, v.w / 2, m.x),
+      y: axis(c.y, b.minY, b.maxY, v.h / 2, m.y),
     };
   };
 

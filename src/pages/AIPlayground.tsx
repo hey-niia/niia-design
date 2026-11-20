@@ -84,7 +84,7 @@ export default function AIPlayground() {
   const smileAt =
     mode === "desktop"
       ? {
-          x: stud(Math.min(c.x - 180, ...cards.map((k) => k.x - k.w / 2)) + 44),
+          x: stud(Math.min(c.x - 180, ...cards.map((k) => k.x - k.w / 2)) + 88),
           y: stud(Math.max(c.y + 180, ...cards.map((k) => k.y + k.h / 2)) + 88),
         }
       : undefined;
@@ -119,6 +119,9 @@ export default function AIPlayground() {
           start={
             mode === "desktop" ? { corner: "top-left", zoom: 0.9 } : undefined
           }
+          // Desktop: the title block sits close to the screen's edges (its
+          // visible panel is 10px inside its 360px box).
+          margin={mode === "desktop" ? { x: 6, y: 17 } : undefined}
           centerW={360}
           centerH={360}
           centerX={pos.center?.x ?? 0}

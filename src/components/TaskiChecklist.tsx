@@ -155,50 +155,6 @@ export default function TaskiChecklist() {
     <>
       <div className="mb-12 max-w-[46rem]">
         <div className="mb-4 flex items-baseline justify-between border-b pb-2">
-          <h3 className="font-medium">Routine</h3>
-          {data.routine.length > 0 && (
-            <span className="text-base opacity-60">
-              {doneCount}/{data.routine.length} today
-            </span>
-          )}
-        </div>
-
-        {data.routine.length > 0 && (
-          <ul className="mb-2">
-            {data.routine.map((t) => (
-              <TaskRow
-                key={t.id}
-                text={t.text}
-                done={t.lastDoneDate === data.todayDate}
-                onToggle={() => toggleRoutine(t.id)}
-                onDelete={() => deleteRoutine(t.id)}
-              />
-            ))}
-          </ul>
-        )}
-
-        <form
-          onSubmit={addRoutine}
-          className="flex items-center gap-3 border-b py-3"
-        >
-          <input
-            value={routineDraft}
-            onChange={(e) => setRoutineDraft(e.target.value)}
-            placeholder="Add a routine step…"
-            className="flex-1 bg-transparent outline-none placeholder:opacity-40"
-          />
-          <button
-            type="submit"
-            disabled={!routineDraft.trim()}
-            className="shrink-0 underline disabled:opacity-30"
-          >
-            Add
-          </button>
-        </form>
-      </div>
-
-      <div className="max-w-[46rem]">
-        <div className="mb-4 flex items-baseline justify-between border-b pb-2">
           <h3 className="font-medium">Today</h3>
           {hasDoneToday && (
             <button
@@ -244,6 +200,50 @@ export default function TaskiChecklist() {
           </button>
         </form>
       </div>
+      <div className="max-w-[46rem]">
+        <div className="mb-4 flex items-baseline justify-between border-b pb-2">
+          <h3 className="font-medium">Routine</h3>
+          {data.routine.length > 0 && (
+            <span className="text-base opacity-60">
+              {doneCount}/{data.routine.length} today
+            </span>
+          )}
+        </div>
+
+        {data.routine.length > 0 && (
+          <ul className="mb-2">
+            {data.routine.map((t) => (
+              <TaskRow
+                key={t.id}
+                text={t.text}
+                done={t.lastDoneDate === data.todayDate}
+                onToggle={() => toggleRoutine(t.id)}
+                onDelete={() => deleteRoutine(t.id)}
+              />
+            ))}
+          </ul>
+        )}
+
+        <form
+          onSubmit={addRoutine}
+          className="flex items-center gap-3 border-b py-3"
+        >
+          <input
+            value={routineDraft}
+            onChange={(e) => setRoutineDraft(e.target.value)}
+            placeholder="Add a routine step…"
+            className="flex-1 bg-transparent outline-none placeholder:opacity-40"
+          />
+          <button
+            type="submit"
+            disabled={!routineDraft.trim()}
+            className="shrink-0 underline disabled:opacity-30"
+          >
+            Add
+          </button>
+        </form>
+      </div>
+
     </>
   );
 }
