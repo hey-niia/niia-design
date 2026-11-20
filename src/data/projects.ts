@@ -945,7 +945,7 @@ export const projects: Project[] = [
     // straight from the Figma file (dashboard C) at 3×, at their real component size.
     slug: "connectiq",
     category: "Dashboard",
-    name: "Giant Pumpkin",
+    name: "Connect IQ",
     title: "ConnectIQ",
     hideClientInHeader: true,
     summary:
