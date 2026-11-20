@@ -149,7 +149,7 @@ export default function AIPlayground() {
             // A pressed-in, flat panel in the studded surface's colour, so the
             // text sits in a smooth recess instead of on the bumps.
             <div
-              className="flex aspect-square w-[min(84vw,340px)] flex-col items-center justify-center gap-4 rounded-[28px] px-7 py-8 text-center"
+              className="flex w-[min(84vw,340px)] flex-col items-center justify-center gap-4 rounded-[28px] px-7 py-7 text-center"
               style={{
                 backgroundColor: "#e2ddd8",
                 boxShadow:
