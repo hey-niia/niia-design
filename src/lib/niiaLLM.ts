@@ -95,9 +95,25 @@ export const PLAYGROUND_CARDS: AnswerCard[] = experiments
 
 const ANSWERS: CannedAnswer[] = [
   {
-    keywords: ["ownership", "taking ownership", "take ownership"],
+    keywords: [
+      "ownership",
+      "taking ownership",
+      "take ownership",
+    ],
     answer:
       "For me, taking ownership means caring deeply about the people we're designing for and the impact of what we build. I love collaborating with engineers, designers, and product teams, bringing different perspectives together, challenging assumptions, and finding solutions that genuinely work for users. It's about taking initiative, sharing responsibility, and working together to make the best possible product.",
+  },
+  // The homepage intro's "collaborating with great teams".
+  {
+    keywords: [
+      "collaborating with great teams",
+      "great teams",
+      "collaboration across teams",
+      "cross-functional",
+      "cross functional",
+    ],
+    answer:
+      "I do my best work with other people. On most projects I'm the only designer, so I work closely with founders, engineers, product managers, and ops leads, sharing work early and often instead of handing over finished screens.\n\nI love bringing different perspectives together, questioning assumptions as a team, and agreeing on the problem before we decide how it looks. With engineers, I build token-based design systems that map straight to code, so we spend less time on handoff and more time making the product better.",
   },
   {
     keywords: ["turning ideas", "ideas into real products", "ideas into products", "real products"],
@@ -107,7 +123,7 @@ const ANSWERS: CannedAnswer[] = [
   {
     keywords: ["like a founder", "founder's mindset", "founder mindset", "think like a founder"],
     answer:
-      "I've always had a founder's mindset. Years ago, I had an idea for what I thought would be the perfect healthy snack. So I built a company around it, from the product itself to the packaging, branding, and distribution. I sold the company in 2022.\n\nThat experience shaped how I approach design today. I think about the whole product, not just how it looks, but how it works, why people need it, and whether it makes sense as a business.",
+      "I've always had a founder's mindset. Years ago, I had an idea for what I thought would be the perfect healthy snack. So I built a company around it, from the product itself to the packaging, branding, and distribution. I sold the company in 2022.\n\nThat experience shaped how I approach design today. I think about the whole product, not just how it looks, but how it works, why people need it, and whether it makes sense as a business.\n\nIt also means taking ownership. I care about the people we're designing for and the impact of what we build, I take the initiative instead of waiting to be asked, and I treat the outcome as mine, not just the screens.",
   },
   // The homepage intro's "Ask Niia AI" pill asks this one.
   {

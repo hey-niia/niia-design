@@ -23,6 +23,9 @@ function AppContent() {
   // The AI Playground is an endless canvas that fills the window, so it has no footer.
   const { pathname } = useLocation();
   const showFooter = pathname !== "/ai-playground";
+  // Project pages put the footer links above their "More AI experiments" band;
+  // About has its own Resume / LinkedIn / Email buttons, so the row would repeat them.
+  const linksInPage = ["/skin", "/taski", "/taski-v1", "/skim", "/about"].includes(pathname);
 
   return (
     <>
@@ -41,7 +44,7 @@ function AppContent() {
           <Route path="/work/:slug" element={<CaseStudy />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
-        {showFooter && <Footer />}
+        {showFooter && <Footer showLinks={!linksInPage} />}
       </div>
       <SelectionAskTooltip />
       <NiiaChatSidebar />

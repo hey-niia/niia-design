@@ -1,9 +1,8 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { Link } from "react-router-dom";
-import ExperimentCard from "../components/ExperimentCard";
+import MoreExperiments from "../components/MoreExperiments";
 import Nav from "../components/Nav";
 import WiggleText from "../components/WiggleText";
-import { experiments } from "../data/experiments";
 
 type RoutineTask = { id: string; text: string; lastDoneDate: string | null };
 type TodayTask = { id: string; text: string; done: boolean };
@@ -84,7 +83,6 @@ function TaskRow({
 }
 
 export default function TaskiV1() {
-  const moreExperiments = experiments.filter((exp) => exp.link !== "/taski-v1");
   const [data, setData] = useState<Stored>(loadInitial);
   const [routineDraft, setRoutineDraft] = useState("");
   const [todayDraft, setTodayDraft] = useState("");
@@ -158,18 +156,22 @@ export default function TaskiV1() {
       <Nav />
 
       <div className="mx-auto max-w-4xl pt-6 md:pt-24">
-        <header className="border-b border-gray-200 pb-8">
+        <header className="pb-8">
           <Link
             to="/ai-playground"
-            className="mb-6 block text-sm text-gray-400 hover:text-[var(--site-accent)]"
+            className="soft-hover soft-key gap-2 font-mono text-xs tracking-widest text-neutral-700 uppercase mb-8"
           >
-            <WiggleText>← AI Playground</WiggleText>
+            <span aria-hidden>←</span> AI Playground
           </Link>
 
+          {/* Same header as the Work case studies. */}
+          <p className="mb-4 font-mono text-xs tracking-widest text-gray-400 uppercase">
+            Web app
+          </p>
           <h1 className="mb-4 text-3xl font-medium lg:text-5xl">
             Taski — first version
           </h1>
-          <p className="max-w-2xl text-gray-500 italic">
+          <p className="mt-4 max-w-2xl">
             This was the first version of Taski, before it became a native Mac
             app. A to-do list that doesn't pressure you: add the things you want
             to do most days once, then just check them off — nothing scores you,
@@ -291,27 +293,19 @@ export default function TaskiV1() {
           </p>
         </section>
 
-        <footer className="border-t border-gray-200 py-16">
+        <footer className="py-16">
           <div className="flex items-center justify-center">
-            <Link to="/taski">
-              <WiggleText>See the current version →</WiggleText>
+            <Link
+              to="/taski"
+              className="soft-hover soft-key gap-2 font-mono text-xs tracking-widest text-neutral-700 uppercase"
+            >
+              See the current version <span aria-hidden>→</span>
             </Link>
           </div>
         </footer>
-
-        {moreExperiments.length > 0 && (
-          <section className="py-16">
-            <p className="mb-6 text-sm tracking-wide text-gray-400 uppercase">
-              More AI experiments
-            </p>
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {moreExperiments.map((exp) => (
-                <ExperimentCard key={exp.name} exp={exp} />
-              ))}
-            </div>
-          </section>
-        )}
       </div>
+
+      <MoreExperiments current="/taski-v1" />
     </main>
   );
 }

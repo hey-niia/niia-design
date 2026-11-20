@@ -1,15 +1,14 @@
 import { Link } from "react-router-dom";
-import ExperimentCard from "../components/ExperimentCard";
+import MoreExperiments from "../components/MoreExperiments";
 import Nav from "../components/Nav";
-import WiggleText from "../components/WiggleText";
 import Zoomable from "../components/Zoomable";
-import { experiments } from "../data/experiments";
 
 const skins = [
   {
     src: "/experiments/skin-settings.webp",
     name: "Settings",
-    caption: "Pick a skin, set the paper grain, tilt the sheets, choose how chats get sent.",
+    caption:
+      "Pick a skin, set the paper grain, tilt the sheets, choose how chats get sent.",
     alt: "Skin settings panel with the neon, kraft, fold and vellum skins, a grain slider and paper toggles",
   },
   {
@@ -30,23 +29,25 @@ const paragraph = "my-4 max-w-[46rem] text-[1.125rem] leading-[1.8]";
 const heading = "mt-12 mb-3 max-w-[46rem] text-[1.375rem] font-semibold";
 
 export default function Skin() {
-  const moreExperiments = experiments.filter((exp) => exp.link !== "/skin");
-
   return (
     <main>
       <Nav />
 
       <div className="mx-auto max-w-4xl pt-6 md:pt-24">
-        <header className="border-b border-gray-200 pb-8">
+        <header className="pb-8">
           <Link
             to="/ai-playground"
-            className="mb-6 block text-sm text-gray-400 hover:text-[var(--site-accent)]"
+            className="soft-hover soft-key gap-2 font-mono text-xs tracking-widest text-neutral-700 uppercase mb-8"
           >
-            <WiggleText>← AI Playground</WiggleText>
+            <span aria-hidden>←</span> AI Playground
           </Link>
 
+          {/* Same header as the Work case studies. */}
+          <p className="mb-4 font-mono text-xs tracking-widest text-gray-400 uppercase">
+            Chrome extension
+          </p>
           <h1 className="mb-4 text-3xl font-medium lg:text-5xl">Skin</h1>
-          <p className="max-w-2xl text-gray-500 italic">
+          <p className="mt-4 max-w-2xl">
             A private skin for your LLM. Think Winamp skins, but for Claude and
             ChatGPT.
           </p>
@@ -66,7 +67,7 @@ export default function Skin() {
               href="https://github.com/hey-niia/skin-extension/releases/latest"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 border border-black px-6 py-3 font-mono text-sm tracking-widest uppercase transition-colors hover:bg-black hover:text-white"
+              className="soft-hover soft-key gap-2 font-mono text-xs tracking-widest text-neutral-700 uppercase"
             >
               Download extension <span aria-hidden>→</span>
             </a>
@@ -79,7 +80,8 @@ export default function Skin() {
             paper you style yourself: color, image, label, or no label at all.
           </p>
           <p className={paragraph}>
-            <strong>Browser-only:</strong> no servers, no accounts, no API calls.
+            <strong>Browser-only:</strong> no servers, no accounts, no API
+            calls.
           </p>
 
           <h3 className={heading}>What it does</h3>
@@ -108,22 +110,20 @@ export default function Skin() {
             <li className="pl-1">
               Reads <strong>only chat links already visible on the page</strong>{" "}
               (the sidebar, the Recents page). It does not call Claude's or
-              ChatGPT's API, and it makes <strong>no network requests</strong> of
-              its own.
+              ChatGPT's API, and it makes <strong>no network requests</strong>{" "}
+              of its own.
             </li>
             <li className="pl-1">
               Stores chat titles, links and settings only in this browser.
             </li>
-            <li className="pl-1">
-              Runs only on claude.ai and chatgpt.com.
-            </li>
+            <li className="pl-1">Runs only on claude.ai and chatgpt.com.</li>
           </ul>
 
           <h3 className={heading}>Skins</h3>
           <p className={paragraph}>
             The design direction is analog paper — grain, soft shadows, folded
-            corners, vellum envelopes for private folders. Pick a skin in settings
-            and the same board changes paper:
+            corners, vellum envelopes for private folders. Pick a skin in
+            settings and the same board changes paper:
           </p>
           <div className="mt-8 space-y-10">
             {skins.map((s) => (
@@ -161,32 +161,21 @@ export default function Skin() {
           </figure>
         </section>
 
-        <footer className="border-t border-gray-200 py-16">
+        <footer className="py-16">
           <div className="flex items-center justify-center">
             <a
               href="https://github.com/hey-niia/skin-extension/releases/latest"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2"
+              className="soft-hover soft-key gap-2 font-mono text-xs tracking-widest text-neutral-700 uppercase"
             >
-              <WiggleText>Download extension</WiggleText> <span aria-hidden>→</span>
+              Download extension <span aria-hidden>→</span>
             </a>
           </div>
         </footer>
-
-        {moreExperiments.length > 0 && (
-          <section className="py-16">
-            <p className="mb-6 text-sm tracking-wide text-gray-400 uppercase">
-              More AI experiments
-            </p>
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {moreExperiments.map((exp) => (
-                <ExperimentCard key={exp.name} exp={exp} />
-              ))}
-            </div>
-          </section>
-        )}
       </div>
+
+      <MoreExperiments current="/skin" />
     </main>
   );
 }

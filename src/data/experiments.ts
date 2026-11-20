@@ -14,7 +14,8 @@ export const allExperiments: Experiment[] = [
     name: "Skin",
     description:
       "Like Winamp skins, but for Claude and ChatGPT — a private, local-first board where every chat lives in a paper folder you style yourself.",
-    stack: "JavaScript browser extension — no servers, no accounts, everything stays in your browser",
+    stack:
+      "JavaScript browser extension — no servers, no accounts, everything stays in your browser",
     platform: "BROWSER EXTENSION",
     link: "/skin",
     image: "/experiments/skin-cover.webp",
@@ -23,7 +24,8 @@ export const allExperiments: Experiment[] = [
     name: "Taski — first version",
     description:
       "The original Taski — a no-pressure to-do list I shipped as a simple web app, still live and working exactly as it did back then.",
-    stack: "React, TypeScript, Tailwind — no backend, saved locally in the browser",
+    stack:
+      "React, TypeScript, Tailwind — no backend, saved locally in the browser",
     platform: "WEB APP",
     link: "/taski-v1",
     image: "/experiments/taski-v1-cover.png",
@@ -32,7 +34,8 @@ export const allExperiments: Experiment[] = [
     name: "Taski",
     description:
       "A native Mac to-do app for family and friends with ADHD, built around routines that reset daily instead of nagging you.",
-    stack: "Tauri, Rust, React, TypeScript, SQLite, Apple Intelligence (Foundation Models)",
+    stack:
+      "Tauri, Rust, React, TypeScript, SQLite, Apple Intelligence (Foundation Models)",
     platform: "MacOS",
     link: "/taski",
     image: "/experiments/taski-cover.png",
@@ -61,3 +64,10 @@ export const allExperiments: Experiment[] = [
 
 /** What the site shows: everything not marked hidden. */
 export const experiments = allExperiments.filter((e) => !e.hidden);
+
+/** How each platform reads next to a project's name. */
+export const PLATFORM_LABEL: Record<Experiment["platform"], string> = {
+  MacOS: "macOS app",
+  "WEB APP": "Web app",
+  "BROWSER EXTENSION": "Chrome extension",
+};

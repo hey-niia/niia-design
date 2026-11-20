@@ -46,7 +46,7 @@ export default function Home() {
           <div className="relative flex flex-col items-start gap-4">
             <p className="t-intro text-2xl">
               <span className="md:whitespace-nowrap">
-                What I love: taking ownership,{" "}
+                What I love: collaborating with great teams,{" "}
                 {/* The space sits inside the highlight so it stays one band on phones. */}
                 <span className="intro-highlight">solving business problems </span>
               </span>

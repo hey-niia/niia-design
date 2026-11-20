@@ -1,3 +1,5 @@
+import { Link } from "react-router-dom";
+import { STUD_BG, STUD_PITCH, STUD_TILE, studTile } from "../lib/studs";
 import {
   useEffect,
   useLayoutEffect,
@@ -6,21 +8,21 @@ import {
   type ReactNode,
 } from "react";
 
-// Background texture: one stud per tile. A soft dark crescent under the
-// bottom right edge, a faint light rim on the top left, the cap in the
-// surface colour.
-const STUD_BG = "#e2ddd8";
-const STUD_PITCH = 22;
-const STUD_TILE = `url("data:image/svg+xml,${encodeURIComponent(
-  `<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 22 22">` +
-    `<defs><filter id="b" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="0.45"/></filter></defs>` +
-    `<circle cx="11.7" cy="12.1" r="7.2" fill="#2e2924" fill-opacity="0.55" filter="url(#b)"/>` +
-    `<circle cx="10.6" cy="10.6" r="7.2" fill="#ffffff" fill-opacity="0.7" filter="url(#b)"/>` +
-    `<circle cx="11" cy="11" r="7.2" fill="${STUD_BG}"/>` +
-    `<circle cx="11" cy="11" r="7.05" fill="none" stroke="#000" stroke-opacity="0.07" stroke-width="0.3"/>` +
-    `</svg>`,
-)}")`;
-import { Link } from "react-router-dom";
+const PINK_BRICK = studTile("#ef7fb2", "#7a2149", true);
+
+// A small smiley of pink 1x1 bricks on the plate, in the canvas's bottom left
+// corner (its edges count towards the bounds, so it's the last thing there).
+// Cells are stud-grid steps from SMILE_AT (a stud centre: 22k + 11).
+const SMILE_AT = { x: -1045, y: 847 };
+const SMILE: [number, number][] = [
+  [-1, -1],
+  [1, -1],
+  [-2, 1],
+  [2, 1],
+  [-1, 2],
+  [0, 2],
+  [1, 2],
+];
 
 export type CanvasCard = {
   /** Centre of the card in the world, in px (the world's centre is 0,0). */
@@ -81,10 +83,18 @@ export default function InfiniteCanvas({
       maxY: Math.max(b.maxY, c.y + c.h / 2),
     }),
     {
-      minX: -centerW / 2,
+      // The smiley sits one stud in from the canvas's bottom left corner
+      // (the bounds sit inside it by the margin, minus one stud).
+      minX: Math.min(
+        -centerW / 2,
+        SMILE_AT.x - 2.5 * STUD_PITCH - STUD_PITCH + FIT_MARGIN,
+      ),
       maxX: centerW / 2,
       minY: -centerH / 2,
-      maxY: centerH / 2,
+      maxY: Math.max(
+        centerH / 2,
+        SMILE_AT.y + 2.5 * STUD_PITCH + STUD_PITCH - FIT_MARGIN,
+      ),
     },
   );
   const boundsRef = useRef(bounds);
@@ -124,14 +134,25 @@ export default function InfiniteCanvas({
     null,
   );
 
-  // Keep the zoom in range, and the middle of the screen over the projects.
+  // Keep the zoom in range, and the screen inside the canvas: panning stops
+  // when a screen edge reaches the canvas edge (plus a small margin), so the
+  // far corners land in the screen's corners. When the canvas is smaller
+  // than the screen on an axis, it stays centred on that axis.
   const clamp = (c: { x: number; y: number; z: number }) => {
     const b = boundsRef.current;
+    const v = viewRef.current;
     const z = Math.min(MAX_ZOOM, Math.max(minZoom(), c.z));
+    const axis = (cam: number, min: number, max: number, half: number) => {
+      const lo = min - FIT_MARGIN + half / z;
+      const hi = max + FIT_MARGIN - half / z;
+      const centre =
+        lo > hi ? (min + max) / 2 : Math.min(hi, Math.max(lo, -cam / z));
+      return -centre * z;
+    };
     return {
       z,
-      x: Math.min(-b.minX * z, Math.max(-b.maxX * z, c.x)),
-      y: Math.min(-b.minY * z, Math.max(-b.maxY * z, c.y)),
+      x: axis(c.x, b.minX, b.maxX, v.w / 2),
+      y: axis(c.y, b.minY, b.maxY, v.h / 2),
     };
   };
 
@@ -356,6 +377,26 @@ export default function InfiniteCanvas({
       >
         <div className="pointer-events-auto">{center}</div>
       </div>
+
+      {SMILE.map(([cx, cy]) => {
+        const size = STUD_PITCH * z;
+        return (
+          <div
+            key={`${cx},${cy}`}
+            aria-hidden
+            className="pointer-events-none absolute"
+            style={{
+              left: originX + (SMILE_AT.x + cx * STUD_PITCH) * z - size / 2,
+              top: originY + (SMILE_AT.y + cy * STUD_PITCH) * z - size / 2,
+              width: size,
+              height: size,
+              backgroundImage: PINK_BRICK,
+              backgroundSize: "100% 100%",
+              filter: "drop-shadow(0.6px 1px 1px rgba(120,40,75,0.35))",
+            }}
+          />
+        );
+      })}
 
       {cards.map((card) => {
         const w = card.w * z;

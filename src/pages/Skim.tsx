@@ -1,29 +1,29 @@
 import { Link } from "react-router-dom";
-import ExperimentCard from "../components/ExperimentCard";
+import MoreExperiments from "../components/MoreExperiments";
 import GitHubIcon from "../components/GitHubIcon";
 import Nav from "../components/Nav";
-import WiggleText from "../components/WiggleText";
 import Zoomable from "../components/Zoomable";
-import { experiments } from "../data/experiments";
 
 export default function Skim() {
-  const moreExperiments = experiments.filter((exp) => exp.link !== "/skim");
-
   return (
     <main>
       <Nav />
 
       <div className="mx-auto max-w-4xl pt-6 md:pt-24">
-        <header className="border-b border-gray-200 pb-8">
+        <header className="pb-8">
           <Link
             to="/ai-playground"
-            className="mb-6 block text-sm text-gray-400 hover:text-[var(--site-accent)]"
+            className="soft-hover soft-key gap-2 font-mono text-xs tracking-widest text-neutral-700 uppercase mb-8"
           >
-            <WiggleText>← AI Playground</WiggleText>
+            <span aria-hidden>←</span> AI Playground
           </Link>
 
+          {/* Same header as the Work case studies. */}
+          <p className="mb-4 font-mono text-xs tracking-widest text-gray-400 uppercase">
+            <span className="normal-case">macOS</span> app
+          </p>
           <h1 className="mb-4 text-3xl font-medium lg:text-5xl">Skim</h1>
-          <p className="max-w-2xl text-gray-500 italic">
+          <p className="mt-4 max-w-2xl">
             A native Mac news reader that reads the article for you — one main
             idea, a few key points, entirely on-device. No account, no cloud
             API, no cost.
@@ -44,7 +44,7 @@ export default function Skim() {
               href="https://github.com/hey-niia/skim/releases/latest"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 border border-black px-6 py-3 font-mono text-sm tracking-widest uppercase transition-colors hover:bg-black hover:text-white"
+              className="soft-hover soft-key gap-2 font-mono text-xs tracking-widest text-neutral-700 uppercase"
             >
               Download for Mac <span aria-hidden>→</span>
             </a>
@@ -129,33 +129,22 @@ export default function Skim() {
           </p>
         </section>
 
-        <footer className="border-t border-gray-200 py-16">
+        <footer className="py-16">
           <div className="flex items-center justify-center">
             <a
               href="https://github.com/hey-niia/skim"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2"
+              className="soft-hover soft-key gap-2 font-mono text-xs tracking-widest text-neutral-700 uppercase"
             >
               <GitHubIcon className="h-4 w-4" />
-              <WiggleText>View on GitHub</WiggleText>
+              View on GitHub
             </a>
           </div>
         </footer>
-
-        {moreExperiments.length > 0 && (
-          <section className="py-16">
-            <p className="mb-6 text-sm tracking-wide text-gray-400 uppercase">
-              More AI experiments
-            </p>
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {moreExperiments.map((exp) => (
-                <ExperimentCard key={exp.name} exp={exp} />
-              ))}
-            </div>
-          </section>
-        )}
       </div>
+
+      <MoreExperiments current="/skim" />
     </main>
   );
 }

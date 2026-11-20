@@ -39,12 +39,22 @@ export default function About() {
                     "These days, I design digital products and use AI to build working prototypes. I work with tools like Claude, Xcode, and SwiftUI to explore ideas, write code, test interactions, and turn designs into functional experiences. It lets me move from an idea to something people can actually try without waiting for a full development cycle."
                   }
                 </p>
-                <p className="t-about mb-6 text-sm">
+                <p className="t-about mb-4 text-sm">
                   {
                     "I care a lot about the details, the little interactions, the moments of surprise, and making something complex feel effortless. AI helps me build faster, but deciding what to build and how it should feel is still my favorite part."
                   }
                 </p>
-                <div className="flex flex-wrap gap-3">
+                <p className="t-about relative z-[1] mb-6 text-sm">
+                  {
+                    "I'm looking for my next role, ideally working on AI-driven products that help shape a better future for people. Feel free to reach out!"
+                  }
+                </p>
+                {/* Let's Talk, LinkedIn, Download Resume in one row on desktop; on
+                    phones the résumé drops below. Each key's white glow spills
+                    up and left, so the keys are painted right-to-left and
+                    bottom-up (reversed flex order): no glow lands on another
+                    key's label. */}
+                <div className="flex flex-col-reverse items-start gap-3 md:flex-row-reverse md:justify-end">
                   <a
                     href="/resume.pdf"
                     target="_blank"
@@ -53,14 +63,36 @@ export default function About() {
                   >
                     <span aria-hidden>↓</span> Download Resume
                   </a>
-                  <a
-                    href={LINKEDIN_URL}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="soft-hover soft-key gap-2 font-mono text-xs tracking-widest text-neutral-700 uppercase"
-                  >
-                    LinkedIn <span aria-hidden>↗</span>
-                  </a>
+                  <div className="flex flex-row-reverse justify-end gap-3">
+                    <a
+                      href={LINKEDIN_URL}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="soft-hover soft-key gap-2 font-mono text-xs tracking-widest text-neutral-700 uppercase"
+                    >
+                      LinkedIn <span aria-hidden>↗</span>
+                    </a>
+                    <a
+                      href="mailto:nia.bieliavtseva@gmail.com"
+                      className="soft-hover soft-key gap-2 font-mono text-xs tracking-widest text-neutral-700 uppercase"
+                    >
+                      {/* Envelope */}
+                      <svg
+                        aria-hidden
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        className="h-3.5 w-3.5"
+                      >
+                        <rect x="2" y="4" width="20" height="16" rx="2" />
+                        <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+                      </svg>
+                      Let's Talk
+                    </a>
+                  </div>
                 </div>
               </div>
             </div>
