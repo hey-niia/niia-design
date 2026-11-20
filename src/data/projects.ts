@@ -1629,7 +1629,7 @@ export const projects: Project[] = [
       "Hiring tool — interaction design and prototyping across the end-to-end recruiting flow.",
     client: "Web App",
     role: "Product design, brand identity, design systems",
-    team: "Founder",
+    team: "Founder and designer",
     credits: [
       { initials: "Me", label: "Niia Bieliavtseva — product design", highlight: true },
       { initials: "F", label: "Founder" },
