@@ -119,9 +119,9 @@ export default function AIPlayground() {
           start={
             mode === "desktop" ? { corner: "top-left", zoom: 0.9 } : undefined
           }
-          // Desktop: the title block sits close to the screen's edges (its
-          // visible panel is 10px inside its 360px box).
-          margin={mode === "desktop" ? { x: 6, y: 17 } : undefined}
+          // Desktop: the title block sits close to the screen's edges, the same
+          // gap on the left and on top (its panel is 10px inside its 360px box).
+          margin={mode === "desktop" ? { x: 15, y: 15 } : undefined}
           centerW={360}
           centerH={360}
           centerX={pos.center?.x ?? 0}

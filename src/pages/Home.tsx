@@ -22,13 +22,40 @@ export default function Home() {
   const { openWelcome, sendMessage } = useNiiaChat();
   const location = useLocation();
 
+  // "Work" in the header lands on the project grid, with a little room above
+  // it. Coming from another page the images are still loading, so the page
+  // grows after the first scroll: keep it on target until the layout settles
+  // (or the visitor scrolls themselves).
   useEffect(() => {
     const state = location.state as { scrollTo?: string } | null;
-    if (state?.scrollTo) {
-      requestAnimationFrame(() => {
-        document.getElementById(state.scrollTo!)?.scrollIntoView();
-      });
-    }
+    if (!state?.scrollTo) return;
+    const id = state.scrollTo;
+    const go = () => {
+      const el = document.getElementById(id);
+      if (el) {
+        window.scrollTo({
+          top: el.getBoundingClientRect().top + window.scrollY - 60,
+        });
+      }
+    };
+    const raf = requestAnimationFrame(go);
+    const ro = new ResizeObserver(go);
+    ro.observe(document.body);
+    const stop = () => {
+      ro.disconnect();
+      window.clearTimeout(timer);
+      window.removeEventListener("wheel", stop);
+      window.removeEventListener("touchstart", stop);
+      window.removeEventListener("keydown", stop);
+    };
+    const timer = window.setTimeout(stop, 2000);
+    window.addEventListener("wheel", stop, { passive: true });
+    window.addEventListener("touchstart", stop, { passive: true });
+    window.addEventListener("keydown", stop);
+    return () => {
+      cancelAnimationFrame(raf);
+      stop();
+    };
   }, [location.state]);
 
   return (

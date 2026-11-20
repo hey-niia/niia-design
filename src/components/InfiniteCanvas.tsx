@@ -151,6 +151,9 @@ export default function InfiniteCanvas({
     return { x: -centerX * z, y: -centerY * z, z };
   });
   const camRef = useRef(cam);
+  // Until the visitor pans or zooms, a resize keeps the starting view (with
+  // `start`, the top-left corner) instead of the old centre point.
+  const touched = useRef(false);
   const raf = useRef<number | null>(null);
   const velocity = useRef({ x: 0, y: 0 });
   const drag = useRef<{
@@ -206,12 +209,14 @@ export default function InfiniteCanvas({
     }
   };
   const moveBy = (dx: number, dy: number) => {
+    touched.current = true;
     const c = camRef.current;
     camRef.current = clamp({ ...c, x: c.x + dx, y: c.y + dy });
     commit();
   };
   // Zoom by `factor`, keeping the point under (fx, fy) on screen where it is.
   const zoomAt = (fx: number, fy: number, factor: number) => {
+    touched.current = true;
     const c = camRef.current;
     const z = Math.min(MAX_ZOOM, Math.max(minZoom(), c.z * factor));
     const r = boxRef.current?.getBoundingClientRect();
@@ -233,7 +238,11 @@ export default function InfiniteCanvas({
       const v = { w: el.clientWidth, h: el.clientHeight };
       viewRef.current = v;
       setView(v);
-      camRef.current = clamp(camRef.current);
+      camRef.current = clamp(
+        start && !touched.current
+          ? { x: 1e6, y: 1e6, z: start.zoom }
+          : camRef.current,
+      );
       setCam(camRef.current);
     };
     measure();
