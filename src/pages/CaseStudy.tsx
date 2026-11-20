@@ -1150,7 +1150,7 @@ export default function CaseStudy() {
               {splitIntoColumns(moreProjects).map((column, i) => (
                 <div key={i} className="flex flex-1 flex-col gap-8">
                   {column.map((p) => (
-                    <WorkGridCard key={p.slug} project={p} titleClassName="text-sm" />
+                    <WorkGridCard key={p.slug} project={p} titleClassName="text-sm" uniform />
                   ))}
                 </div>
               ))}

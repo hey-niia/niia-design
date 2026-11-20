@@ -23,10 +23,14 @@ function renderMetaPart(part: string) {
 export default function WorkGridCard({
   project,
   titleClassName,
+  uniform = false,
 }: {
   project: Project;
   /** Override the title's text size — e.g. a smaller size for a denser grid. */
   titleClassName?: string;
+  /** Every card's cover in the same 4:3 box, so cards in a row line up (the
+   * "More case studies" grid). Covers fill it; the phone shrinks to fit. */
+  uniform?: boolean;
 }) {
   const { slug, name, category, client, lastUpdated, screenshots, coverVideo, coverAnimation } = project;
   const cover = screenshots[0];
@@ -41,12 +45,27 @@ export default function WorkGridCard({
 
   return (
     <Link to={`/work/${slug}`} className="block">
-      <div className={slug === "ios-app" ? "flex justify-center bg-[#36383b] p-10" : undefined}>
+      <div
+        className={
+          uniform
+            ? `relative aspect-[4/3] overflow-hidden ${slug === "ios-app" ? "flex justify-center bg-[#36383b] py-8" : ""}`
+            : slug === "ios-app"
+              ? "flex justify-center bg-[#36383b] p-10"
+              : undefined
+        }
+      >
         {coverAnimation === "connectiq-kanban" ? (
           <KanbanDragCover label={cover.alt} />
         ) : coverAnimation === "matter-flow" ? (
-          // Same width the screen recording had.
-          <FlowAnimation alt={cover.alt} maxWidth={200} compact />
+          uniform ? (
+            // As tall as the box allows, at the phone's own shape.
+            <div className="h-full" style={{ aspectRatio: "200 / 434" }}>
+              <FlowAnimation alt={cover.alt} maxWidth={9999} compact />
+            </div>
+          ) : (
+            // Same width the screen recording had.
+            <FlowAnimation alt={cover.alt} maxWidth={200} compact />
+          )
         ) : coverVideo ? (
           <video
             ref={videoRef}
@@ -64,7 +83,13 @@ export default function WorkGridCard({
           <img
             src={cover.src}
             alt={cover.alt}
-            className={slug === "ios-app" ? "w-4/5" : "w-full"}
+            className={
+              uniform
+                ? "absolute inset-0 h-full w-full object-cover"
+                : slug === "ios-app"
+                  ? "w-4/5"
+                  : "w-full"
+            }
           />
         )}
       </div>

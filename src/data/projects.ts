@@ -1629,7 +1629,12 @@ export const projects: Project[] = [
       "Hiring tool — interaction design and prototyping across the end-to-end recruiting flow.",
     client: "Web App",
     role: "Product design, brand identity, design systems",
-    team: "Founder",
+    team: "Founder and a designer",
+    credits: [
+      { initials: "Me", label: "Niia Bieliavtseva — product design", highlight: true },
+      { initials: "F", label: "Founder" },
+      { initials: "D", label: "Designer" },
+    ],
     duration: "2.5 months",
     tools: ["Figma"],
     screenshots: [{ src: "/projects/hirement.png", alt: "Hirement interview flow builder" }],
@@ -1686,7 +1691,6 @@ export const projects: Project[] = [
         // the UI baked in). Sized to the taller of the two at this width.
         maxWidth: 896,
         viewportHeight: 610,
-        caption: "Structure got worked out in grayscale before color entered the conversation.",
       },
       {
         type: "before-after",
