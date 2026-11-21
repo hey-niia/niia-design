@@ -81,7 +81,12 @@ export type ContentBlock =
         takeaway: string;
       }[];
     }
-  | { type: "gallery"; images: { src: string; alt: string; caption?: string }[] }
+  | {
+      type: "gallery";
+      images: { src: string; alt: string; caption?: string }[];
+      /** Each screen in the case study's frame (rounded, hairline, soft shadow) on the white page. */
+      plain?: boolean;
+    }
   /**
    * Toggle between one surface before and after the redesign.
    * Both images must share an aspect ratio — see BeforeAfter.
@@ -105,6 +110,8 @@ export type ContentBlock =
       dark?: boolean;
       /** No panel: the frame sits on the white page with a soft shadow. */
       plain?: boolean;
+      /** Open on the "before" state instead of "after". */
+      startBefore?: boolean;
     }
   /** Outcome cards (Nadiia style); `green` marks a headline result. */
   | {
@@ -1637,6 +1644,10 @@ export const projects: Project[] = [
     duration: "2.5 months",
     tools: ["Figma"],
     screenshots: [{ src: "/projects/hirement.png", alt: "Hirement interview flow builder" }],
+    hero: {
+      src: "/projects/hirement/10.webp",
+      alt: "Hirement's loops list, grouped by role: candidates, interview progress, interviewers and ratings in one table",
+    },
     lastUpdated: "2023",
     content: [
       { type: "section", id: "problem", title: "Problem" },
@@ -1687,6 +1698,7 @@ export const projects: Project[] = [
         beforeLabel: "Wireframe",
         afterLabel: "Color",
         plain: true,
+        startBefore: true,
         // Cropped to actual content bounds (both frames had dead space below
         // the UI baked in). Sized to the taller of the two at this width.
         maxWidth: 896,
@@ -1716,20 +1728,14 @@ export const projects: Project[] = [
         text: "Each role's loop tracks every candidate's status, interviewers, and running average rating in one table. A loop stays editable after interviews are scheduled, with role, candidates, and invite details in one place. And mid-interview, an interviewer can pull up the candidate's full profile without losing their place in the question.",
       },
       {
-        type: "gallery",
-        images: [
-          {
-            src: "/projects/hirement/2.webp",
-            alt: "Hirement loop dashboard showing candidates for a role",
-          },
-          {
-            src: "/projects/hirement/3.webp",
-            alt: "Hirement edit interview loop modal",
-          },
-        ],
+        type: "image",
+        plain: true,
+        src: "/projects/hirement/3.webp",
+        alt: "Hirement edit interview loop modal",
       },
       {
         type: "image",
+        plain: true,
         src: "/projects/hirement/4.webp",
         alt: "Hirement interview screen with candidate profile lookup open",
       },
@@ -1821,7 +1827,7 @@ export const projects: Project[] = [
       { type: "section", id: "final-design", title: "Final design" },
       {
         type: "paragraph",
-        text: "The site walks a visitor from what the product does, through services, to the team behind it — a single narrative page rather than a stack of disconnected sections.",
+        text: "The site walks a visitor from what the product does, through services, to the team behind it.",
       },
       {
         type: "image",

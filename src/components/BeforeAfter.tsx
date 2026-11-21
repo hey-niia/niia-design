@@ -37,6 +37,7 @@ export default function BeforeAfter({
   dark = false,
   plain = false,
   beforePins,
+  startBefore = false,
 }: {
   before: string;
   after: string;
@@ -58,8 +59,10 @@ export default function BeforeAfter({
   plain?: boolean;
   /** Numbered markers on the "before" screen, with notes on hover. */
   beforePins?: Pin[];
+  /** Open on the "before" state instead of "after". */
+  startBefore?: boolean;
 }) {
-  const [showAfter, setShowAfter] = useState(true);
+  const [showAfter, setShowAfter] = useState(!startBefore);
   // Per-pane, because the two states are rarely the same length.
   const [hasMore, setHasMore] = useState<[boolean, boolean]>([false, false]);
   const boxRef = useRef<HTMLDivElement>(null);

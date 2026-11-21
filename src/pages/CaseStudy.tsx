@@ -717,6 +717,7 @@ function Block({
             viewportHeight={block.viewportHeight}
             caption={block.caption}
             plain={block.plain}
+            startBefore={block.startBefore}
             dark={block.dark ?? dark}
             onImageClick={onImageClick}
             zoomCursor={zoomCursor}
@@ -765,7 +766,11 @@ function Block({
               <img
                 src={img.src}
                 alt={img.alt}
-                className="w-full cursor-none"
+                className={`w-full cursor-none ${
+                  block.plain
+                    ? `${FRAME_RADIUS} shadow-[0_2px_4px_rgba(0,0,0,0.04),0_12px_32px_rgba(0,0,0,0.08)] ring-1 ring-black/10`
+                    : ""
+                }`}
                 onClick={() => onImageClick(img.src)}
                 onMouseMove={zoomCursor.onMouseMove}
                 onMouseLeave={zoomCursor.onMouseLeave}
