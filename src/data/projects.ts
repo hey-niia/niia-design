@@ -220,6 +220,8 @@ export interface Project {
   team?: string;
   /** Placeholder avatar row for `team` — omit if there's nothing to show yet. */
   credits?: Credit[];
+  /** The live site, shown as a button under the summary. */
+  website?: string;
   duration: string;
   tools: string[];
   screenshots: ProjectScreenshot[];
@@ -1781,7 +1783,12 @@ export const projects: Project[] = [
       "A collection of smaller landing pages and web apps — shorter engagements that didn't need a full case study of their own.",
     client: "Landing pages, Web apps",
     role: "UI/UX design, information architecture, visual identity",
-    team: "Founder, Operations team",
+    team: "Designer and web developer",
+    credits: [
+      { initials: "Me", label: "Niia Bieliavtseva — design", highlight: true },
+      { initials: "D", label: "Web developer" },
+    ],
+    website: "https://www.giant-pumpkin.com/",
     duration: "1 month",
     tools: ["Figma"],
     screenshots: [

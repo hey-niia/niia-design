@@ -44,7 +44,6 @@ import ToolMap from "../components/ToolMap";
 import UserGroups from "../components/UserGroups";
 import WiggleText from "../components/WiggleText";
 import WorkGridCard from "../components/WorkGridCard";
-import { useNiiaChat } from "../context/useNiiaChat";
 import { splitIntoColumns } from "../lib/columns";
 import { useAutoplayInView } from "../lib/useAutoplayInView";
 
@@ -127,7 +126,6 @@ const LIGHTBOX_CONTROLS_SPACE = 96;
 // and the default light-glass styling is legible; above it, flip to a dark
 // chip so the white text doesn't wash out against a light part of the image.
 const CONTRAST_LUMA_THRESHOLD = 175;
-const EMAIL = "nia.bieliavtseva@gmail.com";
 
 function Lightbox({
   images,
@@ -790,7 +788,6 @@ const CASE_ACCENT: Record<string, string> = {
 export default function CaseStudy() {
   const { slug } = useParams<{ slug: string }>();
   const project = slug ? getProject(slug) : undefined;
-  const { openWelcome } = useNiiaChat();
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const [activeId, setActiveId] = useState("overview");
   // True once the dark half has scrolled up behind the contents list.
@@ -1013,6 +1010,17 @@ export default function CaseStudy() {
             </p>
             <h1 className="mb-4 text-3xl font-medium lg:text-5xl">{project.title}</h1>
             {project.summary && <p className="mt-4 max-w-2xl">{project.summary}</p>}
+            {project.website && (
+              <a
+                href={project.website}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="soft-hover soft-key mt-6 gap-2 font-mono text-xs tracking-widest text-neutral-700 uppercase"
+              >
+                {new URL(project.website).hostname.replace(/^www\./, "")}{" "}
+                <span aria-hidden>↗</span>
+              </a>
+            )}
           </header>
 
           <section id="overview" className="scroll-mt-8 border-b border-gray-200 py-8">
@@ -1123,23 +1131,6 @@ export default function CaseStudy() {
             </section>
           </DarkHalf>
         </div>
-
-        <footer className="py-16">
-          <div className="flex items-center justify-center gap-8">
-            <a href={`mailto:${EMAIL}`} className="flex items-center gap-1.5">
-              <span aria-hidden>✉</span>
-              <WiggleText>Email</WiggleText>
-            </a>
-            <button
-              type="button"
-              onClick={openWelcome}
-              className="flex cursor-pointer items-center gap-1.5"
-            >
-              <span aria-hidden>✦</span>
-              <WiggleText>Talk to Niia AI</WiggleText>
-            </button>
-          </div>
-        </footer>
 
         {moreProjects.length > 0 && (
           <section className="py-16">
