@@ -1780,7 +1780,7 @@ export const projects: Project[] = [
     name: "Other Projects",
     title: "Corporate website for a digital signage company",
     summary:
-      "A collection of smaller landing pages and web apps — shorter engagements that didn't need a full case study of their own.",
+      "A website for Giant Pumpkin, the team behind the digital screens in KFC, Starbucks, and Uniqlo. They had no site and no visual identity yet, so we built both from scratch in a month.",
     client: "Landing pages, Web apps",
     role: "UI/UX design, information architecture, visual identity",
     team: "Designer and web developer",
@@ -1814,19 +1814,17 @@ export const projects: Project[] = [
       { type: "section", id: "solution", title: "Solution" },
       {
         type: "paragraph",
-        text: "Starting from zero, I built the information architecture, layout system, and visual identity together, then worked with the founder and operations team to refine the messaging and user flow.",
+        text: "I designed the information architecture and layout system from scratch, working closely with the founder and operations team to sharpen the messaging and make the site easy to navigate.",
       },
       {
         type: "list",
         items: [
-          "Information architecture and layout system built to hold both marketing and technical content.",
-          "A visual identity designed to read as modern and credible without going generic.",
-          "Modular, responsive components so desktop and mobile stayed consistent instead of diverging.",
+          "Clear structure. Marketing and technical content, each with room to breathe.",
+          "One flexible system. Modular, responsive components for a consistent experience across desktop and mobile.",
         ],
       },
 
       { type: "section", id: "final-design", title: "Final design" },
-      { type: "heading", text: "One narrative site, from hero to team" },
       {
         type: "paragraph",
         text: "The site walks a visitor from what the product does, through services, to the team behind it — a single narrative page rather than a stack of disconnected sections.",
