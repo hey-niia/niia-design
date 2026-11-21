@@ -785,8 +785,8 @@ function Block({
 const CASE_ACCENT: Record<string, string> = {
   "ios-app": "#e65f2e",
   connectiq: "#e65f2e",
-  // The muted purple of Hirement's toggle, not the brand's bright #922bc5.
-  hirement: "#8f6fae",
+  // Picked in Tweak → Page accents: a soft lavender, not the brand's #922bc5.
+  hirement: "#bd89f0",
 };
 
 /** Each product's toggles in a muted version of its own colour. */
@@ -833,16 +833,18 @@ export default function CaseStudy() {
   // included (it sits outside this page). index.css gives it priority over the
   // Tweak panel's accent while the page is open.
   const pageAccent = project ? CASE_ACCENT[project.slug] : undefined;
+  const pageSlug = project?.slug;
   useEffect(() => {
     if (!pageAccent) return;
     const root = document.documentElement;
-    root.style.setProperty("--page-accent", pageAccent);
+    // In dev, Tweak → "Page accents" sets --page-<slug> to try another colour.
+    root.style.setProperty("--page-accent", `var(--page-${pageSlug}, ${pageAccent})`);
     root.dataset.pageAccent = "";
     return () => {
       root.style.removeProperty("--page-accent");
       delete root.dataset.pageAccent;
     };
-  }, [pageAccent]);
+  }, [pageAccent, pageSlug]);
 
   const [cursorLabel, setCursorLabel] = useState({
     x: 0,
@@ -975,8 +977,14 @@ export default function CaseStudy() {
         // Some case studies keep their own accent instead of the site's pink.
         style={
           {
-            ...(CASE_ACCENT[project.slug] ? { "--site-accent": CASE_ACCENT[project.slug] } : {}),
             ...(TOGGLE_TONE[project.slug] ? toggleToneVars(TOGGLE_TONE[project.slug]) : {}),
+            // A page with its own accent paints its toggle in it too.
+            ...(CASE_ACCENT[project.slug]
+              ? {
+                  "--toggle-from": "var(--site-accent)",
+                  "--toggle-to": "color-mix(in srgb, var(--site-accent) 85%, white)",
+                }
+              : {}),
           } as React.CSSProperties
         }
       >
@@ -1188,7 +1196,6 @@ export default function CaseStudy() {
         style={{
           left: cursorLabel.x,
           top: cursorLabel.y,
-          ...(CASE_ACCENT[project.slug] ? { "--site-accent": CASE_ACCENT[project.slug] } : {}),
         } as React.CSSProperties}
       >
         {cursorLabel.text ?? (

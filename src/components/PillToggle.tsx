@@ -12,7 +12,7 @@ import { useLayoutEffect, useRef, useState, type CSSProperties } from "react";
 export const TOGGLE_TONES = {
   // ConnectIQ's own accent, so its toggle matches the rest of that page.
   orange: { from: "#e65f2e", to: "#f0753f", light: "255,190,160", shade: "140,45,10" },
-  purple: { from: "#8f6fae", to: "#a68ac2", light: "228,212,245", shade: "60,30,90" },
+  purple: { from: "#bd89f0", to: "#c89ff3", light: "238,224,252", shade: "80,40,130" },
   grey: { from: "#8a8a8a", to: "#a3a3a3", light: "235,235,235", shade: "40,40,40" },
 } as const;
 

@@ -7,7 +7,7 @@ import { useEffect, useRef, useState } from "react";
  * into index.css once you like them. Only mounted when running `npm run dev`.
  */
 
-type Area = "site" | "nav" | "navp" | "pad" | "toggle";
+type Area = "site" | "nav" | "navp" | "pad" | "toggle" | "page";
 
 type SizeControl = { kind: "px" | "pct"; key: string; label: string; min: number; max: number };
 type ColorControl = { kind: "color"; key: string; label: string; alpha?: boolean };
@@ -88,6 +88,17 @@ const AREAS: { id: Area; label: string; controls: Control[] }[] = [
       { kind: "px", key: "glow-blur", label: "↖ light blur", min: 0, max: 40 },
     ],
   },
+  {
+    // Each case study's own accent (CaseStudy.tsx, CASE_ACCENT). Shows on that
+    // page only: numbers, Me avatar, nav hover and the toggle.
+    id: "page",
+    label: "Page accents",
+    controls: [
+      { kind: "color", key: "hirement", label: "Hirement" },
+      { kind: "color", key: "connectiq", label: "ConnectIQ" },
+      { kind: "color", key: "ios-app", label: "Matter" },
+    ],
+  },
 ];
 
 // Must match the :root defaults in index.css.
@@ -117,6 +128,8 @@ const DEFAULTS: Record<Area, Values> = {
     "glow-off": "#ffffff", "glow-off-a": 0,
     "glow-dist": 19, "glow-blur": 32,
   },
+  // Must match CASE_ACCENT in CaseStudy.tsx.
+  page: { hirement: "#bd89f0", connectiq: "#e65f2e", "ios-app": "#e65f2e" },
 };
 
 const STORAGE_KEY = "niia-button-tweaks-v6";
