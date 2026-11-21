@@ -84,6 +84,22 @@
    (src/components/TweakPanel.tsx) can adjust each area live:
    --pad-*  drawing-pad buttons (.soft-raised)
    --nav-*  header buttons (.soft-hover) */
+/* A case study with its own accent (CaseStudy.tsx, CASE_ACCENT) wins over the
+   Tweak panel's, which is written inline on <html>, for as long as it's open. */
+/* The pill toggle's off state on a dark page: a charcoal track instead of a
+   white one, and no white glow around the knob. */
+.dark-matter {
+  --toggle-off-face: #2a2a2a;
+  --toggle-off-edge: rgba(255, 255, 255, 0.06);
+  --toggle-off-shade: rgba(0, 0, 0, 0.45);
+  --toggle-off-label: #a3a3a3;
+  --toggle-knob-shadow: 4px 4px 12px rgba(0, 0, 0, 0.7);
+}
+
+html[data-page-accent] {
+  --site-accent: var(--page-accent) !important;
+}
+
 :root {
   /* Main accent colour used across the site. */
   --site-accent: #ff75bf;

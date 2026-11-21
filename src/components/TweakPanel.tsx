@@ -7,7 +7,7 @@ import { useEffect, useRef, useState } from "react";
  * into index.css once you like them. Only mounted when running `npm run dev`.
  */
 
-type Area = "site" | "nav" | "navp" | "pad";
+type Area = "site" | "nav" | "navp" | "pad" | "toggle";
 
 type SizeControl = { kind: "px" | "pct"; key: string; label: string; min: number; max: number };
 type ColorControl = { kind: "color"; key: string; label: string; alpha?: boolean };
@@ -78,6 +78,16 @@ const AREAS: { id: Area; label: string; controls: Control[] }[] = [
       { kind: "pct", key: "edge-a", label: "Top edge", min: 0, max: 100 },
     ],
   },
+  {
+    id: "toggle",
+    label: "Toggle",
+    controls: [
+      { kind: "pct", key: "light-a", label: "Knob light — on (page colour)", min: 0, max: 100 },
+      { kind: "color", key: "glow-off", label: "Knob light — off", alpha: true },
+      { kind: "px", key: "glow-dist", label: "↖ light distance", min: 0, max: 24 },
+      { kind: "px", key: "glow-blur", label: "↖ light blur", min: 0, max: 40 },
+    ],
+  },
 ];
 
 // Must match the :root defaults in index.css.
@@ -100,6 +110,12 @@ const DEFAULTS: Record<Area, Values> = {
     color: "#ffa4ca",
     gap: 8, size: 46, "pad-x": 22, "pad-y": 12, radius: 14, lift: 3, blur: 10,
     "shadow-a": 24, "glow-a": 27, "glow-pressed-a": 69, "edge-a": 27,
+  },
+  // PillToggle's own fallbacks.
+  toggle: {
+    "light-a": 0,
+    "glow-off": "#ffffff", "glow-off-a": 0,
+    "glow-dist": 19, "glow-blur": 32,
   },
 };
 

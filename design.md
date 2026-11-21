@@ -155,23 +155,31 @@ switch style, and don't style it per page. Code: `src/components/PillToggle.tsx`
 before/after block (`BeforeAfter.tsx`) uses it for every comparison.
 
 **Anatomy**
-- Track: a pressed-in soft key, 42px tall, fully rounded. Its width hugs the longer of the
-  two labels (16px in from the label side, 45px on the knob side), so it never jumps when
-  it flips.
+- Track: a pressed-in soft key, 42px tall, fully rounded. Its width hugs the label that is
+  showing: 16px, the word, 8px, the knob, 5px. No empty space between the word and the
+  knob; the width eases to the other label's size when it flips.
 - Label inside the track: Geist Mono, 15px, uppercase. Only the current state's label shows
   (e.g. "AFTER"); white on the filled track, gray-500 on the white one.
-- Knob: a raised white key, 32px, 5px from the edge, with a soft glow toward the top-left.
-  It slides with `cubic-bezier(0.65, 0, 0.35, 1)` over 300ms.
-- On: the track fills with the page's tone (a 135° gradient). Off: a white pressed track.
+- Knob: a white key, 32px, 5px from the edge. When on, it casts a dark shadow toward the
+  bottom-right in a deeper shade of the page's tone (`3px 3px 8px`, 45%), matching the
+  track's inner shadow at the top. **No halo of light** around it by default; if one is
+  ever tried (Tweak → Toggle), it is always the page's own tone, never a fixed colour. It slides with `cubic-bezier(0.65, 0, 0.35, 1)`
+  over 300ms.
+- On: the track fills with the page's tone (a 135° gradient), white label.
+- Off, light page: a white pressed track, gray label.
+- Off, dark page (inside `.dark-matter`): a charcoal pressed track (#2a2a2a), light-grey label
+  (#a3a3a3), and the knob casts a dark shadow (`4px 4px 12px rgba(0,0,0,0.7)`). So on a dark
+  page "before" is dark, and "after" looks exactly as it does on a light page (ConnectIQ).
 
-**Colour — always subtle.** Each case study uses a muted version of its product's colour,
-never the brand-bright one. Tones live in `TOGGLE_TONES`:
+**Colour.** Each case study uses its page's accent, kept muted — never a brand-bright
+colour like Hirement's #922bc5. On ConnectIQ and Matter, orange is the accent of the whole page (section
+numbers, the Me avatar, the nav), and the toggle uses the same orange. Tones live in `TOGGLE_TONES`:
 
 | Tone | Gradient | Used on |
 |---|---|---|
-| `orange` (default) | #d9774f → #e8936b | ConnectIQ (Giant Pumpkin) |
+| `orange` (default) | #e65f2e → #f0753f | ConnectIQ (Giant Pumpkin) and Matter — both pages' own accent |
 | `purple` | #8f6fae → #a68ac2 | Hirement |
-| `grey` | #8a8a8a → #a3a3a3 | Matter (for now) |
+| `grey` | #8a8a8a → #a3a3a3 | spare, for a page without a colour of its own |
 
 A page picks its tone in `TOGGLE_TONE` (`CaseStudy.tsx`), which sets the `--toggle-*`
 variables through `toggleToneVars(tone)`. A new product adds a tone here first.

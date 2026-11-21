@@ -988,8 +988,6 @@ export const projects: Project[] = [
         "A real Airtable job record: assignment, quote reference, service and status fields, a separate linked partner panel, and a job-checks checklist, all on one long scrolling page",
       afterAlt:
         "ConnectIQ's Add job modal, step one: customer, job type, scheduled date, and time slot fields, with a progress indicator for the two steps ahead",
-      beforeLabel: "Airtable",
-      afterLabel: "ConnectIQ",
       maxWidth: 896,
       viewportHeight: 640,
       beforePins: [

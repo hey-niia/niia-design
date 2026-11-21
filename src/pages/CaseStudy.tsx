@@ -784,12 +784,13 @@ function Block({
 // site-wide pink doesn't suit its dark, warm visuals.
 const CASE_ACCENT: Record<string, string> = {
   "ios-app": "#e65f2e",
+  connectiq: "#e65f2e",
 };
 
 /** Each product's toggles in a muted version of its own colour. */
 const TOGGLE_TONE: Record<string, ToggleTone> = {
   connectiq: "orange",
-  "ios-app": "grey",
+  "ios-app": "orange",
   hirement: "purple",
 };
 
@@ -826,6 +827,21 @@ export default function CaseStudy() {
     }
     return list;
   }, [project]);
+  // A page with its own accent paints the whole window in it, the nav
+  // included (it sits outside this page). index.css gives it priority over the
+  // Tweak panel's accent while the page is open.
+  const pageAccent = project ? CASE_ACCENT[project.slug] : undefined;
+  useEffect(() => {
+    if (!pageAccent) return;
+    const root = document.documentElement;
+    root.style.setProperty("--page-accent", pageAccent);
+    root.dataset.pageAccent = "";
+    return () => {
+      root.style.removeProperty("--page-accent");
+      delete root.dataset.pageAccent;
+    };
+  }, [pageAccent]);
+
   const [cursorLabel, setCursorLabel] = useState({
     x: 0,
     y: 0,
