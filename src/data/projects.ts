@@ -1833,7 +1833,6 @@ export const projects: Project[] = [
         type: "image",
         src: "/projects/digitalscreen/1.png",
         alt: "Digital signage company website, full page",
-        caption: "One scrolling narrative, not a set of disconnected marketing sections.",
       },
 
       { type: "section", id: "results", title: "Results" },
