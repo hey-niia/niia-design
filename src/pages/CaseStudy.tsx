@@ -785,6 +785,8 @@ function Block({
 const CASE_ACCENT: Record<string, string> = {
   "ios-app": "#e65f2e",
   connectiq: "#e65f2e",
+  // The muted purple of Hirement's toggle, not the brand's bright #922bc5.
+  hirement: "#8f6fae",
 };
 
 /** Each product's toggles in a muted version of its own colour. */

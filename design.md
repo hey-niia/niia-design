@@ -181,6 +181,11 @@ numbers, the Me avatar, the nav), and the toggle uses the same orange. Tones liv
 | `purple` | #8f6fae → #a68ac2 | Hirement |
 | `grey` | #8a8a8a → #a3a3a3 | spare, for a page without a colour of its own |
 
+**Each case study has its own accent** (`CASE_ACCENT` in `CaseStudy.tsx`): the section
+numbers, the Me avatar, the nav's hover and active states and the toggle all take it while the
+page is open. ConnectIQ and Matter: #e65f2e. Hirement: #8f6fae (the toggle's muted purple).
+Pages without one keep the site's pink.
+
 A page picks its tone in `TOGGLE_TONE` (`CaseStudy.tsx`), which sets the `--toggle-*`
 variables through `toggleToneVars(tone)`. A new product adds a tone here first.
 

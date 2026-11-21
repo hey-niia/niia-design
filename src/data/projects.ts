@@ -1686,6 +1686,7 @@ export const projects: Project[] = [
         afterAlt: "Blue color exploration of the same interview question screen",
         beforeLabel: "Wireframe",
         afterLabel: "Color",
+        plain: true,
         // Cropped to actual content bounds (both frames had dead space below
         // the UI baked in). Sized to the taller of the two at this width.
         maxWidth: 896,
@@ -1699,9 +1700,9 @@ export const projects: Project[] = [
         afterAlt: "Final loops list grouped by role",
         beforeLabel: "Early version",
         afterLabel: "Final",
+        plain: true,
         maxWidth: 896,
         viewportHeight: 634,
-        caption: "The loops list itself changed shape once roles, not just candidates, needed to be scannable.",
       },
 
       { type: "section", id: "final-design", title: "Final design" },
@@ -1711,19 +1712,19 @@ export const projects: Project[] = [
       },
       { type: "heading", text: "The recruiter side" },
       {
+        type: "paragraph",
+        text: "Each role's loop tracks every candidate's status, interviewers, and running average rating in one table. A loop stays editable after interviews are scheduled, with role, candidates, and invite details in one place. And mid-interview, an interviewer can pull up the candidate's full profile without losing their place in the question.",
+      },
+      {
         type: "gallery",
         images: [
           {
             src: "/projects/hirement/2.webp",
             alt: "Hirement loop dashboard showing candidates for a role",
-            caption:
-              "Each role's loop tracks every candidate's status, interviewers, and running average rating in one table.",
           },
           {
             src: "/projects/hirement/3.webp",
             alt: "Hirement edit interview loop modal",
-            caption:
-              "Editing a loop after interviews are already scheduled — role, candidates, and invite details stay in one place.",
           },
         ],
       },
@@ -1731,8 +1732,6 @@ export const projects: Project[] = [
         type: "image",
         src: "/projects/hirement/4.webp",
         alt: "Hirement interview screen with candidate profile lookup open",
-        caption:
-          "Mid-interview, an interviewer can pull up the candidate's full profile without losing their place in the question.",
       },
 
       { type: "heading", text: "The candidate side" },
@@ -1745,15 +1744,12 @@ export const projects: Project[] = [
         src: "/projects/hirement/5.webp",
         alt: "Hirement candidate interview overview guide",
         viewportHeight: 620,
-        caption:
-          "Before their first round, candidates see who's interviewing them, how scoring works, and what to expect.",
       },
       {
         type: "image",
         src: "/projects/hirement/6.webp",
         alt: "Hirement candidate feedback form",
         viewportHeight: 620,
-        caption: "After each round, candidates rate the interview back — anonymously, per question.",
       },
 
       { type: "section", id: "results", title: "Results" },
