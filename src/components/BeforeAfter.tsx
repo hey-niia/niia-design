@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import AnnotatedImage, { type Pin } from "./AnnotatedImage";
+import PillToggle from "./PillToggle";
 import { FRAME_RADIUS, ScrollHint } from "./ScreenshotFrame";
 
-const ACCENT = "var(--site-accent)";
 /** Treat "within this many px of the end" as scrolled through. */
 const END_SLOP = 24;
 
@@ -188,47 +188,13 @@ export default function BeforeAfter({
           <ScrollHint show={hasMore[showAfter ? 1 : 0]} />
         </div>
 
-        <div className="mt-5 flex items-center justify-center gap-3">
-          <button
-            type="button"
-            onClick={() => setShowAfter(false)}
-            className={`text-sm font-medium transition-colors ${
-              showAfter ? "text-gray-400" : dark ? "text-white" : "text-[var(--nd-ink-strong,#000)]"
-            }`}
-          >
-            {beforeLabel}
-          </button>
-
-          <button
-            type="button"
-            role="switch"
-            aria-checked={showAfter}
-            aria-label={`Show ${showAfter ? beforeLabel.toLowerCase() : afterLabel.toLowerCase()}`}
-            onClick={() => setShowAfter((v) => !v)}
-            className="relative h-6 w-11 shrink-0 cursor-pointer rounded-full border transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
-            style={{
-              backgroundColor: showAfter ? ACCENT : dark ? "#525252" : "#d4d4d4",
-              borderColor: showAfter ? ACCENT : dark ? "#525252" : "#d4d4d4",
-            }}
-          >
-            <span
-              className="absolute top-1/2 h-5 w-5 -translate-y-1/2 rounded-full bg-white transition-all"
-              style={{
-                left: showAfter ? 22 : 2,
-                boxShadow: "0 2px 6px rgba(16,24,40,0.18)",
-              }}
-            />
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setShowAfter(true)}
-            className={`text-sm font-medium transition-colors ${
-              showAfter ? (dark ? "text-white" : "text-[var(--nd-ink-strong,#000)]") : "text-gray-400"
-            }`}
-          >
-            {afterLabel}
-          </button>
+        <div className="mt-6 flex justify-center">
+          <PillToggle
+            checked={showAfter}
+            onChange={setShowAfter}
+            onLabel={afterLabel}
+            offLabel={beforeLabel}
+          />
         </div>
 
         {caption && (

@@ -1687,7 +1687,7 @@ export const projects: Project[] = [
         beforeAlt: "Black-and-white wireframe of an interview question screen",
         afterAlt: "Blue color exploration of the same interview question screen",
         beforeLabel: "Wireframe",
-        afterLabel: "Color exploration",
+        afterLabel: "Color",
         // Cropped to actual content bounds (both frames had dead space below
         // the UI baked in). Sized to the taller of the two at this width.
         maxWidth: 896,
@@ -1780,9 +1780,9 @@ export const projects: Project[] = [
     name: "Other Projects",
     title: "Corporate website for a digital signage company",
     summary:
-      "A website for Giant Pumpkin, the team behind the digital screens in KFC, Starbucks, and Uniqlo. They had no site and no visual identity yet, so we built both from scratch in a month.",
+      "A website for Giant Pumpkin, the team behind the digital screens in KFC, Starbucks, and Uniqlo. They had no website yet, so we built one from scratch in a month.",
     client: "Landing pages, Web apps",
-    role: "UI/UX design, information architecture, visual identity",
+    role: "UI/UX design, information architecture",
     team: "Designer and web developer",
     credits: [
       { initials: "Me", label: "Niia Bieliavtseva — design", highlight: true },
@@ -1804,7 +1804,7 @@ export const projects: Project[] = [
       { type: "section", id: "problem", title: "Problem" },
       {
         type: "paragraph",
-        text: "The client needed a site that could explain digital signage technology to potential customers, alongside its services and team. There was nothing to build on: no site, no visual identity yet.",
+        text: "The client needed a site that could explain digital signage technology to potential customers, alongside its services and team. There was nothing to build on: no site yet.",
       },
       {
         type: "paragraph",

@@ -43,6 +43,7 @@ import {
 import ToolMap from "../components/ToolMap";
 import UserGroups from "../components/UserGroups";
 import WiggleText from "../components/WiggleText";
+import { toggleToneVars, type ToggleTone } from "../components/PillToggle";
 import WorkGridCard from "../components/WorkGridCard";
 import { splitIntoColumns } from "../lib/columns";
 import { useAutoplayInView } from "../lib/useAutoplayInView";
@@ -785,6 +786,13 @@ const CASE_ACCENT: Record<string, string> = {
   "ios-app": "#e65f2e",
 };
 
+/** Each product's toggles in a muted version of its own colour. */
+const TOGGLE_TONE: Record<string, ToggleTone> = {
+  connectiq: "orange",
+  "ios-app": "grey",
+  hirement: "purple",
+};
+
 export default function CaseStudy() {
   const { slug } = useParams<{ slug: string }>();
   const project = slug ? getProject(slug) : undefined;
@@ -898,13 +906,12 @@ export default function CaseStudy() {
   }
 
   const hasToc = toc.length > 1;
-  // Sections carry an orange "01/" on a numbered page, the same as on the
-  // dark-visuals pages; `groupVisuals` does the counting on those.
+  // Every case study numbers its sections ("01/"); on the dark-visuals pages
+  // `groupVisuals` does the counting.
   let sectionCount = 0;
   const numberedContent = project.content.map((block) => ({
     block,
-    sectionNumber:
-      project.darkPage && block.type === "section" ? ++sectionCount : undefined,
+    sectionNumber: block.type === "section" ? ++sectionCount : undefined,
   }));
   const impactCards = project.impact && project.impact.length > 0 && (
     // A Nadiia card on its dotted field, the same one the research columns use;
@@ -948,7 +955,12 @@ export default function CaseStudy() {
       <div
         className="mx-auto max-w-4xl pt-6 md:pt-24"
         // Some case studies keep their own accent instead of the site's pink.
-        style={CASE_ACCENT[project.slug] ? ({ "--site-accent": CASE_ACCENT[project.slug] } as React.CSSProperties) : undefined}
+        style={
+          {
+            ...(CASE_ACCENT[project.slug] ? { "--site-accent": CASE_ACCENT[project.slug] } : {}),
+            ...(TOGGLE_TONE[project.slug] ? toggleToneVars(TOGGLE_TONE[project.slug]) : {}),
+          } as React.CSSProperties
+        }
       >
         <div className="relative">
           {/* Sits further out in the page margin, outside the reading column, so

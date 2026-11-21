@@ -146,6 +146,39 @@ sets, with the component-set outline stripped). `bare`: the export brings its ow
   screenshot's "Scroll to see more", so every gesture hint on the site looks the same — reuse
   the token rather than restyling it per page.
 
+---
+
+### Addendum — pill toggle (`PillToggle`, the only toggle on the site)
+
+Every on/off or before/after switch on niia.design is this one element. Don't build another
+switch style, and don't style it per page. Code: `src/components/PillToggle.tsx`; the
+before/after block (`BeforeAfter.tsx`) uses it for every comparison.
+
+**Anatomy**
+- Track: a pressed-in soft key, 42px tall, fully rounded. Its width hugs the longer of the
+  two labels (16px in from the label side, 45px on the knob side), so it never jumps when
+  it flips.
+- Label inside the track: Geist Mono, 15px, uppercase. Only the current state's label shows
+  (e.g. "AFTER"); white on the filled track, gray-500 on the white one.
+- Knob: a raised white key, 32px, 5px from the edge, with a soft glow toward the top-left.
+  It slides with `cubic-bezier(0.65, 0, 0.35, 1)` over 300ms.
+- On: the track fills with the page's tone (a 135° gradient). Off: a white pressed track.
+
+**Colour — always subtle.** Each case study uses a muted version of its product's colour,
+never the brand-bright one. Tones live in `TOGGLE_TONES`:
+
+| Tone | Gradient | Used on |
+|---|---|---|
+| `orange` (default) | #d9774f → #e8936b | ConnectIQ (Giant Pumpkin) |
+| `purple` | #8f6fae → #a68ac2 | Hirement |
+| `grey` | #8a8a8a → #a3a3a3 | Matter (for now) |
+
+A page picks its tone in `TOGGLE_TONE` (`CaseStudy.tsx`), which sets the `--toggle-*`
+variables through `toggleToneVars(tone)`. A new product adds a tone here first.
+
+**Section numbers.** For the same reason, every case study numbers its sections ("01/",
+"02/" …), not only the dark pages.
+
 # Design System — niia.design (v6, historical — see v7 above for the current direction)
 
 **v6 was the pass that introduced the stefanietam.com-driven brutalist direction** (Cargo-template references before it, v1–v5, are further below). Read this section for the reasoning behind the current header/About shape; its Experience layout, Selected Work layout, hover treatment, and typeface call were each superseded by v7 above.
