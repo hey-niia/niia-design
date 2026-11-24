@@ -35,6 +35,9 @@
       content="Niia designs interfaces and builds them into working products with AI."
     />
     <meta name="twitter:image" content="https://niia.design/og-image.jpg" />
+    <!-- Plain-text versions for AI agents and crawlers that don't run JavaScript. -->
+    <link rel="alternate" type="text/markdown" href="/agent.md" title="Agent profile" />
+    <link rel="alternate" type="application/json" href="/agent.json" title="Agent profile (JSON)" />
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
@@ -42,13 +45,17 @@
           {
             "@type": "Person",
             "name": "Niia Bieliavtseva",
-            "jobTitle": "Senior Product Designer",
+            "jobTitle": "Senior Product Designer, AI Design Engineer",
             "url": "https://niia.design/",
+            "email": "mailto:nia.bieliavtseva@gmail.com",
+            "address": { "@type": "PostalAddress", "addressLocality": "New York", "addressCountry": "US" },
+            "description": "Open to new roles, ideally AI-driven products. Designs interfaces and builds them into working products, prototyping in code with Claude. 4 years building digital products, 10 years building products. Led an AI coaching iOS app's redesign that lifted activation from 39% to 60%.",
             "sameAs": [
               "https://www.linkedin.com/in/niia-bieliavtseva/",
+              "https://github.com/hey-niia",
               "https://overspace.co"
             ],
-            "knowsAbout": ["Product Design", "AI-Assisted Design", "Design Systems"],
+            "knowsAbout": ["Product Design", "AI Product Design", "Design Systems", "Interaction Design", "UX Research", "SwiftUI prototyping", "B2B", "SaaS", "Consumer apps", "Mobile (iOS)", "Enterprise dashboards"],
             "worksFor": { "@id": "https://overspace.co/#organization" }
           },
           {
@@ -79,6 +86,14 @@
       })();
     </script>
     <div id="root"></div>
+    <!-- What a client without JavaScript (most AI agents) sees instead of the app. -->
+    <noscript>
+      <h1>Niia Bieliavtseva — Senior Product Designer, AI Design Engineer</h1>
+      <p>New York. Open to new roles, ideally AI-driven products. Led an AI coaching iOS app's
+        redesign: activation 39% → 60%, week-one paid retention 28% → 49%, repeat Apple App of the Day.</p>
+      <p>Full profile: <a href="/agent.md">agent.md</a> · <a href="/agent.json">agent.json</a> ·
+        <a href="/Niia-Bieliavtseva-Resume.pdf">résumé</a> · nia.bieliavtseva@gmail.com</p>
+    </noscript>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

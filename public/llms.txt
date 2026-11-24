@@ -1,14 +1,26 @@
 # Niia Bieliavtseva
 
-> Senior Product Designer, AI Design Engineer. Designs interfaces and builds them into working
-> products with AI — from narrative websites to data-rich dashboards, closing the gap between
-> idea and shipped. Co-founder of Overspace, a product design studio for startups.
+> Senior Product Designer, AI Design Engineer in New York, open to new roles (ideally AI-driven
+> products). Designs interfaces and builds them into working products, prototyping in code with
+> Claude. Led an AI coaching iOS app's redesign that lifted activation from 39% to 60% and
+> week-one paid retention from 28% to 49%. Co-founder of Overspace, a product design studio.
 
-- [Home](https://niia.design/)
-- [Wellness AI Companion — iOS App](https://niia.design/work/ios-app)
-- [Enterprise Dashboard](https://niia.design/work/enterprise-dashboard)
-- [Digital Screen Co.](https://niia.design/work/other-projects)
-- [Hirement](https://niia.design/work/hirement)
-- [AI Playground](https://niia.design/ai-playground)
+## Profile
+
+- [Agent profile (Markdown)](https://niia.design/agent.md): facts, outcomes, work and contact in one file
+- [Agent profile (JSON)](https://niia.design/agent.json): the same, structured
+- [Résumé (PDF)](https://niia.design/Niia-Bieliavtseva-Resume.pdf)
+
+## Case studies
+
+- [Neuroscience App's AI Pivot](https://niia.design/work/ios-app): iOS, activation 39% → 60%
+- [ConnectIQ](https://niia.design/work/connectiq): B2B planning, dispatch and installation platform
+- [Hirement](https://niia.design/work/hirement): collaborative hiring flow platform
+- [Giant Pumpkin](https://niia.design/work/other-projects): corporate website for a digital signage company
+
+## Optional
+
+- [AI Playground](https://niia.design/ai-playground): apps and tools built with AI
+- [About](https://niia.design/about)
 - [Overspace](https://overspace.co)
 - [Leap](https://superleap.com.ua/)

@@ -1,10 +1,12 @@
 import { useEffect } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useSearchParams } from "react-router-dom";
 import Nav from "../components/Nav";
 import WorkGridCard from "../components/WorkGridCard";
 import { projects } from "../data/projects";
 import { splitIntoColumns } from "../lib/columns";
 import { useNiiaChat } from "../context/useNiiaChat";
+import PillToggle from "../components/PillToggle";
+import AgentProfile from "../components/AgentProfile";
 
 // The order projects appear in on the home page. Separate from the data's order,
 // which the case studies' previous/next links follow.
@@ -21,6 +23,12 @@ const INTRO_LOVE = "Solving business problems through design";
 export default function Home() {
   const { openWelcome, sendMessage } = useNiiaChat();
   const location = useLocation();
+  // Human: the portfolio as designed. Agent: the same facts as plain,
+  // structured text. ?mode=agent links straight to it.
+  const [params, setParams] = useSearchParams();
+  const agent = params.get("mode") === "agent";
+  const setAgent = (on: boolean) =>
+    setParams(on ? { mode: "agent" } : {}, { replace: true });
 
   // "Work" in the header lands on the project grid, with the same 16px above
   // it as the page has on its sides. Coming from another page the images are
@@ -62,18 +70,38 @@ export default function Home() {
     <main className="pb-24">
       <Nav />
 
+      <div
+        className="flex justify-center pt-4 md:pt-6"
+        // In the site's own accent, like the case studies' toggles take theirs.
+        style={
+          {
+            "--toggle-from": "var(--site-accent)",
+            "--toggle-to": "color-mix(in srgb, var(--site-accent) 85%, white)",
+            "--toggle-shade": "120,40,80",
+          } as React.CSSProperties
+        }
+      >
+        <PillToggle checked={agent} onChange={setAgent} onLabel="Agent" offLabel="Human" />
+      </div>
+
+      {agent ? (
+        <div className="pt-8 md:pt-10">
+          <AgentProfile />
+        </div>
+      ) : (
+      <>
       {/* The intro: a centred block as wide as its longest line, text aligned
           left, with a little more room below it than above, before the work. */}
-      <section id="about" className="pt-16 pb-20 md:pt-24 md:pb-32">
+      <section id="about" className="pt-8 pb-20 md:pt-10 md:pb-32">
         <div className="mx-auto flex w-fit max-w-full flex-col gap-4 text-left">
-          <p className="t-intro text-2xl">
+          <p className="t-intro text-[18px]">
             I design products, build with AI, and think like a founder.
           </p>
           {/* One phrase looks like text you've selected, with the Ask Niia AI pill
               beside it (below it on phones), to show visitors they can select
               any text and ask about it. */}
           <div className="relative flex flex-col items-start gap-4">
-            <p className="t-intro text-2xl">
+            <p className="t-intro text-[18px]">
               <span className="md:whitespace-nowrap">
                 What I love: collaborating with great teams,{" "}
                 {/* The space sits inside the highlight so it stays one band on phones. */}
@@ -123,6 +151,8 @@ export default function Home() {
           </div>
         ))}
       </section>
+      </>
+      )}
     </main>
   );
 }

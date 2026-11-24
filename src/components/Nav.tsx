@@ -46,7 +46,7 @@ export default function Nav() {
   return (
     <header
       ref={headerRef}
-      className="-mx-4 flex flex-col gap-y-2 bg-[var(--site-bg)] px-4 pt-3 pb-4 font-mono text-[15px] uppercase"
+      className="-mx-4 flex flex-col gap-y-2 bg-[var(--site-bg)] px-4 pt-3 pb-4 font-mono text-[14px] uppercase"
     >
       <div
         ref={measureRef}
@@ -71,10 +71,10 @@ export default function Nav() {
 
       <div className={`flex justify-between gap-x-8 ${fitsInline ? "items-center" : "items-start"}`}>
         <p className={`flex gap-x-2 ${fitsInline ? "items-baseline" : "flex-col"}`}>
-          <Link to="/" className="t-name font-medium text-gray-500">
+          <Link to="/" className="t-name text-gray-500">
             Niia Bieliavtseva
           </Link>
-          <Link to="/" className="t-role text-gray-400 transition-colors hover:text-[var(--site-accent)]">
+          <Link to="/" className="t-role text-[#b4b9c2] transition-colors hover:text-[var(--site-accent)]">
             Product Designer + Engineer
           </Link>
         </p>

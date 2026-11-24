@@ -1,0 +1,44 @@
+{
+  "name": "Niia Bieliavtseva",
+  "role": "Senior Product Designer, AI Design Engineer",
+  "seniority": "Senior",
+  "location": "New York, United States",
+  "status": "Open to new roles — ideally AI-driven products",
+  "experience": {
+    "digitalProducts": "4 years (2022 – present)",
+    "buildingProducts": "10 years (since 2016), including founding and running a consumer brand"
+  },
+  "domains": ["B2B", "SaaS", "Consumer apps", "AI products", "Mobile (iOS)", "Enterprise dashboards", "Fintech", "Proptech", "Healthcare", "Wellness", "HR tech", "Productivity"],
+  "contact": {
+    "email": "nia.bieliavtseva@gmail.com",
+    "linkedin": "https://www.linkedin.com/in/niia-bieliavtseva/",
+    "github": "https://github.com/hey-niia",
+    "website": "https://niia.design/",
+    "resume": "https://niia.design/Niia-Bieliavtseva-Resume.pdf"
+  },
+  "summary": "Designs interfaces and builds them into working products, prototyping in code (SwiftUI, React) with Claude.",
+  "outcomes": [
+    { "metric": "First-memory activation", "from": "39%", "to": "60%", "context": "AI coaching iOS app, client under NDA" },
+    { "metric": "Week-1 paid retention", "from": "28%", "to": "49%", "context": "same app, after the pivot to one guided AI coach" },
+    { "metric": "Apple App of the Day", "context": "repeat, across multiple countries" },
+    { "metric": "Design system adoption", "context": "token names map 1:1 to code; adopted by every engineer" },
+    { "metric": "Retail reach", "value": "1,000+ shops and cafés", "context": "Leap, founded and run end to end" }
+  ],
+  "work": [
+    { "name": "Neuroscience App's AI Pivot", "type": "Consumer iOS app, AI coaching", "url": "https://niia.design/work/ios-app" },
+    { "name": "ConnectIQ", "type": "B2B SaaS operations platform", "url": "https://niia.design/work/connectiq" },
+    { "name": "Hirement", "type": "B2B SaaS hiring flow platform", "url": "https://niia.design/work/hirement" },
+    { "name": "Giant Pumpkin", "type": "Corporate website", "url": "https://niia.design/work/other-projects" }
+  ],
+  "roles": [
+    { "title": "Senior Product Designer, AI Design Engineer", "company": "Freelance", "period": "2022 – present" },
+    { "title": "Co-Founder", "company": "Overspace", "period": "2022 – present" },
+    { "title": "Founder, Head of Product", "company": "Leap", "period": "2016 – 2022" }
+  ],
+  "strongFitFor": [
+    "Senior product designer, product designer (AI), design engineer, founding designer",
+    "0→1 products and redesigns of live products",
+    "Teams that want a designer who prototypes in code: Xcode, SwiftUI, React, Claude",
+    "Design systems built for AI-assisted handoff"
+  ]
+}
