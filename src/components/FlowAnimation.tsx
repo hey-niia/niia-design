@@ -123,6 +123,25 @@ const STEPS: Step[] = [
   { scene: "posted", enter: "publish", tap: [340, 70], hold: 2800, chapter: 4 },
 ];
 
+/** Where each step starts on the timeline, in ms of hold time. */
+const STARTS = STEPS.map((_, i) => STEPS.slice(0, i).reduce((t, s) => t + s.hold, 0));
+const TOTAL = STARTS[STEPS.length - 1] + STEPS[STEPS.length - 1].hold;
+/** Chapter boundaries, drawn as small gaps in the timeline like a video's chapters. */
+const CHAPTER_STARTS = CHAPTERS.map((_, c) => STARTS[STEPS.findIndex((s) => s.chapter === c)])
+  .slice(1)
+  .map((t) => (t / TOTAL) * 100);
+/** Cuts the gaps out of the bar, so they show whatever page is behind it. */
+const CHAPTER_MASK = `linear-gradient(to right, ${[
+  "#000 0",
+  ...CHAPTER_STARTS.flatMap((x) => [
+    `#000 calc(${x}% - 1.5px)`,
+    `transparent calc(${x}% - 1.5px)`,
+    `transparent calc(${x}% + 1.5px)`,
+    `#000 calc(${x}% + 1.5px)`,
+  ]),
+  "#000 100%",
+].join(", ")})`;
+
 /** Plain screens: one image each. Layered scenes are listed in the JSX. */
 const SIMPLE = [
   "moment-ideas",
@@ -532,7 +551,8 @@ export default function FlowAnimation({
     [pressAt, settle, setStream, streamLines],
   );
 
-  const playing = inView && !paused && !reducedMotion;
+  const [scrubbing, setScrubbing] = useState(false);
+  const playing = inView && !paused && !reducedMotion && !scrubbing;
 
   useEffect(() => {
     if (!playing) return;
@@ -554,13 +574,36 @@ export default function FlowAnimation({
   // Initial state before anything plays.
   useEffect(() => settle(0), [settle]);
 
-  const jumpTo = (chapter: number) => {
+  // The timeline: a video-style scrubber. Each step takes the share of the
+  // track its hold time does; while playing, the fill runs across the current
+  // step's share, and dragging lands on whichever step is under the pointer.
+  const track = useRef<HTMLDivElement>(null);
+  const fill = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = fill.current;
+    if (!el) return;
+    const start = (STARTS[index] / TOTAL) * 100;
+    const end = ((STARTS[index] + STEPS[index].hold) / TOTAL) * 100;
+    el.style.transition = "none";
+    el.style.width = `${playing ? start : end}%`;
+    if (playing) {
+      void el.offsetWidth;
+      el.style.transition = `width ${STEPS[index].hold}ms linear`;
+      el.style.width = `${end}%`;
+    }
+  }, [index, playing]);
+
+  const stepAt = (clientX: number) => {
+    const box = track.current?.getBoundingClientRect();
+    if (!box) return indexRef.current;
+    const t = Math.min(1, Math.max(0, (clientX - box.left) / box.width)) * TOTAL;
+    const i = STARTS.findIndex((start, k) => t < start + STEPS[k].hold);
+    return i === -1 ? STEPS.length - 1 : i;
+  };
+  const scrubTo = (i: number) => {
+    if (i === indexRef.current) return;
     cancelPlayback();
-    const first = STEPS.findIndex((s) => s.chapter === chapter);
-    // Land on the chapter's first *resting* frame; for chapter 0 that's the
-    // coach with the drawer already closed.
-    settle(chapter === 0 ? 1 : first);
-    setRunKey((k) => k + 1);
+    settle(i);
   };
 
   const activeChapter = STEPS[index].chapter;
@@ -665,27 +708,14 @@ export default function FlowAnimation({
 
       {!compact && (
         <>
-          {/* Same label treatment as the before/after toggles on this page. */}
-          <div className="mx-auto mt-5 flex flex-wrap items-center justify-center gap-x-3 gap-y-2 sm:gap-x-4">
-            {CHAPTERS.map((label, i) => (
-              <button
-                key={label}
-                type="button"
-                onClick={() => jumpTo(i)}
-                aria-current={i === activeChapter ? "step" : undefined}
-                className={`text-xs font-medium transition-colors hover:text-[var(--site-accent)] sm:text-sm ${
-                  i === activeChapter ? "text-[var(--nd-ink-strong,#000)]" : "text-gray-400"
-                }`}
-              >
-                {label}
-              </button>
-            ))}
+          {/* A video-style timeline: drag (or click) anywhere to scrub. */}
+          <div className="mx-auto mt-5 flex items-center gap-3" style={{ maxWidth }}>
             {!reducedMotion && (
               <button
                 type="button"
                 onClick={() => setPaused((p) => !p)}
                 aria-label={paused ? "Play animation" : "Pause animation"}
-                className="flex h-6 w-6 items-center justify-center rounded-full text-gray-400 transition-colors hover:text-[var(--site-accent)]"
+                className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-gray-400 transition-colors hover:text-[var(--site-accent)]"
               >
                 {paused ? (
                   <svg viewBox="0 0 12 12" className="h-3 w-3" fill="currentColor" aria-hidden>
@@ -699,6 +729,44 @@ export default function FlowAnimation({
                 )}
               </button>
             )}
+            <div
+              ref={track}
+              role="slider"
+              tabIndex={0}
+              aria-label="Animation timeline"
+              aria-valuemin={0}
+              aria-valuemax={STEPS.length - 1}
+              aria-valuenow={index}
+              aria-valuetext={CHAPTERS[activeChapter]}
+              onPointerDown={(e) => {
+                e.currentTarget.setPointerCapture(e.pointerId);
+                setScrubbing(true);
+                scrubTo(stepAt(e.clientX));
+              }}
+              onPointerMove={(e) => {
+                if (scrubbing) scrubTo(stepAt(e.clientX));
+              }}
+              onPointerUp={() => {
+                setScrubbing(false);
+                setRunKey((k) => k + 1);
+              }}
+              onPointerCancel={() => setScrubbing(false)}
+              onKeyDown={(e) => {
+                const step = e.key === "ArrowRight" ? 1 : e.key === "ArrowLeft" ? -1 : 0;
+                if (!step) return;
+                e.preventDefault();
+                scrubTo((indexRef.current + step + STEPS.length) % STEPS.length);
+                setRunKey((k) => k + 1);
+              }}
+              className="group relative flex h-6 flex-1 cursor-pointer touch-none items-center rounded-full outline-none focus-visible:ring-2 focus-visible:ring-neutral-400"
+            >
+              <div
+                className="relative h-1 w-full overflow-hidden rounded-full bg-[var(--nd-ink-strong,#000)]/15 transition-[height] group-hover:h-1.5"
+                style={{ maskImage: CHAPTER_MASK, WebkitMaskImage: CHAPTER_MASK }}
+              >
+                <div ref={fill} className="absolute inset-y-0 left-0 bg-[var(--site-accent)]" style={{ width: 0 }} />
+              </div>
+            </div>
           </div>
           {caption && (
             <figcaption className="mx-auto mt-5 max-w-[30rem] text-center text-sm italic text-gray-400">
