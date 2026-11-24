@@ -379,16 +379,14 @@ export default function NiiaChatSidebar() {
 
           {messages.map((m, i) => (
             <div key={i} className="niia-fade-in-up">
-              <p className="mb-1 font-mono text-xs tracking-widest text-black/50 uppercase">
+              {/* Your side of the chat is light on the pink, Niia AI's is dark. */}
+              <p
+                className={`mb-1 font-mono text-xs tracking-widest uppercase ${
+                  m.role === "user" ? "text-white/90" : "text-black/70"
+                }`}
+              >
                 {m.role === "user" ? "You" : "Niia AI"}
               </p>
-              {m.quote && (
-                // The text they selected: a light bar on the left, set in
-                // near-white on the pink, upright and without quote marks.
-                <p className="mb-1.5 border-l-2 border-white/70 pl-2 text-xs text-white/90">
-                  {m.quote}
-                </p>
-              )}
               {m.role === "bot" ? (
                 <>
                   {renderAnswer(m.text)}
@@ -402,14 +400,24 @@ export default function NiiaChatSidebar() {
                   {m.cards && <AnswerCards cards={m.cards} />}
                 </>
               ) : (
-                <p className="text-sm leading-relaxed">{m.text}</p>
+                <>
+                  <p className="text-sm leading-relaxed text-white">{m.text}</p>
+                  {m.quote && (
+                    // What they're asking about, under the question ("Tell me
+                    // more about" + this): a light bar on the left, set in
+                    // near-white on the pink, upright and without quote marks.
+                    <p className="mt-1.5 rounded-r-md border-l-2 border-white/70 bg-white/15 py-1 pr-2 pl-2 text-xs text-white/90">
+                      {m.quote}
+                    </p>
+                  )}
+                </>
               )}
             </div>
           ))}
 
           {isTyping && (
             <div className="niia-fade-in-up">
-              <p className="mb-1 font-mono text-xs tracking-widest text-black/50 uppercase">
+              <p className="mb-1 font-mono text-xs tracking-widest text-black/70 uppercase">
                 Niia AI
               </p>
               <div

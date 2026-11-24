@@ -117,10 +117,8 @@ export default function Home() {
               type="button"
               onClick={() => {
                 openWelcome();
-                sendMessage(
-                  "Tell me more about solving business problems through design",
-                  INTRO_LOVE,
-                );
+                // The quote carries the topic, so the question doesn't repeat it.
+                sendMessage("Tell me more about", INTRO_LOVE);
               }}
               className="flex items-center gap-1.5 rounded-full bg-[var(--site-accent)]/90 px-3 py-1.5 text-xs whitespace-nowrap text-white shadow-lg backdrop-blur-sm transition-transform hover:scale-105 md:absolute md:-top-5 md:left-full md:ml-1"
             >

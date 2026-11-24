@@ -1,0 +1,5 @@
+# Everyone, people's agents included, is welcome to read this site.
+User-agent: *
+Allow: /
+
+Sitemap: https://niia.design/sitemap.xml
