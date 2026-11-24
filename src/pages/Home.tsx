@@ -92,7 +92,7 @@ export default function Home() {
       <>
       {/* The intro: a centred block as wide as its longest line, text aligned
           left, with a little more room below it than above, before the work. */}
-      <section id="about" className="pt-8 pb-20 md:pt-10 md:pb-32">
+      <section id="about" className="pt-8 pb-12 md:pt-10 md:pb-16">
         <div className="mx-auto flex w-fit max-w-full flex-col gap-4 text-left">
           <p className="t-intro text-[18px]">
             I design products, build with AI, and think like a founder.

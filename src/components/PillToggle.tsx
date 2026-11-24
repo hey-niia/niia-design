@@ -35,10 +35,10 @@ const TO = v("to", TOGGLE_TONES.orange.to);
 const LIGHT = (a: number) => `rgba(${v("light", TOGGLE_TONES.orange.light)}, ${a})`;
 const SHADE = (a: number) => `rgba(${v("shade", TOGGLE_TONES.orange.shade)}, ${a})`;
 
-const KNOB = 32;
-const INSET = 5;
-/** Track = 16px + label + 8px + knob + 5px: snug around the word, no gap. */
-const TRACK_EXTRA = 16 + 8 + KNOB + INSET;
+const KNOB = 28;
+const INSET = 4;
+/** Track = 14px + label + 8px + knob + 4px: snug around the word, no gap. */
+const TRACK_EXTRA = 14 + 8 + KNOB + INSET;
 
 export default function PillToggle({
   checked,
@@ -78,7 +78,7 @@ export default function PillToggle({
       aria-checked={checked}
       aria-label={`Showing ${checked ? onLabel : offLabel}. Switch to ${checked ? offLabel : onLabel}`}
       onClick={() => onChange(!checked)}
-      className={`relative inline-block h-[42px] cursor-pointer overflow-hidden rounded-[21px] transition-[width,background,box-shadow] duration-300 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neutral-400 ${className}`}
+      className={`relative inline-block h-[36px] cursor-pointer overflow-hidden rounded-[18px] transition-[width,background,box-shadow] duration-300 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neutral-400 ${className}`}
       style={{
         width,
         ...(checked
@@ -112,19 +112,19 @@ export default function PillToggle({
           key={m.label}
           ref={m.ref}
           aria-hidden
-          className="invisible absolute top-0 left-0 font-mono text-[15px] whitespace-nowrap uppercase"
+          className="invisible absolute top-0 left-0 font-mono text-[14px] whitespace-nowrap uppercase"
         >
           {m.label}
         </span>
       ))}
       {[
-        { label: onLabel, shown: checked, side: "left-4", color: "text-white" },
-        { label: offLabel, shown: !checked, side: "right-4", color: "text-[var(--toggle-off-label,#6b7280)]" },
+        { label: onLabel, shown: checked, side: "left-3.5", color: "text-white" },
+        { label: offLabel, shown: !checked, side: "right-3.5", color: "text-[var(--toggle-off-label,#6b7280)]" },
       ].map((t) => (
         <span
           key={t.label}
           aria-hidden
-          className={`absolute top-1/2 -translate-y-1/2 ${t.side} ${t.color} font-mono text-[15px] whitespace-nowrap uppercase transition-opacity duration-200`}
+          className={`absolute top-1/2 -translate-y-1/2 ${t.side} ${t.color} font-mono text-[14px] whitespace-nowrap uppercase transition-opacity duration-200`}
           style={{ opacity: t.shown ? 1 : 0 }}
         >
           {t.label}

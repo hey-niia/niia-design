@@ -155,12 +155,12 @@ switch style, and don't style it per page. Code: `src/components/PillToggle.tsx`
 before/after block (`BeforeAfter.tsx`) uses it for every comparison.
 
 **Anatomy**
-- Track: a pressed-in soft key, 42px tall, fully rounded. Its width hugs the label that is
-  showing: 16px, the word, 8px, the knob, 5px. No empty space between the word and the
+- Track: a pressed-in soft key, 36px tall, fully rounded. Its width hugs the label that is
+  showing: 14px, the word, 8px, the knob, 4px. No empty space between the word and the
   knob; the width eases to the other label's size when it flips.
-- Label inside the track: Geist Mono, 15px, uppercase. Only the current state's label shows
+- Label inside the track: Geist Mono, 14px, uppercase (the header's size). Only the current state's label shows
   (e.g. "AFTER"); white on the filled track, gray-500 on the white one.
-- Knob: a white key, 32px, 5px from the edge. When on, it casts a dark shadow toward the
+- Knob: a white key, 28px, 4px from the edge. When on, it casts a dark shadow toward the
   bottom-right in a deeper shade of the page's tone (`3px 3px 8px`, 45%), matching the
   track's inner shadow at the top. **No halo of light** around it by default; if one is
   ever tried (Tweak → Toggle), it is always the page's own tone, never a fixed colour. It slides with `cubic-bezier(0.65, 0, 0.35, 1)`
