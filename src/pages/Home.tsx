@@ -67,7 +67,7 @@ export default function Home() {
   }, [location.state]);
 
   return (
-    <main className="pb-24">
+    <main className="pb-12">
       <Nav />
 
       <div
@@ -122,7 +122,7 @@ export default function Home() {
                   INTRO_LOVE,
                 );
               }}
-              className="flex items-center gap-1.5 rounded-full bg-[var(--site-accent)]/90 px-3 py-1.5 text-xs whitespace-nowrap text-white shadow-lg backdrop-blur-sm transition-transform hover:scale-105 md:absolute md:top-0.5 md:left-full md:ml-6"
+              className="flex items-center gap-1.5 rounded-full bg-[var(--site-accent)]/90 px-3 py-1.5 text-xs whitespace-nowrap text-white shadow-lg backdrop-blur-sm transition-transform hover:scale-105 md:absolute md:-top-5 md:left-full md:ml-1"
             >
               <span aria-hidden>✦</span> Ask Niia AI
             </button>

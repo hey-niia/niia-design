@@ -383,8 +383,10 @@ export default function NiiaChatSidebar() {
                 {m.role === "user" ? "You" : "Niia AI"}
               </p>
               {m.quote && (
-                <p className="mb-1.5 border-l-2 border-[var(--site-accent)]/40 pl-2 text-xs text-neutral-500 italic">
-                  “{m.quote}”
+                // The text they selected: a light bar on the left, set in
+                // near-white on the pink, upright and without quote marks.
+                <p className="mb-1.5 border-l-2 border-white/70 pl-2 text-xs text-white/90">
+                  {m.quote}
                 </p>
               )}
               {m.role === "bot" ? (
