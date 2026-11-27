@@ -577,3 +577,53 @@ video::-webkit-media-controls-start-playback-button {
   align-items: center;
   padding: inherit;
 }
+
+/* Matter case study: the skill icons behind the first animation
+   (SkillsBackdrop.tsx), printed in dots. Each icon is a fine dot grid seen
+   through the icon's shape. They pop up one by one when the stage comes into
+   view, then each gives its own small pop now and then. */
+.skill-dot {
+  background-image: radial-gradient(circle, rgba(255, 255, 255, 0.85) 0.9px, transparent 1.2px);
+  background-size: 3.5px 3.5px;
+  mask-size: contain;
+  mask-repeat: no-repeat;
+  mask-position: center;
+  -webkit-mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0.4);
+}
+.skills-dots.is-on .skill-dot {
+  animation:
+    skill-pop-in 650ms cubic-bezier(0.34, 1.56, 0.64, 1) var(--d) forwards,
+    skill-pop var(--every) ease-in-out calc(var(--d) + 1400ms) infinite;
+}
+@keyframes skill-pop-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.4);
+  }
+  to {
+    opacity: 0.45;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+@keyframes skill-pop {
+  0%,
+  88%,
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+  }
+  93% {
+    transform: translate(-50%, -50%) scale(1.14);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .skill-dot,
+  .skills-dots.is-on .skill-dot {
+    animation: none;
+    opacity: 0.45;
+    transform: translate(-50%, -50%);
+  }
+}

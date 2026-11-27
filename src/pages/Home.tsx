@@ -19,6 +19,10 @@ const homeProjects = [...projects].sort((a, b) => rank(a.slug) - rank(b.slug));
 
 // The highlighted part of the intro, quoted above the question in the chat.
 const INTRO_LOVE = "Solving business problems through design";
+// Trying the intro without the "selected text" highlight and its Ask Niia AI
+// pill. Flip back to true to bring both back.
+const SHOW_ASK_HINT = false;
+const HIGHLIGHT = SHOW_ASK_HINT ? "intro-highlight" : "";
 
 export default function Home() {
   const { openWelcome, sendMessage } = useNiiaChat();
@@ -94,25 +98,26 @@ export default function Home() {
           left, with a little more room below it than above, before the work. */}
       <section id="about" className="pt-8 pb-12 md:pt-10 md:pb-16">
         <div className="mx-auto flex w-fit max-w-full flex-col gap-4 text-left">
-          <p className="t-intro text-[18px]">
+          <p className="t-intro text-[16px]">
             I design products, build with AI, and think like a founder.
           </p>
           {/* One phrase looks like text you've selected, with the Ask Niia AI pill
               beside it (below it on phones), to show visitors they can select
               any text and ask about it. */}
           <div className="relative flex flex-col items-start gap-4">
-            <p className="t-intro text-[18px]">
+            <p className="t-intro text-[16px]">
               <span className="md:whitespace-nowrap">
                 What I love: collaborating with great teams,{" "}
                 {/* The space sits inside the highlight so it stays one band on phones. */}
-                <span className="intro-highlight">
+                <span className={HIGHLIGHT}>
                   solving business problems{" "}
                 </span>
               </span>
               <br className="hidden md:block" />
-              <span className="intro-highlight">through design</span>, and
+              <span className={HIGHLIGHT}>through design</span>, and
               turning ideas into real products.
             </p>
+            {SHOW_ASK_HINT && (
             <button
               type="button"
               onClick={() => {
@@ -124,6 +129,7 @@ export default function Home() {
             >
               <span aria-hidden>✦</span> Ask Niia AI
             </button>
+            )}
           </div>
         </div>
       </section>

@@ -48,7 +48,14 @@ export type ContentBlock =
       height?: number;
     }
   /** Phone walkthrough played from static Figma frames — see FlowAnimation. */
-  | { type: "flow-animation"; alt: string; caption?: string; maxWidth?: number }
+  | {
+      type: "flow-animation";
+      alt: string;
+      caption?: string;
+      maxWidth?: number;
+      /** Scatter the app's skill icons and pills faintly behind it (Matter). */
+      backdrop?: "skills";
+    }
   /** Screenshot with interactive numbered markers — see AnnotatedImage. */
   | {
       type: "annotated-image";
@@ -341,6 +348,7 @@ export const projects: Project[] = [
         // and tap points live in FlowAnimation.tsx. 277px wide = 600px tall,
         // the height the video had.
         type: "flow-animation",
+        backdrop: "skills",
         maxWidth: 277,
         alt: "Animated walkthrough of logging a memory: the coach suggests recent photos, you pick one and write what made it good, the coach replies with which neurotransmitters it affected, and you share it to your team feed",
       },

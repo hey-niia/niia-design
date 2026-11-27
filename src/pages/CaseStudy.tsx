@@ -43,6 +43,7 @@ import {
 import ToolMap from "../components/ToolMap";
 import UserGroups from "../components/UserGroups";
 import WiggleText from "../components/WiggleText";
+import SkillsBackdrop from "../components/SkillsBackdrop";
 import { toggleToneVars, type ToggleTone } from "../components/PillToggle";
 import WorkGridCard from "../components/WorkGridCard";
 import { splitIntoColumns } from "../lib/columns";
@@ -671,7 +672,18 @@ function Block({
         </div>
       );
     case "flow-animation":
-      return <FlowAnimation alt={block.alt} caption={block.caption} maxWidth={block.maxWidth} />;
+      return block.backdrop === "skills" ? (
+        // The phone stands in front of the scattered skills; hovering anywhere
+        // on the stage sets them off.
+        <div className="skills-stage relative">
+          <SkillsBackdrop />
+          <div className="relative">
+            <FlowAnimation alt={block.alt} caption={block.caption} maxWidth={block.maxWidth} />
+          </div>
+        </div>
+      ) : (
+        <FlowAnimation alt={block.alt} caption={block.caption} maxWidth={block.maxWidth} />
+      );
     case "annotated-image":
       return (
         // Straight on the white page, no grey field; the notes live on the markers
