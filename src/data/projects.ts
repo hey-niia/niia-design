@@ -348,7 +348,6 @@ export const projects: Project[] = [
         // and tap points live in FlowAnimation.tsx. 277px wide = 600px tall,
         // the height the video had.
         type: "flow-animation",
-        backdrop: "skills",
         maxWidth: 277,
         alt: "Animated walkthrough of logging a memory: the coach suggests recent photos, you pick one and write what made it good, the coach replies with which neurotransmitters it affected, and you share it to your team feed",
       },
